@@ -204,7 +204,7 @@ gulp.task('server', function() {
 		} else {
 			console.log('responsive-check server.js restarted');
 			gulp.src(watchFilesFor.server)
-				.pipe(gulpLivereload( { quiet: true } ))
+				.pipe(gulpLivereload( { quiet: true } ));
 		}
 	});
 });
@@ -227,8 +227,6 @@ watchFilesFor.livereload = [
 ];
 gulp.task('livereload', function() {
 	gulp.src(watchFilesFor.livereload)
-		.pipe(changed(path.dirname('<%= file.path %>')))
-		.pipe(log({ message: 'livereload: <%= file.path %>', title: 'Gulp livereload' }))
 		.pipe(gulpLivereload( { quiet: true } ));
 });
 
