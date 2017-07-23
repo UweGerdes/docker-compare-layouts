@@ -1,0 +1,300 @@
+// Styles for compare-layouts -  special stylings for application pages
+
+@import '../vars';
+
+.app {
+	.container {
+		clear: both;
+		margin: 0px auto @footer_height auto;
+		max-width: 1400px;
+		min-width: 1000px;
+		width: 80%;
+
+		&::after {
+			content: '';
+			clear: both;
+			display: table;
+		}
+
+		.head {
+
+			&:after {
+				clear: both;
+				content: '';
+				display: block;
+			}
+
+			& > h1:first-child {
+				margin-top: 0px;
+			}
+		}
+
+		.configs {
+			clear: both;
+			padding-top: 15px;
+		}
+
+		.list {
+			float: left;
+			width: @list_width;
+
+			&::after {
+				content: '';
+				clear: both;
+				display: table;
+			}
+
+			h1 {
+				margin-top: 0px;
+				padding-left: 1px;
+			}
+
+			.configs {
+				padding: 15px 0px;
+
+				.config {
+					list-style: none;
+					padding-left: 1px;
+
+					.name {
+						float: left;
+						font-size: 1.5em;
+						height: 2em;
+						margin-right: 8px;
+						overflow: hidden;
+						width: 50%;
+
+						a {
+							display: block;
+							text-decoration: none;
+						}
+					}
+
+					&.failed {
+						color: @failed_color;
+					}
+				}
+			}
+		}
+
+		.item {
+			float: left;
+			width: 100% - @list_width;
+
+			.result {
+				clear: both;
+			}
+
+			.started {
+				display: none;
+			}
+
+			.running .started {
+				display: inline;
+			}
+
+			.start {
+				display: inline;
+			}
+
+			.running .start {
+				display: none;
+			}
+
+			.response {
+				display: block;
+			}
+		}
+	}
+
+	&.runall {
+		.item {
+			.head,
+			.result,
+			.configFile,
+			.configData {
+				display: none;
+			}
+		}
+	}
+
+	.error {
+		h2 {
+			color: #cc0000;
+		}
+	}
+
+	.footer {
+		height: @footer_height;
+	}
+}
+
+body > .result {
+		clear: both;
+		margin: 0px auto @footer_height auto;
+		max-width: 1400px;
+		min-width: 1000px;
+		width: 80%;
+}
+
+.configs {
+	min-width: 400px;
+
+	th {
+		font-size: 1.2em;
+		padding: 5px 0px;
+	}
+
+	td {
+		color: green;
+		font-size: 1.2em;
+		padding: 3px 10px 3px 0px;
+	}
+
+	.failed td {
+		color: red;
+	}
+}
+
+.results {
+	min-width: 400px;
+
+	th {
+		font-size: 1.2em;
+		padding: 5px 0px;
+	}
+
+	td {
+		padding: 3px 10px 3px 0px;
+	}
+}
+
+.buttonContainer {
+	float: left;
+}
+
+.button {
+	background-color: #ffbb00;
+	border: 1px solid grey;
+	border-radius: 4px;
+	color: #000000;
+	display: block;
+	float: left;
+	font-size: 1.5em;
+	font-weight: bold;
+	margin-right: 15px;
+	padding: 5px 10px;
+	text-decoration: none;
+}
+
+.running .started {
+	border: 1px solid transparent;
+	display: inline-block;
+	font-size: 1.5em;
+	font-weight: bold;
+	margin-right: 20px;
+	padding: 5px 0px;
+}
+
+.response {
+	background-color: #eeeeee;
+	border: 1px solid grey;
+	line-height: 1.4em;
+	margin: 5px 0px 10px 0px;
+	max-height: 400px;
+	overflow: auto;
+	padding: 3px;
+	white-space: pre;
+}
+
+.params {
+	float: left;
+	padding-right: 15px;
+	padding-top: 7px;
+
+	[type='checkbox'] {
+		cursor: pointer;
+		float: left;
+		height: 18px;
+		width: 18px;
+	}
+
+	.checkbox {
+		cursor: pointer;
+		display: block;
+		float: left;
+		font-size: 1.5em;
+	}
+
+	.running & {
+		display: none;
+	}
+}
+
+.show {
+	.started {
+		display: none;
+	}
+
+	.running .started {
+		display: inline;
+	}
+
+	.start {
+		display: inline;
+	}
+
+	.running .start {
+		display: none;
+	}
+
+	.response {
+		display: block;
+	}
+}
+
+.list {
+	.reload {
+		display: inline;
+	}
+
+	.running .reload {
+		display: inline;
+	}
+
+	.runAll {
+		display: inline;
+	}
+
+	.running .runAll {
+		display: none;
+	}
+
+	.configs {
+		display: block;
+	}
+
+	.running .configs {
+		display: none;
+	}
+}
+
+.compare1 {
+	color: blue;
+}
+
+.compare2 {
+	color: green;
+}
+
+.success {
+	color: #00bb00;
+}
+
+.fail {
+	color: #dd0000;
+}
+
+a {
+	color: inherit;
+}
