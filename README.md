@@ -32,6 +32,14 @@ Perhaps I can figure out how to configure a livereload to trigger an automatic s
 
 The configuration file defines urls, viewport widths and page elements and how to compare them.
 
+## Docker Build
+
+Build the docker image with:
+
+```bash
+$ docker build -t uwegerdes/compare-layouts .
+```
+
 ## Development
 
 For the development time a gulpfile.js is included to generate css from less and restart the server.
