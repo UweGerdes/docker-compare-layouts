@@ -8,11 +8,11 @@ FROM uwegerdes/nodejs
 MAINTAINER Uwe Gerdes <entwicklung@uwegerdes.de>
 
 RUN apt-get update && \
-    apt-get dist-upgrade -y && \
-    apt-get install -y \
-                iceweasel \
-                xvfb && \
-    rm -rf /var/lib/apt/lists/*
+	apt-get dist-upgrade -y && \
+	apt-get install -y \
+				iceweasel \
+				xvfb && \
+	rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV development
 ENV HOME ${NODE_HOME}
@@ -23,18 +23,17 @@ ENV LIVERELOAD_PORT 35730
 COPY package.json ${NODE_HOME}/
 
 RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
-    npm ${NPM_LOGLEVEL} ${NPM_PROXY} install -g \
-                casperjs \
-                gulp \
-                phantomjs-prebuilt \
-                slimerjs && \
-    npm cache clean
+	npm ${NPM_LOGLEVEL} ${NPM_PROXY} install -g \
+				casperjs \
+				gulp \
+				phantomjs-prebuilt \
+				slimerjs && \
+	npm cache clean
 
 WORKDIR ${NODE_HOME}
 
-RUN export NODE_TLS_REJECT_UNAUTHORIZED=0 && \
-    npm ${NPM_LOGLEVEL} ${NPM_PROXY} install && \
-    npm cache clean
+RUN npm ${NPM_LOGLEVEL} ${NPM_PROXY} install && \
+	npm cache clean
 
 COPY . ${APP_HOME}
 

@@ -38,11 +38,11 @@ For the development time a gulpfile.js is included to generate css from less and
 
 ```bash
 $ docker run -it --rm \
-	-v $(pwd):/home/node/app \
+	-v $(pwd):/home/node/dev \
 	-p 3001:3000 \
 	--name compare-layouts \
 	uwegerdes/compare-layouts \
-	bash
+	"cd /home/hode/dev && bash"
 ```
 
 ## Self Test

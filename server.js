@@ -1,10 +1,10 @@
 /*
- * Start eines HTTP-Servers für compare-layouts
+ * HTTP-Server for compare-layouts
  *
  * node server.js
  *
- * config-Dateien in ./config
- * Ergebnis-Dateien in ./results
+ * config files in ./config
+ * result files in ./results
  *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
@@ -92,40 +92,6 @@ app.get('/show/:config/:compare', function(req, res){
 	});
 });
 
-// Handle form post requests for app view
-app.post('/app/:config?/:action?', function(req, res){
-	var list = getList(res);
-	var config = {};
-	var action = 'show';
-	console.log('post: ' + req.params.config + ' ' + req.params.action);
-	if (req.params.config) {
-		if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
-			config = getConfig(req.params.config);
-		} else {
-			config.error = 'config file not found: ./config/' + req.params.config + '.js';
-			console.log('config file not found: ./config/' + req.params.config + '.js');
-		}
-		if (req.params.action) {
-			action = req.params.action;
-			if (action == 'edit' && req.body.configfile) {
-				storeConfig(config, req.body.configfile);
-				action = 'check';
-			} else {
-				console.log('not written: ' + configDir + '/' + config.name + '.js\n' + JSON.stringify(req.body, null, 4));
-				action = '';
-			}
-		}
-	}
-	res.render('appView.ejs', {
-		list: list,
-		config: config,
-		action: action,
-		livereloadPort: livereloadPort,
-		httpPort: httpPort,
-		running: running
-	});
-});
-
 // Handle AJAX requests for run configs
 app.get('/run/:config/:verbose?', function(req, res){
 	console.log('starting ' + req.params.config);
@@ -157,6 +123,40 @@ app.get('/', function(req, res){
 // Route for everything else.
 app.get('*', function(req, res){
 	res.status(404).send('Sorry cant find that: ' + req.url);
+});
+
+// Handle form POST requests for app view
+app.post('/app/:config?/:action?', function(req, res){
+	var list = getList(res);
+	var config = {};
+	var action = 'show';
+	console.log('post: ' + req.params.config + ' ' + req.params.action);
+	if (req.params.config) {
+		if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
+			config = getConfig(req.params.config);
+		} else {
+			config.error = 'config file not found ./config/' + req.params.config + '.js';
+			console.log('config file not found: ./config/' + req.params.config + '.js');
+		}
+		if (req.params.action) {
+			action = req.params.action;
+			if (action == 'edit' && req.body.configfile) {
+				storeConfig(config, req.body.configfile);
+				action = 'check';
+			} else {
+				console.log('not written: ' + configDir + '/' + config.name + '.js\n' + JSON.stringify(req.body, null, 4));
+				action = '';
+			}
+		}
+	}
+	res.render('appView.ejs', {
+		list: list,
+		config: config,
+		action: action,
+		livereloadPort: livereloadPort,
+		httpPort: httpPort,
+		running: running
+	});
 });
 
 // Fire it up!

@@ -31,14 +31,35 @@
   },
   "dependencies": {
     "body-parser": "^1.15.0",
-    "dateformat": "^1.0.12",
+    "dateformat": "^2.0.0",
     "ejs": "^2.4.1",
     "eval": "^0.1.1",
     "express": "^4.13.4",
     "file-system": "^2.2.1",
-    "fs-tools": "^0.2.11",
-    "livereload": "^0.4.1",
+    "fs-tools": "^0.3.0",
+    "livereload": "^0.6.2",
     "mkdirp": "^0.5.1",
     "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "del": "^3.0.0",
+    "eval": "^0.1.1",
+    "glob": "^7.0.6",
+    "gulp": "^3.8.10",
+    "gulp-autoprefixer": "^4.0.0",
+    "gulp-changed": "^3.1.0",
+    "gulp-develop-server": "^0.5.2",
+    "gulp-jshint": "^2.0.1",
+    "gulp-less": "^3.3.2",
+    "gulp-less-changed": "^1.2.0",
+    "gulp-lesshint": "^4.0.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-notify": "^3.0.0",
+    "gulp-postmortem": "^1.0.5",
+    "gulp-uglify": "^3.0.0",
+    "gulp-util": "^3.0.2",
+    "jshint": "^2.9.3",
+    "rename": "^1.0.3",
+    "run-sequence": "^2.0.0"
   }
 }
