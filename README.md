@@ -42,7 +42,7 @@ $ docker run -it --rm \
 	-p 3001:3000 \
 	--name compare-layouts \
 	uwegerdes/compare-layouts \
-	"cd /home/hode/dev && bash"
+	bash
 ```
 
 ## Self Test
