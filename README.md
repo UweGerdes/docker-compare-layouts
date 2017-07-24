@@ -67,3 +67,9 @@ $ docker run -it --rm \
 	bash
 ```
 
+## SlimerJS vs. Firefox
+
+sudo vi /usr/lib/node_modules/slimerjs/src/application.ini
+
+replace s/MaxVersion=52\.\*/MaxVersion=54.*/
+

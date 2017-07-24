@@ -5,7 +5,7 @@
 var slimerjs = 'slimerjs';
 var phantomjs = 'phantomjs';
 
-slimerjs = phantomjs;
+//slimerjs = phantomjs;
 
 // TODO implement
 var viewports = [
