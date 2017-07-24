@@ -111,7 +111,7 @@ function whitelistOk(requestData) {
 	if (requestData.url.indexOf(domain) > -1) {
 		result = true;
 	} else {
-		whitelist.split(/,/).forEach(function(whitedomain){
+		whitelist.split(/,\s*/).forEach(function(whitedomain){
 			if (requestData.url.indexOf(whitedomain) > -1) {
 				result = true;
 			}
@@ -123,7 +123,7 @@ function whitelistOk(requestData) {
 function blacklistHit(requestData) {
 	var result = false;
 	if (blacklist.length > 0) {
-		blacklist.split(/,/).forEach(function(blackdomain){
+		blacklist.split(/,\s*/).forEach(function(blackdomain){
 			if (requestData.url.indexOf(blackdomain) > -1) {
 				result = true;
 			}

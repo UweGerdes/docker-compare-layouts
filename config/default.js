@@ -21,7 +21,7 @@ var viewports = [
 
 module.exports = {
 	destDir: 'default',
-	whitelist: 'www.uwegerdes.de', // allow load from uri with this substring
+	whitelist: 'fonts.googleapis.com, fonts.gstatic.com', // allow load from uri with this substring
 	blacklist: '.js', // do not load - even if it comes from whitelist
 	widths: [ 1200, 1024, 768, 600, 360, 320 ],
 	pages: {
