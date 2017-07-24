@@ -39,7 +39,7 @@ function toHTML(obj, indent) {
 		});
 		html += indent + '</dl>\n';
 	} else {
-		html += indent + '<span class="' + type(obj) + '">' + obj + '</span>\n';
+		html += indent + '<span class="' + type(obj) + '">' + obj.toString().replace(/</g, '&lt;') + '</span>\n';
 	}
 	return html;
 }
