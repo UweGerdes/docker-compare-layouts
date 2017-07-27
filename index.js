@@ -15,6 +15,7 @@
 var fs = require('fs'),
 	exec = require('child_process').exec,
 	obj2html = require('./bin/obj2html.js'),
+	path = require('path'),
 	styleTree = require('./bin/style-tree.js');
 
 var configFile = 'config/default.js',
@@ -32,11 +33,13 @@ if (reload) {
 
 var verbose = process.argv.indexOf('-v') > -1;
 
-var resultsDir = 'results';
-var destDir = resultsDir + '/' + config.destDir;
+var resultsDir = './results';
+var destDir = path.join(resultsDir, config.destDir);
 var pages = config.pages;
 var compares = config.compares;
 var pagesLoaded = 0;
+//var pagesExpected = [];
+//var pagesLoaded = [];
 
 if (!fs.existsSync(resultsDir)) {
 	fs.mkdirSync(resultsDir);
@@ -77,6 +80,11 @@ function load() {
 		} else {
 			pagesLoaded++;
 		}
+
+//		config.viewports.forEach(function(viewport) {
+//			pagesExpected.push(getPageKey(engine, viewport.name));
+//			loadPage(config, engine, viewport, addResult);
+//		});
 	});
 }
 
@@ -120,89 +128,109 @@ function comparePages() {
 	}
 	var results = {};
 	Object.keys(compares).forEach(function(key) {
+		console.log('compare ' + key);
 		var compare = compares[key];
 		var page1 = pages[compare.page1];
 		var page2 = pages[compare.page2];
-		compare.selector1 = compare.selector1 ? compare.selector1 : page1.selector;
-		compare.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-		compare.baseFilename1 = destDir + '/' + compare.page1 + '/' + safeFilename(compare.selector1);
-		compare.baseFilename2 = destDir + '/' + compare.page2 + '/' + safeFilename(compare.selector2);
-		compare.exists1 = chkCacheFile(compare.baseFilename1 + '.json');
-		compare.exists2 = chkCacheFile(compare.baseFilename2 + '.json');
-		compare.success = false;
-		if ((page1.cache || page1.loaded) && compare.exists1 &&
-			(page2.cache || page2.loaded) && compare.exists2) {
-			pagesLoading.push(key);
-			compare.success = true;
-			compare.compareFilename = destDir + '/' + safeFilename(key) + '_compare.png';
-			compare.compositeFilename = destDir + '/' + safeFilename(key) + '_composite.png';
-			compare.compositeMonochromeFilename = destDir + '/' + safeFilename(key) + '_composite_monochrome.png';
-			compare.jsonFilename = destDir + '/' + safeFilename(key) + '.json';
-			compare.htmlFilename = destDir + '/' + safeFilename(key) + '.html';
-			exec('compare -metric AE ' + compare.baseFilename1 + '.png ' + compare.baseFilename2 + '.png ' + compare.compareFilename,
-				function (error, stdout, stderr) {
-					if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
-					if (stderr == '0') {
-						if (verbose) { console.log(compare.compareFilename + ' saved'); }
-					} else {
-						compare.success = false;
-						success = false;
-					}
-					compare.imageStderr = stderr;
-					exec('composite -compose difference ' + compare.baseFilename1 + '.png ' + compare.baseFilename2 + '.png ' + compare.compositeFilename,
-						function (error, stdout, stderr) {
-							logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
-							if (stderr.length === 0) {
-								if (verbose) { console.log(compare.compositeFilename + ' saved'); }
-							} else {
-								compare.compositeFilename = '';
-								compare.success = false;
-								success = false;
-							}
-							exec('composite -compose difference -monochrome ' + compare.baseFilename2 + '.png ' + compare.baseFilename2 + '.png ' + compare.compositeMonochromeFilename,
-								function (error, stdout, stderr) {
-									logExecResult('composite -monochrome', null, stdout, stderr.replace(/ @.+/, ''));
-									if (stderr.length === 0) {
-										if (verbose) { console.log(compare.compositeMonochromeFilename + ' saved'); }
-									} else {
-										compare.compositeMonochromeFilename = '';
-										compare.success = false;
-										success = false;
-									}
-									compareResults(compare);
-									pagesLoading.splice(pagesLoading.indexOf(key), 1);
-									if (pagesLoading.length === 0) {
-										fs.writeFile(destDir + '/' + 'index.json', JSON.stringify(results, null, 4), 0);
-										console.log((success ? "SUCCESS" : "FAIL") + ' compare-layouts/' + destDir + '/index.json');
-									}
-								}
-							);
+		Object.keys(config.widths).forEach(function(widthKey) {
+			var width = config.widths[widthKey];
+			console.log('compare ' + key + ', width: ' + width);
+			var result = {};
+			result.name = key;
+			result.width = width;
+			result.page1 = page1;
+			result.page2 = page2;
+			result.subdir1 = compare.page1;
+			result.subdir2 = compare.page2;
+			result.selector1 = compare.selector1 ? compare.selector1 : page1.selector;
+			result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
+			result.baseFilename1 = destDir + '/' + width + '/' + compare.page1 + '/' + safeFilename(result.selector1);
+			result.baseFilename2 = destDir + '/' + width + '/' + compare.page2 + '/' + safeFilename(result.selector2);
+			result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
+			result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
+			result.success = false;
+			if ((page1.cache || page1.loaded) && result.exists1 &&
+				(page2.cache || page2.loaded) && result.exists2) {
+				pagesLoading.push(key);
+				result.success = true;
+				result.compareFilename = destDir + '/' + width + '/' + safeFilename(key) + '_compare.png';
+				result.compositeFilename = destDir + '/' + width + '/' + safeFilename(key) + '_composite.png';
+				result.compositeMonochromeFilename = destDir + '/' + width + '/' + safeFilename(key) + '_composite_monochrome.png';
+				result.jsonFilename = destDir + '/' + width + '/' + safeFilename(key) + '.json';
+				result.htmlFilename = destDir + '/' + width + '/' + safeFilename(key) + '.html';
+				exec('compare -metric AE ' + result.baseFilename1 + '.png ' + result.baseFilename2 + '.png ' + result.compareFilename,
+					function (error, stdout, stderr) {
+						if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
+						if (stderr == '0') {
+							if (verbose) { console.log(result.compareFilename + ' saved'); }
+						} else {
+							result.success = false;
+							success = false;
 						}
-					);
-				}
-			);
-		}
-		results[key] = compare;
+			console.log('compare ' + result.baseFilename1 + ' / ' + result.baseFilename2);
+						result.imageStderr = stderr;
+						exec('composite -compose difference ' + result.baseFilename1 + '.png ' + result.baseFilename2 + '.png ' + result.compositeFilename,
+							function (error, stdout, stderr) {
+								logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
+								if (stderr.length === 0) {
+									if (verbose) { console.log(result.compositeFilename + ' saved'); }
+								} else {
+									result.compositeFilename = '';
+									result.success = false;
+									success = false;
+								}
+								exec('composite -compose difference -monochrome ' + result.baseFilename2 + '.png ' + result.baseFilename2 + '.png ' + result.compositeMonochromeFilename,
+									function (error, stdout, stderr) {
+										logExecResult('composite -monochrome', null, stdout, stderr.replace(/ @.+/, ''));
+										if (stderr.length === 0) {
+											if (verbose) { console.log(result.compositeMonochromeFilename + ' saved'); }
+										} else {
+											result.compositeMonochromeFilename = '';
+											result.success = false;
+											success = false;
+										}
+										compareResults(compare, key);
+										pagesLoading.splice(pagesLoading.indexOf(key), 1);
+										if (pagesLoading.length === 0) {
+											fs.writeFile(destDir + '/' + 'index.json', JSON.stringify(results, null, 4), 0);
+											console.log((success ? "SUCCESS" : "FAIL") + ' compare-layouts/' + destDir + '/index.json');
+										}
+									}
+								);
+							}
+						);
+					}
+				);
+			} else {
+				console.log('loaded pages not found');
+			}
+			results[key + '_' + width] = result;
+		});
 	});
 }
 
-function compareResults(compare) {
+function compareResults(compare, name) {
 	var page1 = pages[compare.page1];
 	var selector1 = compare.selector1 ? compare.selector1 : page1.selector;
 	var page2 = pages[compare.page2];
 	var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-	if (chkCacheFile(destDir + '/' + compare.page1 + '/' + safeFilename(selector1) + '.json') &&
-		chkCacheFile(destDir + '/' + compare.page2 + '/' + safeFilename(selector2) + '.json')) {
-		var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page1 + '/' + safeFilename(selector1) + '.json')));
-		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page2 + '/' + safeFilename(selector2) + '.json')));
-		var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-        compare.resultHtml = obj2html.toHtml(compareResult);
-		fs.writeFile(compare.jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
-		console.log(compare.jsonFilename + ' saved');
-		return true;
-	} else {
-		return false;
-	}
+	var result = true;
+				console.log('comparing ' + selector1);
+	config.widths.forEach(function(width) {
+		if (chkCacheFile(destDir + '/' + width + '/' + compare.page1 + '/' + safeFilename(selector1) + '.json') &&
+			chkCacheFile(destDir + '/' + width + '/' + compare.page2 + '/' + safeFilename(selector2) + '.json')) {
+			var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + width + '/' + compare.page1 + '/' + safeFilename(selector1) + '.json')));
+			var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + width + '/' + compare.page2 + '/' + safeFilename(selector2) + '.json')));
+			var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
+			compare.resultHtml = obj2html.toHtml(compareResult);
+			var jsonFilename = destDir + '/' + width + '/' + safeFilename(name) + '.json';
+			fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
+			console.log(jsonFilename + ' saved ' + name);
+		} else {
+			result = false;
+		}
+	});
+	return result;
 }
 
 function logExecResult(msgStart, error, stdout, stderr) {

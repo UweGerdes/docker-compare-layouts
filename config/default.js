@@ -23,7 +23,7 @@ module.exports = {
 	destDir: 'default',
 	whitelist: 'fonts.googleapis.com, fonts.gstatic.com', // allow load from uri with this substring
 	blacklist: '.js', // do not load - even if it comes from whitelist
-	widths: [ 1200, 1024, 768, 600, 360, 320 ],
+	widths: [ 600, 1200 ],
 	pages: {
 		'index-phantomjs': {
 			'url': 'http://localhost:3000/',

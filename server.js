@@ -73,19 +73,20 @@ app.get('/app/:config?/:action?/:param?', function(req, res){
 });
 
 // Handle requests for app view
-app.get('/show/:config/:compare', function(req, res){
+app.get('/show/:config/:width/:compare', function(req, res){
 	var config = getConfig(req.params.config);
-    var compare = getCompare(config.data.destDir, req.params.compare);
-    var result = getResult(config.data.destDir)[req.params.compare];
-    var page1 = config.data.pages[result.page1];
-    var page2 = config.data.pages[result.page2];
+	var compare = getCompare(config.data.destDir, req.params.compare);
+	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.width ];
+	var page1 = config.data.pages[result.page1];
+	var page2 = config.data.pages[result.page2];
 
 	res.render('resultView.ejs', {
 		config: config,
-        compare: compare,
-        page1: page1,
-        page2: page2,
-        result: result,
+		compare: compare,
+		page1: page1,
+		page2: page2,
+		result: result,
+		width: req.params.width,
 		livereloadPort: livereloadPort,
 		httpPort: httpPort,
 		running: running
@@ -163,12 +164,12 @@ app.post('/app/:config?/:action?', function(req, res){
 app.listen(httpPort);
 var addresses = [];
 for (var k in interfaces) {
-    for (var k2 in interfaces[k]) {
-        var address = interfaces[k][k2];
-        if (address.family === 'IPv4' && !address.internal) {
-            addresses.push(address.address);
-        }
-    }
+	for (var k2 in interfaces[k]) {
+		var address = interfaces[k][k2];
+		if (address.family === 'IPv4' && !address.internal) {
+			addresses.push(address.address);
+		}
+	}
 }
 // console.log("IP address of container  :  " + addresses);
 console.log('compare-layouts server listening on http://' + addresses[0] + ':' + httpPort);

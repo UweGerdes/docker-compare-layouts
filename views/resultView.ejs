@@ -2,16 +2,16 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>Compare Layouts <%= page1.url %> <%= result.selector1 %> &lt;=&gt; <%= page2.url %> <%= result.selector1 %></title>
+<title>Compare Layouts <%= result.page1.url %> <%= result.selector1 %> &lt;=&gt; <%= result.page2.url %> <%= result.selector1 %></title>
 <link href="/css/app.css" rel="stylesheet" />
 </head>
 <body>
 <div class="result">
 	<h1>Compare Layouts</h1>
-	<h4><%= page1.url %> "<%= result.selector1 %>"</h4>
+	<h4><%= result.page1.url %> "<%= result.selector1 %>"</h4>
 	<div class="image1"><img src="/<%= result.baseFilename1 %>.png" /></div>
     <br />
-	<h4><%= page2.url %> "<%= result.selector2 %>"</h4>
+	<h4><%= result.page2.url %> "<%= result.selector2 %>"</h4>
 	<div class="image2"><img src="/<%= result.baseFilename2 %>.png" /></div>
     <br />
 	<% if (result.imageStderr && result.imageStderr.indexOf('a') > 0) { %>

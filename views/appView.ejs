@@ -136,7 +136,12 @@
 							<th>Selektor 1</th>
 							<th>Selektor 2</th>
 						</thead>
-						<tbody><% Object.keys(config.result).forEach(function(resultKey) { %><% result = config.result[resultKey] %><% include showItem %><% }) %></tbody>
+						<tbody>
+<% Object.keys(config.result).forEach(function(resultKey) { %>
+	<% result = config.result[resultKey] %><%= resultKey %>X
+	<% include showItem %>
+<% }) %>
+						</tbody>
 					</table>
 				</div>
 				<% } %>
@@ -144,10 +149,12 @@
 					<h2>Log-Ausgabe</h2>
 					<div id="response" class="response"><%- config.logfile %></div>
 				</div>
+<% /* %>
 				<div class="resultData">
 					<h2>Ergebnisdaten</h2>
 					<pre class="editor">config.result = <%= JSON.stringify(config.result, null, 4) %></pre>
 				</div>
+<% */ %>
 				<div class="configFile">
 					<h2>Konfigurationsdatei config/<%= config.name %>.js</h2>
 					<pre class="editor"><%= config.file %></pre>

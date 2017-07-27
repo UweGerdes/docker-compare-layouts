@@ -5,7 +5,7 @@
  * casperjs load-page-styles.js --configFile="../config/default.js" --pageKey="google-form-phantomjs"
  *
  * additional argument to overwrite config settings:
- * --url=http://www.google.de --selector="form" --subdir=google-form --hover="#submit" --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
+ * --url=https://www.google.de --selector="form" --widths=360,768,1024,1200 --subdir=google-form --hover="#submit" --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
  *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
@@ -22,6 +22,7 @@ var config = null,
 	subdir = 'localhost',
 	url = 'http://localhost/',
 	domain = 'localhost',
+	widths = [1024],
 	hover = '',
 	whitelist = '',
 	blacklist = '',
@@ -43,8 +44,6 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	catch (err) {
 		throw("FAIL: could not read file " + configFile);
 	}
-	subdir = 'results/' + config.destDir + '/' + pageKey;
-	console.log('subdir: ' + subdir);
 	if (config.pages[pageKey]) {
 		var page = config.pages[pageKey];
 		url = page.url;
@@ -65,6 +64,9 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	} else {
 		throw("FAIL: pageKey not found: " + pageKey);
 	}
+	if (config.widths && config.widths.length > 0) {
+		widths = config.widths;
+	}
 	if (config.blacklist && config.blacklist.length > 0) {
 		blacklist = config.blacklist;
 	}
@@ -73,14 +75,6 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	}
 }
 casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
-try {
-	if (fs.stat(subdir) && !fs.stat(subdir).isDirectory()) {
-		console.log('can\'t create ' + subdir);
-	}
-} catch(err) {
-	fs.makeTree(subdir);
-	console.log('created ' + subdir);
-}
 
 // event handling
 casper.on('remote.message', function(msg) {
@@ -210,56 +204,72 @@ function _setTestClass(selector) {
 
 casper.start();
 
-casper.viewport(1024, 768);
-
 if (uname.length > 0 && pval.length > 0) {
 	casper.setHttpAuth(uname, pval);
 }
-
-selectorList.forEach(function(sel) {
-	casper.thenOpen(url, function() {
-		this.echo('searching for "' + sel + '"', 'INFO');
-		casper.evaluate(_setTestClass);
-	})
-	.then(function() {
-		if (hover !== '') {
-			this.echo('hover to "' + hover + '"', 'INFO');
-			casper.mouse.move(hover);
-		}
-	})
-	.then(function() {
-		results[sel] = this.evaluate(_getStyles, sel, hover); // evaluate in browser
-	});
+casper.thenOpen(url, function() {
+	this.echo('opening "' + url + '"', 'INFO');
 });
-casper.then(function() {
-	Object.keys(results).forEach(function(selector) {
-		var result = results[selector];
-		var name = safeFilename(selector);
-		if (result && result.length > 0) {
-			var html;
-			if (selector.indexOf('/') === 0) {
-				html = casper.getHTML(x(selector), true);
-			} else {
-				html = casper.getHTML(selector, true);
-			}
-			fs.write(subdir + '/' + name + '.html', html);
-			casper.echo(subdir + '/' + name + '.html' + ' saved', 'INFO');
-			fs.write(subdir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
-			casper.echo(subdir + '/' + name + '.json' + ' saved', 'INFO');
-			if (selector.indexOf('/') === 0) {
-				casper.captureSelector(subdir + '/' + name + '.png', x(selector), { format: 'png' });
-			} else {
-				casper.captureSelector(subdir + '/' + name + '.png', selector, { format: 'png' });
-			}
-			casper.echo(subdir + '/' + name + '.png' + ' saved', 'INFO');
-		} else {
-			casper.echo('element not found: "' + selector + '"', 'ERROR');
-		}
+
+widths.forEach(function(width) {
+	casper.then(function() {
+		casper.viewport(width, 768);
 	});
-	fs.write(subdir + '/page.html', casper.getHTML(), 0);
-	casper.echo(subdir + '/page.html' + ' saved', 'INFO');
-	casper.capture(subdir + '/page.png', undefined, { format: 'png' });
-	casper.echo(subdir + '/page.png' + ' saved', 'INFO');
+	selectorList.forEach(function(sel) {
+		casper.then(function() {
+			this.echo('searching for "' + sel + '"', 'INFO');
+			casper.evaluate(_setTestClass);
+		})
+		.then(function() {
+			if (hover !== '') {
+				this.echo('hover to "' + hover + '"', 'INFO');
+				casper.mouse.move(hover);
+			}
+		})
+		.then(function() {
+			results[sel] = this.evaluate(_getStyles, sel, hover); // evaluate in browser
+		});
+	});
+	casper.then(function() {
+		subdir = 'results/' + config.destDir + '/' + width + '/' + pageKey;
+		console.log('subdir: ' + subdir);
+		try {
+			if (fs.stat(subdir) && !fs.stat(subdir).isDirectory()) {
+				console.log('can\'t create ' + subdir);
+			}
+		} catch(err) {
+			fs.makeTree(subdir);
+			console.log('created ' + subdir);
+		}
+		Object.keys(results).forEach(function(selector) {
+			var result = results[selector];
+			var name = safeFilename(selector);
+			if (result && result.length > 0) {
+				var html;
+				if (selector.indexOf('/') === 0) {
+					html = casper.getHTML(x(selector), true);
+				} else {
+					html = casper.getHTML(selector, true);
+				}
+				fs.write(subdir + '/' + name + '.html', html);
+				casper.echo(subdir + '/' + name + '.html' + ' saved', 'INFO');
+				fs.write(subdir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
+				casper.echo(subdir + '/' + name + '.json' + ' saved', 'INFO');
+				if (selector.indexOf('/') === 0) {
+					casper.captureSelector(subdir + '/' + name + '.png', x(selector), { format: 'png' });
+				} else {
+					casper.captureSelector(subdir + '/' + name + '.png', selector, { format: 'png' });
+				}
+				casper.echo(subdir + '/' + name + '.png' + ' saved', 'INFO');
+			} else {
+				casper.echo('element not found: "' + selector + '"', 'ERROR');
+			}
+		});
+		fs.write(subdir + '/page.html', casper.getHTML(), 0);
+		casper.echo(subdir + '/page.html' + ' saved', 'INFO');
+		casper.capture(subdir + '/page.png', undefined, { format: 'png' });
+		casper.echo(subdir + '/page.png' + ' saved', 'INFO');
+	});
 });
 casper.run(function() {
 	this.exit();
