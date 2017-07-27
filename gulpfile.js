@@ -98,18 +98,18 @@ gulp.task('jshint', function(callback) {
 		;
 });
 
-watchFilesFor.default = [
+watchFilesFor['compare-layouts-default'] = [
 	path.join(baseDir, 'config', 'default.js'),
 	path.join(baseDir, 'index.js'),
 	path.join(baseDir, 'bin', 'load-page.js')
 ];
-gulp.task('default', function(callback) {
+gulp.task('compare-layouts-default', function(callback) {
 	del( [
 			path.join(baseDir, 'results', 'default', '*.png'),
 			path.join(baseDir, 'results', 'default', '*.css.json')
 		], { force: true } );
 	var loader = exec('node index.js config/default.js',
-		{ cwd: path.join(baseDir, 'responsive-check') },
+		{ cwd: baseDir },
 		function (err, stdout, stderr) {
 			logExecResults(err, stdout, stderr);
 			callback();
