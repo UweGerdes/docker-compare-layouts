@@ -10,8 +10,8 @@
 	<h1>Compare Layouts</h1>
 	<h2>Dynamischer Vergleich</h2>
 	<div class="result-compare-label" style="width:<%= result.width %>px">
-		<h4 class="result-compare-label1"><%= result.page1.url %> "<%= result.selector1 %>"</h4>
-		<h4 class="result-compare-label2"><%= result.page2.url %> "<%= result.selector2 %>"</h4>
+		<h4 class="result-compare-label1"><%= result.page1.engine %> <%= result.page1.url %> "<%= result.selector1 %>"</h4>
+		<h4 class="result-compare-label2"><%= result.page2.engine %> <%= result.page2.url %> "<%= result.selector2 %>"</h4>
 	</div>
 	<div id="result-compare" class="result-compare">
 		<div class="result-compare1"><img src="/<%= result.baseFilename1 %>.png" /></div>
