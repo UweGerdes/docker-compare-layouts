@@ -44,7 +44,7 @@ module.exports = {
 			'cache': false
 		},
 		'app-slimerjs': {
-			'url': 'http://localhost:3000/app',
+			'url': 'http://localhost:3000/app/default',
 			'selector': 'body',
 			'engine': slimerjs,
 			'cache': false

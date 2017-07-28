@@ -6,6 +6,40 @@ img:hover {
 	border-color: #ffffff;
 }
 
+.result {
+	&-compare {
+		float: left;
+		overflow: hidden;
+		position: relative;
+
+		&::after {
+			clear: both;
+			content: '';
+			display: div;
+		}
+
+		&2 {
+			left: 0px;
+			position: absolute;
+			top: 0px;
+
+			img {
+				opacity: 0.5;
+			}
+		}
+
+		&-sensor {
+			background: rgba(255, 255, 0, 0.1);
+			bottom: 0px;
+			left: 50%;
+			margin-left: -100px;
+			position: absolute;
+			top: 0px;
+			width: 200px;
+		}
+	}
+}
+
 ol {
 	clear: both;
 	list-style-type: disc;
