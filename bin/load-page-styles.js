@@ -91,7 +91,9 @@ casper.on('http.status.404', function(resource) {
 // block external resources
 casper.options.onResourceRequested = function(C, requestData, request) {
 	if ( requestData.url.match(/https?:\/\//) && ( ! whitelistOk(requestData) || blacklistHit(requestData) ) ) {
-//		casper.echo('skipped: ' + requestData.url, 'WARNING');
+		if (verbose) {
+			casper.echo('skipped: ' + requestData.url, 'WARNING');
+		}
 		request.abort();
 	} else {
 		if (verbose) {
