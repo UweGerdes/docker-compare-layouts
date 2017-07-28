@@ -1,11 +1,9 @@
-//
-// default configuration for compare-layouts
-//
+/**
+ * default configuration for compare-layouts
+ */
 
 var slimerjs = 'slimerjs';
 var phantomjs = 'phantomjs';
-
-//slimerjs = phantomjs;
 
 // TODO implement
 var viewports = [

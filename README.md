@@ -46,7 +46,9 @@ For the development time a gulpfile.js is included to generate css from less and
 
 ```bash
 $ docker run -it --rm \
-	-v $(pwd):/home/node/dev \
+	-v $(pwd):/home/node/app \
+	-v $(pwd)/config:/home/node/app/config \
+	-v $(pwd)/results:/home/node/app/results \
 	-p 3001:3000 \
 	--name compare-layouts \
 	uwegerdes/compare-layouts \
@@ -68,7 +70,7 @@ Start the docker container in your project test directory (with config and resul
 
 ```bash
 $ docker run -it --rm \
-	-v $(pwd):/home/node/app/config \
+	-v $(pwd)/config:/home/node/app/config \
 	-v $(pwd)/results:/home/node/app/results \
 	-p 3001:3000 \
 	--name compare-layouts \

@@ -1,8 +1,6 @@
 /*
  * gulpfile for compare-layouts
  *
- * edit /node_modules/gulp-less/index.js:68 : replace 'done' with 'then'
- *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
 'use strict';
