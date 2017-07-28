@@ -1,16 +1,14 @@
-img {
-	border: 1px dotted #808080;
-}
-
-img:hover {
-	border-color: #ffffff;
-}
-
 .result {
 	&-compare {
+		border: 1px dotted #808080;
 		float: left;
+		margin-bottom: 30px;
 		overflow: hidden;
 		position: relative;
+
+		&:hover {
+			border-color: #ffffff;
+		}
 
 		&::after {
 			clear: both;
@@ -59,6 +57,22 @@ img:hover {
 			background-color: rgba(255, 255, 0, 0);
 			background-image: radial-gradient(transparent 40%, green 40%, transparent 60%);
 		}
+	}
+}
+
+.imageDiff {
+	border: 1px dotted #808080;
+	float: left;
+	margin-bottom: 30px;
+
+	&::after {
+		clear: both;
+		content: '';
+		display: div;
+	}
+
+	&:hover {
+		border-color: #ffffff;
 	}
 }
 
