@@ -69,7 +69,7 @@ module.exports = {
 			page2: 'index-slimerjs',
 			showHTML: false
 		},
-		'index-phantomjs-phantomjs': {
+		'index-phantomjs-cached-phantomjs': {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'index-phantomjs-cached',
 			page2: 'index-phantomjs',
@@ -81,7 +81,7 @@ module.exports = {
 			page2: 'app-slimerjs',
 			showHTML: false
 		},
-		'app-slimerjs-slimerjs': {
+		'app-slimerjs-cached-slimerjs': {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'app-slimerjs-cached',
 			page2: 'app-slimerjs',
