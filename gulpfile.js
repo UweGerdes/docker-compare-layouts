@@ -223,7 +223,7 @@ watchFilesFor.livereload = [
 	path.join(baseDir, 'views', '*.ejs'),
 	path.join(baseDir, 'css', '*.css'),
 	path.join(baseDir, 'js', '*.js'),
-	path.join(baseDir, 'results', '**', '*.log')
+	path.join(baseDir, 'results', '**', 'index.json')
 ];
 gulp.task('livereload', function() {
 	gulp.src(watchFilesFor.livereload)
