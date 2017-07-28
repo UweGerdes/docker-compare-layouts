@@ -35,7 +35,7 @@ module.exports = {
 			'url': 'http://localhost:3000/',
 			'selector': 'body',
 			'engine': slimerjs,
-			'cache': false
+			'cache': true
 		},
 		'app-phantomjs': {
 			'url': 'http://localhost:3000/app',
@@ -47,7 +47,7 @@ module.exports = {
 			'url': 'http://localhost:3000/app',
 			'selector': 'body',
 			'engine': slimerjs,
-			'cache': false
+			'cache': true
 		}
 	},
 	compares: {
