@@ -131,6 +131,14 @@ function comparePages() {
 		var compare = compares[key];
 		var page1 = pages[compare.page1];
 		var page2 = pages[compare.page2];
+		if (page1 === null || page1 === undefined) {
+			console.log('ERROR in configfile: compage selector page1 "' + compare.page1 + '" not found');
+			return;
+		}
+		if (page2 === null || page2 === undefined) {
+			console.log('ERROR in configfile: compage selector page2 "' + compare.page2 + '" not found');
+			return;
+		}
 		Object.keys(config.widths).forEach(function(widthKey) {
 			var width = config.widths[widthKey];
 			console.log('compare ' + key + ', width: ' + width);
