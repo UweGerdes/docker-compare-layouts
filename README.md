@@ -53,7 +53,6 @@ $ docker run -it --rm \
 	--name compare-layouts \
 	uwegerdes/compare-layouts \
 	bash
-node@xxx: ~/app$ cd ../dev
 node@xxx: ~/dev$ gulp
 ```
 
