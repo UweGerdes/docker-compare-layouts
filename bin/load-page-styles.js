@@ -5,7 +5,7 @@
  * casperjs load-page-styles.js --configFile="../config/default.js" --pageKey="google-form-phantomjs"
  *
  * additional argument to overwrite config settings:
- * --url=https://www.google.de --selector="form" --widths=360,768,1024,1200 --subdir=google-form --hover="#submit" --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
+ * --url=https://www.google.de --selector="form" --subdir=google-form --hover="#submit" --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
  *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
@@ -23,6 +23,9 @@ var config = null,
 	url = 'http://localhost/',
 	domain = 'localhost',
 	widths = [1024],
+	viewports = {
+		'Tablet Portrait': { width:  768, height: 1024 }
+	},
 	hover = '',
 	whitelist = '',
 	blacklist = '',
@@ -66,6 +69,9 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	}
 	if (config.widths && config.widths.length > 0) {
 		widths = config.widths;
+	}
+	if (config.viewports) {
+		viewports = config.viewports;
 	}
 	if (config.blacklist && config.blacklist.length > 0) {
 		blacklist = config.blacklist;
@@ -209,13 +215,14 @@ casper.start();
 if (uname.length > 0 && pval.length > 0) {
 	casper.setHttpAuth(uname, pval);
 }
+
 casper.thenOpen(url, function() {
 	this.echo('opening "' + url + '"', 'INFO');
 });
 
-widths.forEach(function(width) {
+Object.keys(viewports).forEach(function(viewport) {
 	casper.then(function() {
-		casper.viewport(width, 768);
+		casper.viewport(viewports[viewport].width, viewports[viewport].height);
 	});
 	selectorList.forEach(function(sel) {
 		casper.then(function() {
@@ -233,7 +240,7 @@ widths.forEach(function(width) {
 		});
 	});
 	casper.then(function() {
-		subdir = 'results/' + config.destDir + '/' + width + '/' + pageKey;
+		subdir = 'results/' + config.destDir + '/' + pageKey + '/' + viewport;
 		console.log('subdir: ' + subdir);
 		try {
 			if (fs.stat(subdir) && !fs.stat(subdir).isDirectory()) {
@@ -272,6 +279,7 @@ widths.forEach(function(width) {
 		casper.capture(subdir + '/page.png', undefined, { format: 'png' });
 		casper.echo(subdir + '/page.png' + ' saved', 'INFO');
 	});
+	casper.echo('viewports: ', 'ERROR');
 });
 casper.run(function() {
 	this.exit();

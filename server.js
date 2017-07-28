@@ -74,10 +74,10 @@ app.get('/app/:config?/:action?/:param?', function(req, res){
 });
 
 // Handle requests for app view
-app.get('/show/:config/:width/:compare', function(req, res){
+app.get('/show/:config/:compare/:viewport', function(req, res){
 	var config = getConfig(req.params.config);
-	var compare = getCompare(config.data.destDir, req.params.compare, req.params.width);
-	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.width ];
+	var compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
+	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.viewport ];
 	var page1,
 		page2;
 	if (result !== null && result !== undefined) {
@@ -91,7 +91,7 @@ app.get('/show/:config/:width/:compare', function(req, res){
 		page1: page1,
 		page2: page2,
 		result: result,
-		width: req.params.width,
+		viewport: req.params.viewport,
 		livereloadPort: livereloadPort,
 		httpPort: httpPort,
 		running: running
@@ -277,13 +277,13 @@ function getResult(destDir) {
 }
 
 // get compare data
-function getCompare(destDir, compare, width) {
+function getCompare(destDir, compare, viewport) {
 	var result = {};
 	try {
-		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, width, compare + '.json')));
-		console.log('compare file found: ' + path.join(resultsDir, destDir, width, compare + '.json'));
+		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, compare, viewport + '.json')));
+		console.log('compare file found: ' + path.join(resultsDir, destDir, compare, viewport + '.json'));
 	} catch (err) {
-		console.log('compare file not found: ' + path.join(resultsDir, destDir, width, compare + '.json'));
+		console.log('compare file not found: ' + path.join(resultsDir, destDir, compare, viewport + '.json'));
 		// probably file not found
 	}
 	return result;

@@ -5,23 +5,18 @@
 var slimerjs = 'slimerjs';
 var phantomjs = 'phantomjs';
 
-// TODO implement
-var viewports = [
-	{
-		'name': 'smartphone-portrait',
-		'viewport': {width: 320, height: 480}
-	},
-	{
-		'name': 'desktop-standard',
-		'viewport': {width: 1280, height: 1024}
-	}
-];
-
 module.exports = {
 	destDir: 'default',
 	whitelist: 'fonts.googleapis.com, fonts.gstatic.com', // allow load from uri with this substring
 	blacklist: '.js', // do not load - even if it comes from whitelist
-	widths: [ 600, 1200 ],
+	widths: [ 768, 1200 ],
+	viewports: {
+		'iPhone-5':        { width:  320, height:  568 },
+		'iPhone-6':        { width:  375, height:  667 },
+		'Galaxy-S5':       { width:  360, height:  640 },
+		'Tablet-Portrait': { width:  768, height: 1024 },
+		'Desktop':         { width: 1280, height: 1024 }
+	},
 	pages: {
 		'index-phantomjs': {
 			'url': 'http://localhost:3000/',
