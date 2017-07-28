@@ -62,7 +62,6 @@ To look whats going on in the container use (perhaps start tasks that are not tr
 $ docker exec -it compare-layouts bash
 ```
 
-
 ## Usage
 
 Start the docker container in your project test directory (with config and results directory):
@@ -79,6 +78,14 @@ $ docker run -it --rm \
 Open the server address listed in the output. Read content.
 
 To use a virtual hostname with ip in the config file you should map it to the container with `--add-host apphostname:192.168.1.10`. Perhaps allow firewall rule for docker ip network.
+
+You may experience different behaviour if the result subdirectories are created:
+
+- because gulp knows nothing about the new index.json - it will not livereload
+- the default task app-slimerjs-cached-slimerjs will succeed the first time and fail if result cache is filled
+
+Just restart gulp to have the full experience.
+
 
 ## SlimerJS vs. Firefox
 
