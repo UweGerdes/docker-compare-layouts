@@ -55,6 +55,13 @@ node@xxx: ~/app$ cd ../dev
 node@xxx: ~/dev$ gulp
 ```
 
+To look whats going on in the container use (perhaps start tasks that are not triggered by watch):
+
+```bash
+$ docker exec -it compare-layouts bash
+```
+
+
 ## Usage
 
 Start the docker container in your project test directory (with config and results directory):
@@ -69,6 +76,8 @@ $ docker run -it --rm \
 ```
 
 Open the server address listed in the output. Read content.
+
+To use a virtual hostname with ip in the config file you should map it to the container with `--add-host apphostname:192.168.1.10`. Perhaps allow firewall rule for docker ip network.
 
 ## SlimerJS vs. Firefox
 
