@@ -14,7 +14,6 @@
 
 var fs = require('fs'),
 	exec = require('child_process').exec,
-	obj2html = require('./bin/obj2html.js'),
 	path = require('path'),
 	styleTree = require('./bin/style-tree.js');
 
@@ -222,7 +221,6 @@ function compareResults(compare, name) {
 			var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + width + '/' + compare.page1 + '/' + safeFilename(selector1) + '.json')));
 			var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + width + '/' + compare.page2 + '/' + safeFilename(selector2) + '.json')));
 			var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-			compare.resultHtml = obj2html.toHtml(compareResult);
 			var jsonFilename = destDir + '/' + width + '/' + safeFilename(name) + '.json';
 			fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
 			console.log(jsonFilename + ' saved ' + name);

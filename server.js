@@ -20,6 +20,7 @@ var fs = require('fs'),
 	logger = require('morgan'),
 	dateFormat = require('dateformat'),
 	_eval = require('eval'),
+	obj2html = require('./bin/obj2html.js'),
 	interfaces = os.networkInterfaces(),
 	app = express();
 
@@ -75,17 +76,18 @@ app.get('/app/:config?/:action?/:param?', function(req, res){
 // Handle requests for app view
 app.get('/show/:config/:width/:compare', function(req, res){
 	var config = getConfig(req.params.config);
-	var compare = getCompare(config.data.destDir, req.params.compare);
+	var compare = getCompare(config.data.destDir, req.params.compare, req.params.width);
 	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.width ];
 	var page1 = config.data.pages[result.page1];
 	var page2 = config.data.pages[result.page2];
 
 	res.render('resultView.ejs', {
 		config: config,
-		compare: compare,
+		compare: obj2html.toHtml(compare),
 		page1: page1,
 		page2: page2,
 		result: result,
+		styles: result,
 		width: req.params.width,
 		livereloadPort: livereloadPort,
 		httpPort: httpPort,
@@ -272,11 +274,13 @@ function getResult(destDir) {
 }
 
 // get compare data
-function getCompare(destDir, compare) {
+function getCompare(destDir, compare, width) {
 	var result = {};
 	try {
-		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, compare + '.json')));
+		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, width, compare + '.json')));
+		console.log('compare file found: ' + path.join(resultsDir, destDir, width, compare + '.json'));
 	} catch (err) {
+		console.log('compare file not found: ' + path.join(resultsDir, destDir, width, compare + '.json'));
 		// probably file not found
 	}
 	return result;
