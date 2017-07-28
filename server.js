@@ -78,8 +78,10 @@ app.get('/show/:config/:width/:compare', function(req, res){
 	var config = getConfig(req.params.config);
 	var compare = getCompare(config.data.destDir, req.params.compare, req.params.width);
 	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.width ];
-	var page1 = config.data.pages[result.page1];
-	var page2 = config.data.pages[result.page2];
+	if (result !== null && result !== undefined) {
+		var page1 = config.data.pages[result.page1];
+		var page2 = config.data.pages[result.page2];
+	}
 
 	res.render('resultView.ejs', {
 		config: config,
@@ -87,7 +89,6 @@ app.get('/show/:config/:width/:compare', function(req, res){
 		page1: page1,
 		page2: page2,
 		result: result,
-		styles: result,
 		width: req.params.width,
 		livereloadPort: livereloadPort,
 		httpPort: httpPort,
