@@ -24,14 +24,16 @@
     "start": "gulp"
   },
   "files": [
+    "index.js",
     "server.js",
+    "gulpfile.js",
     "bin",
     "views",
     "css"
   ],
   "config": {
     "port": "3000",
-    "livereload": "35730"
+    "livereload": "5082"
   },
   "dependencies": {
     "body-parser": "^1.15.0",

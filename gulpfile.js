@@ -36,7 +36,7 @@ var logMode = 0;
 var txtLog = [];
 var htmlLog = [];
 var watchFilesFor = {};
-var lifereloadPort = process.env.GULP_LIVERELOAD || 5081;
+var lifereloadPort = process.env.GULP_LIVERELOAD || 5082;
 
 /*
  * log only to console, not GUI
@@ -184,7 +184,7 @@ gulp.task('logTestResults', function(callback) {
 gulp.task('server:start', function() {
 	server.listen({
 			path: path.join(baseDir, 'server.js'),
-			env: { LIVERELOAD_PORT: lifereloadPort, VERBOSE: false },
+			env: { GULP_LIVERELOAD: lifereloadPort, VERBOSE: false },
 			cwd: baseDir
 		}
 	);
