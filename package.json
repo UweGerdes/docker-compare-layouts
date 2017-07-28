@@ -1,7 +1,7 @@
 {
   "name": "compare-layouts",
   "description": "compare rendered html page elements",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "MIT",
   "keywords": [
     "compare",
@@ -16,8 +16,12 @@
     "email": "entwicklung@uwegerdes.de"
   },
   "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uwegerdes/docker-compare-layouts"
+  },
   "scripts": {
-    "start": "node server.js"
+    "start": "gulp"
   },
   "files": [
     "server.js",
@@ -47,7 +51,6 @@
     "glob": "^7.0.6",
     "gulp": "^3.8.10",
     "gulp-autoprefixer": "^4.0.0",
-    "gulp-changed": "^3.1.0",
     "gulp-develop-server": "^0.5.2",
     "gulp-jshint": "^2.0.1",
     "gulp-less": "^3.3.2",
