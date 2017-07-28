@@ -74,7 +74,7 @@ function load() {
 		} else {
 			selectorList = page.selector.split(/,/);
 		}
-		if (reload || !page.cache || !isCached(destDir + '/' + pageKey, selectorList)) {
+		if (reload || !page.cache || !isCached(destDir + '/' + config.widths[0] + '/' + pageKey, selectorList)) {
 			loadPage(configFile, pageKey, page);
 		} else {
 			pagesLoaded++;
