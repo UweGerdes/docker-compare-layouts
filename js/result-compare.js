@@ -1,5 +1,5 @@
 /**
- * opacity on mousemove for result-compare
+ * opacity on mousemove for result-compare, slider positioning
  */
 'use strict';
 

@@ -40,7 +40,7 @@ Build the docker image with:
 $ docker build -t uwegerdes/compare-layouts .
 ```
 
-## Development
+## Development / Self Test
 
 For the development time a gulpfile.js is included to generate css from less and restart the server.
 
@@ -51,11 +51,13 @@ $ docker run -it --rm \
 	--name compare-layouts \
 	uwegerdes/compare-layouts \
 	bash
+node@xxx: ~/app$ cd ../dev
+node@xxx: ~/dev$ gulp
 ```
 
-## Self Test
+## Usage
 
-Start the docker container in this directory (with config and results directory):
+Start the docker container in your project test directory (with config and results directory):
 
 ```bash
 $ docker run -it --rm \
@@ -63,13 +65,15 @@ $ docker run -it --rm \
 	-v $(pwd)/results:/home/node/app/results \
 	-p 3001:3000 \
 	--name compare-layouts \
-	uwegerdes/compare-layouts \
-	bash
+	uwegerdes/compare-layouts
 ```
+
+Open the server address listed in the output. Read content.
 
 ## SlimerJS vs. Firefox
 
-sudo vi /usr/lib/node_modules/slimerjs/src/application.ini
+SlimerJS has a version restriction that prevents it from using current Firefox versions. A quick hack is included in the Dockerfile:
 
-replace s/MaxVersion=52\.\*/MaxVersion=54.*/
+/usr/lib/node_modules/slimerjs/src/application.ini:
+	replace s/MaxVersion=52\.\*/MaxVersion=54.*/
 
