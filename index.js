@@ -75,10 +75,10 @@ function load() {
 			selectorList = page.selector.split(/,/);
 		}
 		if (reload || !page.cache || !fs.existsSync(destDir + '/' + pageKey)) {
-			console.log('starting: ' + pageKey);
+			console.log('loading: ' + pageKey);
 			loadPage(configFile, pageKey, page);
 		} else {
-			console.log('cached  : ' + pageKey);
+			console.log('cached : ' + pageKey);
 			pagesLoaded++;
 		}
 	});
@@ -155,13 +155,13 @@ function comparePages() {
 			result.success = false;
 			if ((page1.cache || page1.loaded) && result.exists1 &&
 				(page2.cache || page2.loaded) && result.exists2) {
+				var resultPath = destDir + '/' + safeFilename(key) + '/' + viewport;
 				pagesLoading.push(key);
 				result.success = true;
-				result.compareFilename = destDir + '/' + safeFilename(key) + '/' + viewport + '_compare.png';
-				result.compositeFilename = destDir + '/' + safeFilename(key) + '/' + viewport + '_composite.png';
-				result.compositeMonochromeFilename = destDir + '/' + safeFilename(key) + '/' + viewport + '_composite_monochrome.png';
-				result.jsonFilename = destDir + '/' + safeFilename(key) + '/' + viewport + '.json';
-				result.htmlFilename = destDir + '/' + safeFilename(key) + '/' + viewport + '.html';
+				result.compareFilename = resultPath + '_compare.png';
+				result.compositeFilename = resultPath + '_composite.png';
+				result.jsonFilename = resultPath + '.json';
+				result.htmlFilename = resultPath + '.html';
 				exec('compare -metric AE "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compareFilename,
 					function (error, stdout, stderr) {
 						if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
