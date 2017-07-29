@@ -74,16 +74,13 @@ function load() {
 		} else {
 			selectorList = page.selector.split(/,/);
 		}
-		if (reload || !page.cache || !isCached(destDir + '/' + config.widths[0] + '/' + pageKey, selectorList)) {
+		if (reload || !page.cache || !fs.existsSync(destDir + '/' + pageKey)) {
+			console.log('starting: ' + pageKey);
 			loadPage(configFile, pageKey, page);
 		} else {
+			console.log('cached  : ' + pageKey);
 			pagesLoaded++;
 		}
-
-//		config.viewports.forEach(function(viewport) {
-//			pagesExpected.push(getPageKey(engine, viewport.name));
-//			loadPage(config, engine, viewport, addResult);
-//		});
 	});
 }
 
@@ -100,7 +97,6 @@ function loadPage(configFile, pageKey, page) {
 			cmd = 'xvfb-run -a casperjs';
 		}
 	}
-	console.log('starting: ' + cmd + ' ' + args.join(' '));
 	var loader = exec(cmd + ' ' + args.join(' '),
 		function (error, stdout, stderr) {
 			logExecResult('loaded page ' + page.url, error, "", stderr);
@@ -143,7 +139,6 @@ function comparePages() {
 			return;
 		}
 		Object.keys(config.viewports).forEach(function(viewport) {
-			console.log('compare ' + key + ', viewport: ' + viewport);
 			var result = {};
 			result.name = key;
 			result.viewport = viewport;
@@ -176,7 +171,6 @@ function comparePages() {
 							result.success = false;
 							success = false;
 						}
-			console.log('compare ' + result.baseFilename1 + ' / ' + result.baseFilename2);
 						result.imageStderr = stderr;
 						exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
 							function (error, stdout, stderr) {
@@ -188,7 +182,7 @@ function comparePages() {
 									result.success = false;
 									success = false;
 								}
-								compareResults(compare, key);
+								compareResults(compare, key, viewport);
 								pagesLoading.splice(pagesLoading.indexOf(key), 1);
 								if (pagesLoading.length === 0) {
 									fs.writeFile(destDir + '/' + 'index.json', JSON.stringify(results, null, 4), 0);
@@ -206,26 +200,23 @@ function comparePages() {
 	});
 }
 
-function compareResults(compare, name) {
+function compareResults(compare, name, viewport) {
 	var page1 = pages[compare.page1];
 	var selector1 = compare.selector1 ? compare.selector1 : page1.selector;
 	var page2 = pages[compare.page2];
 	var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
 	var result = true;
-console.log('comparing ' + selector1);
-	Object.keys(config.viewports).forEach(function(viewport) {
-		if (chkCacheFile(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json') &&
-			chkCacheFile(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')) {
-			var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json')));
-			var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')));
-			var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-			var jsonFilename = destDir + '/' + safeFilename(name) + '/' + viewport + '.json';
-			fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
-			console.log(jsonFilename + ' saved ' + name);
-		} else {
-			result = false;
-		}
-	});
+	if (chkCacheFile(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json') &&
+		chkCacheFile(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')) {
+		var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json')));
+		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')));
+		var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
+		var jsonFilename = destDir + '/' + safeFilename(name) + '/' + viewport + '.json';
+		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
+		console.log(jsonFilename + ' saved');
+	} else {
+		result = false;
+	}
 	return result;
 }
 
@@ -233,18 +224,6 @@ function logExecResult(msgStart, error, stdout, stderr) {
 	if (stdout.length > 0) { console.log(msgStart + ' stdout: ' + stdout.trim()); }
 	if (stderr.length > 0) { console.log(msgStart + ' stderr: ' + stderr.trim()); }
 	if (error !== null)	{ console.log(msgStart + ' error:\n' + JSON.stringify(error, undefined, 4)); }
-}
-
-function isCached(subdir, selectorList) {
-	var result = true;
-	selectorList.forEach(function(selector) {
-		if (chkCacheFile(subdir + '/' + safeFilename(selector) + '.json') === false ||
-			chkCacheFile(subdir + '/' + safeFilename(selector) + '.png') === false ||
-			chkCacheFile(subdir + '/' + safeFilename(selector) + '.html') === false) {
-			result = false;
-		}
-	});
-	return result;
 }
 
 function chkCacheFile(filename) {

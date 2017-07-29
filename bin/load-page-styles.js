@@ -279,7 +279,6 @@ Object.keys(viewports).forEach(function(viewport) {
 		casper.capture(subdir + '/page.png', undefined, { format: 'png' });
 		casper.echo(subdir + '/page.png' + ' saved', 'INFO');
 	});
-	casper.echo('viewports: ', 'ERROR');
 });
 casper.run(function() {
 	this.exit();
