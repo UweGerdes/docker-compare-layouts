@@ -98,7 +98,7 @@ gulp.task('jshint', function(callback) {
 watchFilesFor['compare-layouts-default'] = [
 	path.join(baseDir, 'config', 'default.js'),
 	path.join(baseDir, 'index.js'),
-	path.join(baseDir, 'bin', 'load-page.js')
+	path.join(baseDir, 'bin', 'load-page-styles.js')
 ];
 gulp.task('compare-layouts-default', function(callback) {
 	del( [
