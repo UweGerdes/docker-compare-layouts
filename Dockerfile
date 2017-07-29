@@ -48,7 +48,5 @@ VOLUME [ "${APP_HOME}", "${APP_HOME}/config", "${APP_HOME}/results" ]
 
 EXPOSE ${COMPARE_LAYOUTS_HTTP} ${GULP_LIVERELOAD}
 
-#CMD [ "npm", "start" ]
-
-CMD [ "/bin/bash" ]
+CMD [ "npm", "start" ]
 
