@@ -24,7 +24,7 @@ var fs = require('fs'),
 	interfaces = os.networkInterfaces(),
 	app = express();
 
-var livereloadPort = process.env.GULP_LIVERELOAD || 5082,
+var livereloadPort = process.env.GULP_LIVERELOAD,
 	httpPort = process.env.COMPARE_LAYOUTS_HTTP || 3000;
 
 var configDir = path.join(__dirname, 'config'),
