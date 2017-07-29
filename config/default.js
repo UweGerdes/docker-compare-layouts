@@ -9,7 +9,6 @@ module.exports = {
 	destDir: 'default',
 	whitelist: 'fonts.googleapis.com, fonts.gstatic.com', // allow load from uri with this substring
 	blacklist: '.js', // do not load - even if it comes from whitelist
-	widths: [ 768, 1200 ],
 	viewports: {
 		'iPhone-5':        { width:  320, height:  568 },
 		'iPhone-6':        { width:  375, height:  667 },
