@@ -67,12 +67,22 @@ $ docker exec -it compare-layouts bash
 Start the docker container in your project test directory (with config and results directory):
 
 ```bash
-$ docker run -it --rm \
+$ docker run -d --rm \
 	-v $(pwd)/config:/home/node/app/config \
 	-v $(pwd)/results:/home/node/app/results \
 	-p 3001:3000 \
 	--name compare-layouts \
 	uwegerdes/compare-layouts
+```
+
+The container starts in background, you might want to use some of these commands:
+
+```bash
+$ docker exec -it compare-layouts bash
+$ docker logs -f compare-layouts
+$ docker stop compare-layouts
+$ docker start compare-layouts
+
 ```
 
 Open the server address listed in the output. Read content.
