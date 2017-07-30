@@ -86,6 +86,18 @@ You may experience different behaviour if the result subdirectories are created:
 
 Just restart gulp to have the full experience.
 
+## Self Test
+
+Start the docker container in directory with a `./results/` directory:
+
+```bash
+$ docker run -it --rm \
+	-v $(pwd)/results:/home/node/app/results \
+	uwegerdes/compare-layouts \
+	npm test
+```
+
+You will find a lot of files (the cache for the server app) in a subdirectory of `./results/`.
 
 ## SlimerJS vs. Firefox
 

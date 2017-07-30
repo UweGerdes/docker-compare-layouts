@@ -229,6 +229,17 @@ gulp.task('livereload', function() {
 });
 
 /*
+ * compare-layouts selftest task
+ */
+gulp.task('compare-layouts-selftest', function(callback) {
+	runSequence('server:start',
+		'build',
+		'compare-layouts-default',
+		'server:stop',
+		callback);
+});
+
+/*
  * run all build tasks
  */
 gulp.task('build', function(callback) {
