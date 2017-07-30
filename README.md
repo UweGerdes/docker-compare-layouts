@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/UweGerdes/docker-compare-layouts.svg?branch=master)](https://travis-ci.org/UweGerdes/docker-compare-layouts)
+
 # Docker for compare-layouts
 
 Regression testing for frontend developement
