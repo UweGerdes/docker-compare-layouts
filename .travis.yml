@@ -8,4 +8,4 @@ before_install:
   - docker build -t uwegerdes/compare-layouts .
 
 script:
-- bundle exec docker run -it --rm uwegerdes/compare-layouts npm test
+- docker run -it --rm uwegerdes/compare-layouts npm test
