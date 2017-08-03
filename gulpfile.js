@@ -58,14 +58,14 @@ gulp.task('less-lint', function () {
 });
 
 watchFilesFor.less = [
-	path.join(baseDir, 'less', '**', '*.less'),
-	path.join(baseDir, 'less', 'app.less')
+	path.join(baseDir, 'less', 'app.less'),
+	path.join(baseDir, 'less', '**', '*.less')
 ];
 gulp.task('less', function () {
 	var dest = function(filename) {
 		return path.join(path.dirname(path.dirname(filename)), 'css');
 	};
-	var src = watchFilesFor.less.filter(function(el){return el.indexOf('/**/') == -1; });
+	var src = watchFilesFor.less.filter(function(el){return el.indexOf('**') == -1; });
 	return gulp.src( src )
 		.pipe(lessChanged({
 			getOutputFileName: function(file) {
