@@ -86,7 +86,8 @@ gulp.task('less', function () {
  */
 watchFilesFor.jshint = [
 	path.join(baseDir, 'package.json'),
-	path.join(baseDir, '**', '*.js')
+	path.join(baseDir, '*.js'),
+	path.join(baseDir, 'js', '*.js')
 ];
 gulp.task('jshint', function(callback) {
 	return gulp.src(watchFilesFor.jshint)
@@ -103,7 +104,7 @@ watchFilesFor['compare-layouts-default'] = [
 gulp.task('compare-layouts-default', function(callback) {
 	del( [
 			path.join(baseDir, 'results', 'default', '*.png'),
-			path.join(baseDir, 'results', 'default', '*.css.json')
+			path.join(baseDir, 'results', 'default', '**', 'index.json')
 		], { force: true } );
 	var loader = exec('node index.js config/default.js',
 		{ cwd: baseDir },
