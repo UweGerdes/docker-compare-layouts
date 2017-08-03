@@ -74,7 +74,7 @@ function load() {
 		} else {
 			selectorList = page.selector.split(/,/);
 		}
-		if (reload || !page.cache || !fs.existsSync(destDir + '/' + pageKey)) {
+		if (reload || !page.cache || !fs.existsSync(path.join(destDir,  pageKey))) {
 			console.log('loading: ' + pageKey);
 			loadPage(configFile, pageKey, page);
 		} else {
@@ -124,8 +124,8 @@ function comparePages() {
 	var results = {};
 	Object.keys(compares).forEach(function(key) {
 		console.log('compare ' + key);
-		if (!fs.existsSync(destDir + '/' + safeFilename(key))) {
-			fs.mkdirSync(destDir + '/' + safeFilename(key));
+		if (!fs.existsSync(path.join(destDir,  safeFilename(key)))) {
+			fs.mkdirSync(path.join(destDir,  safeFilename(key)));
 		}
 		var compare = compares[key];
 		var page1 = pages[compare.page1];
@@ -148,14 +148,14 @@ function comparePages() {
 			result.subdir2 = compare.page2;
 			result.selector1 = compare.selector1 ? compare.selector1 : page1.selector;
 			result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-			result.baseFilename1 = destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(result.selector1);
-			result.baseFilename2 = destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(result.selector2);
+			result.baseFilename1 = path.join(destDir,  compare.page1,  viewport,  safeFilename(result.selector1));
+			result.baseFilename2 = path.join(destDir,  compare.page2,  viewport,  safeFilename(result.selector2));
 			result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
 			result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
 			result.success = false;
 			if ((page1.cache || page1.loaded) && result.exists1 &&
 				(page2.cache || page2.loaded) && result.exists2) {
-				var resultPath = destDir + '/' + safeFilename(key) + '/' + viewport;
+				var resultPath = path.join(destDir,  safeFilename(key),  viewport);
 				pagesLoading.push(key);
 				result.success = true;
 				result.compareFilename = resultPath + '_compare.png';
@@ -185,8 +185,8 @@ function comparePages() {
 								compareResults(compare, key, viewport);
 								pagesLoading.splice(pagesLoading.indexOf(key), 1);
 								if (pagesLoading.length === 0) {
-									fs.writeFile(destDir + '/' + 'index.json', JSON.stringify(results, null, 4), 0);
-									console.log((success ? "SUCCESS" : "FAIL") + ' compare-layouts/' + destDir + '/index.json');
+									fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(results, null, 4));
+									console.log((success ? "SUCCESS" : "FAIL") + ' - result in: ' + path.join(destDir,  'index.json').toString());
 								}
 							}
 						);
@@ -206,13 +206,14 @@ function compareResults(compare, name, viewport) {
 	var page2 = pages[compare.page2];
 	var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
 	var result = true;
-	if (chkCacheFile(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json') &&
-		chkCacheFile(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')) {
-		var styleTree1 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page1 + '/' + viewport + '/' + safeFilename(selector1) + '.json')));
-		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(destDir + '/' + compare.page2 + '/' + viewport + '/' + safeFilename(selector2) + '.json')));
+	if (chkCacheFile(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json')) &&
+		chkCacheFile(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))) {
+		var styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json'))));
+		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
 		var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-		var jsonFilename = destDir + '/' + safeFilename(name) + '/' + viewport + '.json';
-		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), 0);
+		var jsonFilename = path.join(destDir,  safeFilename(name),  viewport + '.json');
+        console.log("Filename: " + jsonFilename);
+		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4));
 		console.log(jsonFilename + ' saved');
 	} else {
 		result = false;
