@@ -93,8 +93,10 @@ function loadPage(configFile, pageKey, page) {
 	if (page.engine) {
 		args.unshift('--engine="' + page.engine + '"');
 		if (page.engine == 'slimerjs') {
-//			cmd = 'xvfb-run -a -e /dev/stdout casperjs';
-			cmd = 'xvfb-run -a casperjs';
+			if (process.platform == "linux") {
+//				cmd = 'xvfb-run -a -e /dev/stdout casperjs';
+				cmd = 'xvfb-run -a casperjs';
+			}
 		}
 	}
 	var loader = exec(cmd + ' ' + args.join(' '),
@@ -212,7 +214,6 @@ function compareResults(compare, name, viewport) {
 		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
 		var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
 		var jsonFilename = path.join(destDir,  safeFilename(name),  viewport + '.json');
-        console.log("Filename: " + jsonFilename);
 		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4));
 		console.log(jsonFilename + ' saved');
 	} else {
