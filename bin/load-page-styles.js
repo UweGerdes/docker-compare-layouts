@@ -40,7 +40,6 @@ var results = {};
 if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	var configFile = fs.absolute(casper.cli.options.configFile);
 	pageKey = casper.cli.options.pageKey;
-	console.log("config file: " + configFile);
 	try {
 		config = require(configFile);
 	}

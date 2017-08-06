@@ -106,7 +106,7 @@ function loadPage(configFile, pageKey, page) {
 	);
 	loader.stdout.on('data', function(data) { if (verbose || data.indexOf('element not found') > -1) {console.log(pageKey + ': ' + data.trim());} });
 	loader.stderr.on('data', function(data) { console.log(pageKey + ' stderr: ' + data.trim()); });
-	loader.on('error', function(err) { console.log(pageKey + ' error: ' + err.trim()); });
+	loader.on('error', function(err) { console.log(pageKey + ' error: ' + err); });
 	loader.on('close', function(code) {
 		if (code > 0) {
 			console.log('load ' + page.url + ' exit: ' + code);
@@ -187,8 +187,12 @@ function comparePages() {
 								compareResults(compare, key, viewport);
 								pagesLoading.splice(pagesLoading.indexOf(key), 1);
 								if (pagesLoading.length === 0) {
-									fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(results, null, 4));
-									console.log((success ? "SUCCESS" : "FAIL") + ' - result in: ' + path.join(destDir,  'index.json').toString());
+									fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(results, null, 4), function(err) {
+										if(err) {
+											return console.log(path.join(destDir,  'index.json') + ' error: ' + err);
+										}
+										console.log((success ? "SUCCESS" : "FAIL") + ' - result in: ' + path.join(destDir,  'index.json'));
+									});
 								}
 							}
 						);
@@ -214,8 +218,12 @@ function compareResults(compare, name, viewport) {
 		var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
 		var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
 		var jsonFilename = path.join(destDir,  safeFilename(name),  viewport + '.json');
-		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4));
-		console.log(jsonFilename + ' saved');
+		fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), function(err) {
+			if(err) {
+				return console.log(jsonFilename + ' error: ' + err);
+			}
+			console.log(jsonFilename + ' saved');
+		});
 	} else {
 		result = false;
 	}
