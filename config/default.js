@@ -23,17 +23,17 @@ module.exports = {
 			'engine': phantomjs,
 			'cache': false
 		},
-		'index-phantomjs-cached': {
-			'url': 'http://localhost:3000/',
-			'selector': 'body',
-			'engine': phantomjs,
-			'cache': true
-		},
 		'index-slimerjs': {
 			'url': 'http://localhost:3000/',
 			'selector': 'body',
 			'engine': slimerjs,
 			'cache': false
+		},
+		'index-phantomjs-cached': {
+			'url': 'http://localhost:3000/',
+			'selector': 'body',
+			'engine': phantomjs,
+			'cache': true
 		},
 		'app-phantomjs': {
 			'url': 'http://localhost:3000/app',
@@ -43,7 +43,7 @@ module.exports = {
 		},
 		'app-slimerjs': {
 			'url': 'http://localhost:3000/app',
-			'selector': 'body',
+			'selector': 'body,.app',
 			'engine': slimerjs,
 			'cache': false
 		},
@@ -71,12 +71,22 @@ module.exports = {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'app-phantomjs',
 			page2: 'app-slimerjs',
+			selector2: 'body',
 			showHTML: false
 		},
 		'app-slimerjs-cached-slimerjs': {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'app-slimerjs-cached',
 			page2: 'app-slimerjs',
+			selector2: 'body',
+			showHTML: false
+		},
+		'app-slimerjs-cached-slimerjs-app': {
+			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
+			page1: 'app-slimerjs-cached',
+			selector1: 'body',
+			page2: 'app-slimerjs',
+			selector2: '.app',
 			showHTML: false
 		}
 	}

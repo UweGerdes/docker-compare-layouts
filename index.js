@@ -248,5 +248,5 @@ function chkCacheFile(filename) {
 }
 
 function safeFilename(name) {
-	return name.replace(/[ ?#/:\(\)<>|\\]/g, "_").trim();
+	return name.replace(/[ .?#/:\(\)<>|\\]/g, "_").trim();
 }
