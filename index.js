@@ -152,6 +152,8 @@ function comparePages() {
 			result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
 			result.baseFilename1 = path.join(destDir,  compare.page1,  viewport,  safeFilename(result.selector1));
 			result.baseFilename2 = path.join(destDir,  compare.page2,  viewport,  safeFilename(result.selector2));
+			result.htmlFilename1 = destDir + '/' +  compare.page1 + '/' +  viewport + '/' +  safeFilename(result.selector1);
+			result.htmlFilename2 = destDir + '/' + compare.page2 + '/' +  viewport + '/' +  safeFilename(result.selector2);
 			result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
 			result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
 			result.success = false;
