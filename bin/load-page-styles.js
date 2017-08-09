@@ -22,7 +22,6 @@ var config = null,
 	subdir = 'localhost',
 	url = 'http://localhost/',
 	domain = 'localhost',
-	widths = [1024],
 	viewports = {
 		'Tablet Portrait': { width:  768, height: 1024 }
 	},
@@ -30,9 +29,9 @@ var config = null,
 	whitelist = '',
 	blacklist = '',
 	uname = '',
-	pval = '';
-
-var verbose = false;
+	pval = '',
+	timeout = 20000,
+	showExternalUrls = false;
 
 var results = {};
 
@@ -96,15 +95,24 @@ casper.on('http.status.404', function(resource) {
 // block external resources
 casper.options.onResourceRequested = function(C, requestData, request) {
 	if ( requestData.url.match(/https?:\/\//) && ( ! whitelistOk(requestData) || blacklistHit(requestData) ) ) {
-		if (verbose) {
+		if (showExternalUrls) {
 			casper.echo('skipped: ' + requestData.url, 'WARNING');
 		}
 		request.abort();
 	} else {
-		if (verbose) {
+		if (showExternalUrls) {
 			casper.echo('loading: ' + requestData.url, 'INFO');
 		}
 	}
+};
+
+casper.options.timeout = timeout;
+casper.options.onTimeout = function (timeout) {
+	casper.echo('TIMEOUT ' + timeout + 'ms without answer from server', 'ERROR');
+};
+//casper.options.waitTimeout = timeout;
+casper.options.onLoadError = function () {
+	casper.echo('LOAD ERROR', 'ERROR');
 };
 
 function whitelistOk(requestData) {
