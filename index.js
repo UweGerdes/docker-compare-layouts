@@ -39,6 +39,7 @@ var compares = config.compares;
 var pagesLoaded = 0;
 //var pagesExpected = [];
 //var pagesLoaded = [];
+var results = {};
 
 if (!fs.existsSync(resultsDir)) {
 	fs.mkdirSync(resultsDir);
@@ -123,7 +124,6 @@ function comparePages() {
 	if (pagesLoaded < Object.keys(pages).length) {
 		return;
 	}
-	var results = {};
 	Object.keys(compares).forEach(function(key) {
 		console.log('compare ' + key);
 		if (!fs.existsSync(path.join(destDir,  safeFilename(key)))) {
@@ -187,15 +187,6 @@ function comparePages() {
 									success = false;
 								}
 								compareResults(compare, key, viewport);
-								pagesLoading.splice(pagesLoading.indexOf(key), 1);
-								if (pagesLoading.length === 0) {
-									fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(results, null, 4), function(err) {
-										if(err) {
-											return console.log(path.join(destDir,  'index.json') + ' error: ' + err);
-										}
-										console.log((success ? "SUCCESS" : "FAIL") + ' - result in: ' + path.join(destDir,  'index.json'));
-									});
-								}
 							}
 						);
 					}
@@ -225,11 +216,24 @@ function compareResults(compare, name, viewport) {
 				return console.log(jsonFilename + ' error: ' + err);
 			}
 			console.log(jsonFilename + ' saved');
+			pagesLoading.splice(pagesLoading.indexOf(compare), 1);
+			if (pagesLoading.length === 0) {
+				saveResults(compare, results, success);
+			}
 		});
 	} else {
 		result = false;
 	}
 	return result;
+}
+
+function saveResults(compare, results, success) {
+	fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(results, null, 4), function(err) {
+		if(err) {
+			return console.log(path.join(destDir,  'index.json') + ' error: ' + err);
+		}
+		console.log((success ? "SUCCESS" : "FAIL") + ' - result in: ' + path.join(destDir,  'index.json'));
+	});
 }
 
 function logExecResult(msgStart, error, stdout, stderr) {
