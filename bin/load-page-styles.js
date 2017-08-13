@@ -39,6 +39,7 @@ var results = {};
 if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	var configFile = fs.absolute(casper.cli.options.configFile);
 	pageKey = casper.cli.options.pageKey;
+	//console.error("loading pageKey: " + pageKey);
 	try {
 		config = require(configFile);
 	}
@@ -77,6 +78,8 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	if (config.whitelist && config.whitelist.length > 0) {
 		whitelist = config.whitelist;
 	}
+} else {
+	throw("FAIL: configFile and pageKey have to be provided");
 }
 casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
 
