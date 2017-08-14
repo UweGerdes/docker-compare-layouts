@@ -40,7 +40,7 @@ function loadPage(pageKey) {
   var page = config.pages[pageKey];
   if (page.cache && chkCacheFile(pageKey)) {
     return new Promise(function(resolve, reject) {
-      resolve(pageKey);
+      resolve({'pageKey': pageKey, 'status': 'cached'});
     });
   }
   return new Promise(function(resolve, reject) {
@@ -58,6 +58,7 @@ function loadPage(pageKey) {
         }
       }
     }
+    console.log('loading page ' + page.url + ' ' + pageKey);
     var loader = exec(cmd + ' ' + args.join(' '));
     loader.stdout.on('data', function(data) {
       if (verbose || data.indexOf('element not found') > -1) {
@@ -73,16 +74,74 @@ function loadPage(pageKey) {
     loader.on('close', function(code) {
         console.log('loaded page ' + page.url + ' ' + pageKey);
       if (code > 0) {
-        reject('load ' + pageKey + ' exit: ' + code);
+        reject({'pageKey': pageKey, 'status': 'error', 'exitcode': code});
       } else {
-        resolve(pageKey);
+        resolve({'pageKey': pageKey, 'status': 'loaded'});
       }
     });
   });
 }
 
-function compareStyleTree(compareKey) {
-  var viewport = 'Desktop';
+function compareImages(compareSet) {
+  var compareKey = compareSet.compareKey;
+  var viewport = compareSet.viewport;
+  var compare = config.compares[compareKey];
+  var page1 = config.pages[compare.page1];
+  var page2 = config.pages[compare.page2];
+  return new Promise(function(resolve, reject) {
+    if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
+      fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
+    }
+    var result = {};
+    result.name = compareKey;
+    result.viewport = viewport;
+    result.page1 = page1;
+    result.page2 = page2;
+    result.subdir1 = compare.page1;
+    result.subdir2 = compare.page2;
+    result.selector1 = compare.selector1 ? compare.selector1 : page1.selector;
+    result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
+    result.baseFilename1 = path.join(destDir,  compare.page1,  viewport,  safeFilename(result.selector1));
+    result.baseFilename2 = path.join(destDir,  compare.page2,  viewport,  safeFilename(result.selector2));
+    result.htmlFilename1 = destDir + '/' +  compare.page1 + '/' +  viewport + '/' +  safeFilename(result.selector1);
+    result.htmlFilename2 = destDir + '/' + compare.page2 + '/' +  viewport + '/' +  safeFilename(result.selector2);
+    result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
+    result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
+    result.success = true;
+    result.path = path.join(destDir,  safeFilename(compareKey),  viewport);
+    result.compareFilename = result.path + '_compare.png';
+    result.compositeFilename = result.path + '_composite.png';
+    result.jsonFilename = result.path + '.json';
+    result.htmlFilename = result.path + '.html';
+    exec('compare -metric AE "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compareFilename,
+      function (error, stdout, stderr) {
+        //if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
+        if (stderr == '0') {
+          if (verbose) { console.log(result.compareFilename + ' saved'); }
+        } else {
+          result.success = false;
+        }
+        result.imageStderr = stderr;
+        exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
+          function (error, stdout, stderr) {
+            //logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
+            if (stderr.length === 0) {
+              if (verbose) { console.log(result.compositeFilename + ' saved'); }
+            } else {
+              result.compositeFilename = '';
+              result.success = false;
+            }
+            resolve({ 'compareKey': compareKey, 'viewport': viewport, 'result': result});
+          }
+        );
+      }
+    );
+  });
+}
+
+function compareStyleTree(compare) {
+  var compareKey = compare.compareKey;
+  var viewport = compare.viewport;
   return new Promise(function(resolve, reject) {
     if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
       fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
@@ -102,40 +161,41 @@ function compareStyleTree(compareKey) {
         reject({'compareKey': compareKey, 'error': err});
       }
       console.log(jsonFilename + ' saved');
+      resolve({'compareKey': compareKey, 'viewport': viewport, 'resultFilename': jsonFilename});
     });
-    resolve({ 'compareKey': compareKey, 'resultFilename': jsonFilename});
   });
 }
 
-
+var results = {};
+var compares = [];
+Object.keys(config.compares).forEach(function(compareKey) {
+  Object.keys(config.viewports).forEach(function(viewport) {
+    compares.push({'compareKey': compareKey, 'viewport': viewport});
+  });
+});
 var promise = new Promise((resolve, reject) => { resolve(path.basename(__filename)); });
-promise.then(function(response) {
+promise = promise.then(function(response) {
   console.log("Starting:", response);
   return response;
-}).then(function(list) {
-  var paths = list.storyFiles.map(function (name) {return path.join('tests', name);});
-  console.log('paths:', JSON.stringify(paths, undefined, 4));
-  return Promise.all(
-    paths.map(getJSON)
-  );
-}).then(function(response) {
-  console.log("Success2:", JSON.stringify(response, undefined, 4));
-}).catch(function(error) {
-  console.error("Failed!", error);
 }).then(function(response) {
   var pageKeys = Object.keys(config.pages);
   return Promise.all(
     pageKeys.map(loadPage)
   );
-}).then(function(response) {
-  console.log("Success3:", JSON.stringify(response, undefined, 4));
-}).then(function(response) {
-  var compares = Object.keys(config.compares);
+}).then(function(pages) {
+  results.pages = pages;
+  return Promise.all(
+    compares.map(compareImages)
+  );
+}).then(function(data) {
+  results.data = data;
   return Promise.all(
     compares.map(compareStyleTree)
   );
-}).then(function(response) {
-  console.log("Success4:", JSON.stringify(response, undefined, 4));
+});
+promise.then(function(compared) {
+//  results.compared = compared;
+  console.log("results:", JSON.stringify(results, undefined, 4));
 }).catch(function(error) {
   console.error("Failed!", error);
 });
