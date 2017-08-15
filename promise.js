@@ -82,17 +82,13 @@ function loadPage(pageKey) {
   });
 }
 
-function compareImages(compareSet) {
-  var compareKey = compareSet.compareKey;
-  var viewport = compareSet.viewport;
-  var compare = config.compares[compareKey];
-  var page1 = config.pages[compare.page1];
-  var page2 = config.pages[compare.page2];
+function compareData(result) {
   return new Promise(function(resolve, reject) {
-    if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
-      fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
-    }
-    var result = {};
+    var compareKey = result.compareKey;
+    var viewport = result.viewport;
+    var compare = config.compares[compareKey];
+    var page1 = config.pages[compare.page1];
+    var page2 = config.pages[compare.page2];
     result.name = compareKey;
     result.viewport = viewport;
     result.page1 = page1;
@@ -103,8 +99,8 @@ function compareImages(compareSet) {
     result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
     result.baseFilename1 = path.join(destDir,  compare.page1,  viewport,  safeFilename(result.selector1));
     result.baseFilename2 = path.join(destDir,  compare.page2,  viewport,  safeFilename(result.selector2));
-    result.htmlFilename1 = destDir + '/' +  compare.page1 + '/' +  viewport + '/' +  safeFilename(result.selector1);
-    result.htmlFilename2 = destDir + '/' + compare.page2 + '/' +  viewport + '/' +  safeFilename(result.selector2);
+    result.htmlFilename1 = [destDir, compare.page1, viewport, safeFilename(result.selector1)].join('/');
+    result.htmlFilename2 = [destDir, compare.page2, viewport, safeFilename(result.selector2)].join('/');
     result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
     result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
     result.success = true;
@@ -113,27 +109,44 @@ function compareImages(compareSet) {
     result.compositeFilename = result.path + '_composite.png';
     result.jsonFilename = result.path + '.json';
     result.htmlFilename = result.path + '.html';
+    if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
+      fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
+    }
+    resolve(result);
+  });
+}
+
+function compareImages(result) {
+  return new Promise(function(resolve, reject) {
     exec('compare -metric AE "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compareFilename,
       function (error, stdout, stderr) {
         //if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
         if (stderr == '0') {
           if (verbose) { console.log(result.compareFilename + ' saved'); }
         } else {
+          result.compareFilename = '';
           result.success = false;
         }
-        result.imageStderr = stderr;
-        exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
-          function (error, stdout, stderr) {
-            //logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
-            if (stderr.length === 0) {
-              if (verbose) { console.log(result.compositeFilename + ' saved'); }
-            } else {
-              result.compositeFilename = '';
-              result.success = false;
-            }
-            resolve({ 'compareKey': compareKey, 'viewport': viewport, 'result': result});
-          }
-        );
+        result.compareImagesStderr = stderr;
+        resolve(result);
+      }
+    );
+  });
+}
+
+function compositeImages(result) {
+  return new Promise(function(resolve, reject) {
+    exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
+      function (error, stdout, stderr) {
+        //logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
+        if (stderr.length === 0) {
+          if (verbose) { console.log(result.compositeFilename + ' saved'); }
+        } else {
+          result.compositeFilename = '';
+          result.success = false;
+        }
+        result.compositeImagesStderr = stderr;
+        resolve(result);
       }
     );
   });
@@ -155,13 +168,15 @@ function compareStyleTree(compare) {
     var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
     var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
     var jsonFilename = path.join(destDir,  safeFilename(compareKey),  viewport + '.json');
-    fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), function(err) {
-      if(err) {
-        console.log(jsonFilename + ' error: ' + err);
-        reject({'compareKey': compareKey, 'error': err});
+    fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), function(error) {
+      if(error) {
+        console.log(jsonFilename + ' error: ' + error);
+        compare.error = error;
+        reject(compare);
       }
       console.log(jsonFilename + ' saved');
-      resolve({'compareKey': compareKey, 'viewport': viewport, 'resultFilename': jsonFilename});
+      compare.jsonFilename = jsonFilename;
+      resolve(compare);
     });
   });
 }
@@ -185,21 +200,51 @@ promise = promise.then(function(response) {
 }).then(function(pages) {
   results.pages = pages;
   return Promise.all(
+    compares.map(compareData)
+  );
+}).then(function(result) {
+  results.result = result;
+  return Promise.all(
     compares.map(compareImages)
   );
-}).then(function(data) {
-  results.data = data;
+}).then(function(compares) {
+  return Promise.all(
+    compares.map(compositeImages)
+  );
+}).then(function(compares) {
   return Promise.all(
     compares.map(compareStyleTree)
   );
 });
 promise.then(function(compared) {
-//  results.compared = compared;
+  results.compared = compared;
   console.log("results:", JSON.stringify(results, undefined, 4));
 }).catch(function(error) {
   console.error("Failed!", error);
 });
 
+function makePath(directoryPath) {
+  const directory = path.normalize(directoryPath);
+  return new Promise((resolve, reject) => {
+    fs.stat(directory, (error) => {
+      if (error) {
+        if (error.code === 'ENOENT') {
+          fs.mkdir(directory, (error) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(directory);
+            }
+          });
+        } else {
+          reject(error);
+        }
+      } else {
+        resolve(directory);
+      }
+    });
+  });
+}
 
 function chkCacheFile(pageKey) {
   try {
