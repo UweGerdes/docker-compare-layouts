@@ -1,5 +1,13 @@
 /**
  * load pages in phantomjs or slimerjs, grab elements, use viewports, prepare results for server
+ *
+ * node index.js [configfile] [-v] [-r]
+ *
+ * configfile: config/[name].js
+ * -v: verbose
+ * -r: force reload / ignore cache
+ *
+ * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
 
 'use strict';
@@ -22,9 +30,9 @@ function getFile(filename) {
   console.log('reading: ' + filename);
   return new Promise(
     function(resolve, reject) {
-      fs.readFile(filename, function(err, data) {
-        if (err) {
-          reject(Error(err.code));
+      fs.readFile(filename, function(error, data) {
+        if (error) {
+          reject(Error(error.code));
         }
         resolve(data.toString());
       });
@@ -38,7 +46,8 @@ function getJSON(filename) {
 
 function loadPage(pageKey) {
   var page = config.pages[pageKey];
-  if (page.cache && chkCacheFile(pageKey)) {
+  if (page.cache && chkCacheFile(path.join(destDir, pageKey, Object.keys(config.viewports)[0], 'page.png'))) {
+    console.log('cached page  ' + pageKey + ': ' + page.url);
     return new Promise(function(resolve, reject) {
       resolve({'pageKey': pageKey, 'status': 'cached'});
     });
@@ -58,28 +67,44 @@ function loadPage(pageKey) {
         }
       }
     }
-    console.log('loading page ' + page.url + ' ' + pageKey);
-    var loader = exec(cmd + ' ' + args.join(' '));
-    loader.stdout.on('data', function(data) {
-      if (verbose || data.indexOf('element not found') > -1) {
-        console.log(pageKey + ': ' + data.trim());
+    console.log('loading page ' + pageKey + ': ' + page.url);
+    var loader = exec(cmd + ' ' + args.join(' '), function(error, stdout, stderr) {
+      if (verbose || stdout.indexOf('element not found') > -1) {
+        console.log(pageKey + ': ' + stdout.trim());
       }
     });
-    loader.stderr.on('data', function(data) {
-      console.log(pageKey + ' stderr: ' + data);
+    loader.stderr.on('data', function(stderr) {
+      console.log(pageKey + ' stderr: ' + stderr.trim());
     });
-    loader.on('error', function(err) {
-      console.log(pageKey + ' error: ' + err);
+    loader.on('error', function(error) {
+      console.log(pageKey + ' error: ' + error);
     });
-    loader.on('close', function(code) {
-        console.log('loaded page ' + page.url + ' ' + pageKey);
-      if (code > 0) {
-        reject({'pageKey': pageKey, 'status': 'error', 'exitcode': code});
+    loader.on('close', function(error) {
+      console.log('loaded page ' + pageKey + ': ' + page.url);
+      if (error > 0) {
+        reject({'pageKey': pageKey, 'status': 'error', 'exitcode': error});
       } else {
         resolve({'pageKey': pageKey, 'status': 'loaded'});
       }
     });
   });
+}
+
+function makeCompareDir(compareKey) {
+  if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
+    fs.mkdir(path.join(destDir,  safeFilename(compareKey)),function(error) {
+      if (error) {
+        console.log('makeCompareDir ' + compareKey + ' error: ' + error);
+      }
+      return new Promise(function(resolve, reject) {
+        resolve(compareKey);
+      });
+    });
+  } else {
+    return new Promise(function(resolve, reject) {
+      resolve(compareKey);
+    });
+  }
 }
 
 function compareData(result) {
@@ -109,9 +134,6 @@ function compareData(result) {
     result.compositeFilename = result.path + '_composite.png';
     result.jsonFilename = result.path + '.json';
     result.htmlFilename = result.path + '.html';
-    if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
-      fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
-    }
     resolve(result);
   });
 }
@@ -181,6 +203,19 @@ function compareStyleTree(compare) {
   });
 }
 
+function saveResults(results) {
+  let output = {};
+  results.forEach(function (result) {
+    output[result.compareKey + '_' + result.viewport] = result;
+  });
+  fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(output, null, 4), function(error) {
+    if(error) {
+      return console.log(path.join(destDir,  'index.json') + ' error: ' + error);
+    }
+    console.log('result in: ' + path.join(destDir,  'index.json'));
+  });
+}
+
 var results = {};
 var compares = [];
 Object.keys(config.compares).forEach(function(compareKey) {
@@ -202,23 +237,27 @@ promise = promise.then(function(response) {
   return Promise.all(
     compares.map(compareData)
   );
-}).then(function(result) {
-  results.result = result;
+}).then(function(data) {
+  return Promise.all(
+    Object.keys(config.compares).map(makeCompareDir)
+  );
+}).then(function() {
   return Promise.all(
     compares.map(compareImages)
   );
 }).then(function(compares) {
+  results.compares = compares;
   return Promise.all(
     compares.map(compositeImages)
   );
 }).then(function(compares) {
+  results.compares = compares;
   return Promise.all(
     compares.map(compareStyleTree)
   );
 });
 promise.then(function(compared) {
-  results.compared = compared;
-  console.log("results:", JSON.stringify(results, undefined, 4));
+  saveResults(results.compares);
 }).catch(function(error) {
   console.error("Failed!", error);
 });
@@ -246,11 +285,11 @@ function makePath(directoryPath) {
   });
 }
 
-function chkCacheFile(pageKey) {
+function chkCacheFile(file) {
   try {
-    return fs.lstatSync(path.join(destDir, pageKey)).isDirectory();
-  } catch(err) {
-    //console.log('chk ' + filename + ' not found');
+    return fs.lstatSync(file).isFile();
+  } catch(error) {
+    //console.log('chkCacheFile ' + file + ' not found');
   }
   return false;
 }
