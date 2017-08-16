@@ -174,22 +174,19 @@ function compositeImages(result) {
   });
 }
 
-function compareStyleTree(compare) {
-  var compareKey = compare.compareKey;
-  var viewport = compare.viewport;
+function compareStyleTree(comp) {
+  var compareKey = comp.compareKey;
+  var viewport = comp.viewport;
+  var compare = config.compares[compareKey];
+  var page1 = config.pages[compare.page1];
+  var selector1 = compare.selector1 ? compare.selector1 : page1.selector;
+  var page2 = config.pages[compare.page2];
+  var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
+  var styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json'))));
+  var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
+  var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
+  var jsonFilename = path.join(destDir,  safeFilename(compareKey),  viewport + '.json');
   return new Promise(function(resolve, reject) {
-    if (!fs.existsSync(path.join(destDir,  safeFilename(compareKey)))) {
-      fs.mkdirSync(path.join(destDir,  safeFilename(compareKey)));
-    }
-    var compare = config.compares[compareKey];
-    var page1 = config.pages[compare.page1];
-    var selector1 = compare.selector1 ? compare.selector1 : page1.selector;
-    var page2 = config.pages[compare.page2];
-    var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-    var styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json'))));
-    var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
-    var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-    var jsonFilename = path.join(destDir,  safeFilename(compareKey),  viewport + '.json');
     fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), function(error) {
       if(error) {
         console.log(jsonFilename + ' error: ' + error);
