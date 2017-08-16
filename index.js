@@ -175,7 +175,7 @@ function comparePages() {
 							result.success = false;
 							success = false;
 						}
-						result.imageStderr = stderr;
+						result.compareImagesStderr = stderr;
 						exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
 							function (error, stdout, stderr) {
 								logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));

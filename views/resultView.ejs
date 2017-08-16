@@ -20,11 +20,11 @@
 	</div>
 	<script src="/js/result-compare.js"></script>
 	<br />
-	<% if (result.imageStderr && result.imageStderr.indexOf('a') > 0) { %>
-		<h3><%= result.imageStderr.replace(/ `.+/, '') %></h3>
+	<% if (result.compareImagesStderr && result.compareImagesStderr.indexOf('a') > 0) { %>
+		<h3><%= result.compareImagesStderr.replace(/ `.+/, '') %></h3>
 		<br />
 	<% } else { %>
-		<% if (result.imageStderr != "0") { %>
+		<% if (result.compareImagesStderr != "0") { %>
 			<h2>Unterschiede</h2>
 			<h3>Maske</h3>
 			<div class="imageDiff"><img src="/<%= result.compareFilename %>" /></div>
@@ -34,7 +34,7 @@
 			<br />
 		<% } %>
 	<% } %>
-	<% if (result.imageStderr != "0") { %>
+	<% if (result.compareImagesStderr != "0") { %>
 		<h3>Differenz</h3>
 		<div class="imageDiff composite"><img src="/<%= result.compositeFilename %>" /></div><br />
 	<% } %>
