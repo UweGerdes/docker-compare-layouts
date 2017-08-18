@@ -11,6 +11,9 @@ RUN apt-get update && \
 	apt-get dist-upgrade -y && \
 	apt-get install -y \
 				firefox \
+				graphviz \
+				imagemagick \
+				libpng-dev \
 				xvfb && \
 	rm -rf /var/lib/apt/lists/*
 
@@ -28,12 +31,13 @@ RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
 				gulp \
 				phantomjs-prebuilt \
 				slimerjs && \
-	sed -i -e "s/MaxVersion=52\.\*/MaxVersion=54.*/" /usr/lib/node_modules/slimerjs/src/application.ini && \
+	sed -i -e "s/MaxVersion=5.\.\*/MaxVersion=55.*/" /usr/lib/node_modules/slimerjs/src/application.ini && \
 	npm cache clean
 
 WORKDIR ${NODE_HOME}
 
 RUN npm ${NPM_LOGLEVEL} ${NPM_PROXY} install && \
+	chown -R node:node ${NODE_HOME} && \
 	npm cache clean
 
 COPY . ${APP_HOME}
