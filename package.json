@@ -1,7 +1,7 @@
 {
   "name": "compare-layouts",
   "description": "compare rendered html page elements",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "keywords": [
     "compare",
