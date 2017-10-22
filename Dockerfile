@@ -7,6 +7,8 @@ FROM uwegerdes/nodejs
 
 MAINTAINER Uwe Gerdes <entwicklung@uwegerdes.de>
 
+USER root
+
 RUN apt-get update && \
 	apt-get dist-upgrade -y && \
 	apt-get install -y \
@@ -26,7 +28,7 @@ ENV GULP_LIVERELOAD 5082
 COPY package.json ${NODE_HOME}/
 
 RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
-	npm ${NPM_LOGLEVEL} ${NPM_PROXY} install -g \
+	npm install -g \
 				casperjs \
 				gulp \
 				phantomjs-prebuilt \
@@ -36,7 +38,7 @@ RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
 
 WORKDIR ${NODE_HOME}
 
-RUN npm ${NPM_LOGLEVEL} ${NPM_PROXY} install && \
+RUN npm install && \
 	chown -R node:node ${NODE_HOME} && \
 	npm cache clean
 
