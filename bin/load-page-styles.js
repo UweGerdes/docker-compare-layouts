@@ -250,15 +250,10 @@ Object.keys(viewports).forEach(function(viewport) {
 		});
 	});
 	casper.then(function() {
-		subdir = 'results/' + config.destDir + '/' + pageKey + '/' + viewport;
+		subdir = fs.absolute(".") + '/results/' + config.destDir + '/' + pageKey + '/' + viewport;
 		console.log('subdir: ' + subdir);
-		try {
-			if (fs.stat(subdir) && !fs.stat(subdir).isDirectory()) {
-				console.log('can\'t create ' + subdir);
-			}
-		} catch(err) {
-			fs.makeTree(subdir);
-			console.log('created ' + subdir);
+		if (!fs.makeTree(subdir)) {
+			throw 'can\'t create "' + subdir + '"';
 		}
 		Object.keys(results).forEach(function(selector) {
 			var result = results[selector];
