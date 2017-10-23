@@ -39,7 +39,7 @@ module.exports = {
 			'url': 'http://localhost:3000/app',
 			'selector': 'body',
 			'engine': phantomjs,
-			'cache': false
+			'cache': true
 		}
 	},
 	compares: {
