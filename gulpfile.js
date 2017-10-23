@@ -106,7 +106,7 @@ gulp.task('compare-layouts-default', function(callback) {
 			path.join(baseDir, 'results', 'default', '*.png'),
 			path.join(baseDir, 'results', 'default', '**', 'index.json')
 		], { force: true } );
-	var loader = exec('node index.js config/default.js',
+	var loader = exec('node index.js config/default.js -v',
 		{ cwd: baseDir },
 		function (err, stdout, stderr) {
 			logExecResults(err, stdout, stderr);
@@ -245,8 +245,11 @@ gulp.task('compare-layouts-selftest', function(callback) {
  * compare-layouts selftest check result task
  */
 gulp.task('compare-layouts-selftest-success', function() {
+	if (!fs.existsSync(path.join(baseDir, 'results', 'default', 'index-phantomjs', 'Desktop', 'body.html'))) {
+		throw 'no data files created';
+	}
 	if (!fs.existsSync(path.join(baseDir, 'results', 'default', 'index.json'))) {
-		throw 'no result summary created';
+		console.log('data files created but no result summary created');
 	} else {
 		console.log('result summary successfully created (with compare differences)');
 	}
