@@ -216,6 +216,12 @@ function saveResults(results) {
 var results = {};
 var compares = [];
 
+var stats = fs.statSync(resultsDir);
+if (stats.isDirectory(resultsDir)) {
+    console.log('resultsDir: ' + resultsDir);
+}
+fs.accessSync(resultsDir, fs.constants.W_OK);
+
 if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir);
 }

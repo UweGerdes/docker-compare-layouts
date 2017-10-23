@@ -47,6 +47,8 @@ COPY . ${APP_HOME}
 
 RUN chown -R ${USER_NAME}:${USER_NAME} ${APP_HOME}
 
+RUN ls -l ${APP_HOME}
+
 WORKDIR ${APP_HOME}
 
 USER ${USER_NAME}
