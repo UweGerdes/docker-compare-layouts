@@ -116,21 +116,6 @@ gulp.task('compare-layouts-default', function(callback) {
 	loader.stdout.on('data', function(data) { if(!data.match(/PASS/)) { console.log(data.trim()); } });
 });
 
-watchFilesFor.promise = [
-	path.join(baseDir, 'promise.js')
-];
-gulp.task('promise', function(callback) {
-	var loader = exec('node promise.js',
-		{ cwd: baseDir },
-		function (err, stdout, stderr) {
-			console.log('node promise.js finished');
-			callback();
-		}
-	);
-	loader.stdout.on('data', function(data) { console.log(data); } );
-	loader.stdout.on('error', function(err) { console.log(err); } );
-});
-
 // helper functions
 var logExecResults = function (err, stdout, stderr) {
 	logTxt (stdout.replace(/\u001b\[[^m]+m/g, '').match(/[^\n]*FAIL [^\n]+/g));
