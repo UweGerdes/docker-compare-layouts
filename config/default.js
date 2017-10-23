@@ -2,7 +2,7 @@
  * default configuration for compare-layouts
  */
 
-var slimerjs = 'slimerjs';
+// var slimerjs = 'slimerjs';
 var phantomjs = 'phantomjs';
 
 module.exports = {
@@ -23,12 +23,6 @@ module.exports = {
 			'engine': phantomjs,
 			'cache': false
 		},
-		'index-slimerjs': {
-			'url': 'http://localhost:3000/',
-			'selector': 'body',
-			'engine': slimerjs,
-			'cache': false
-		},
 		'index-phantomjs-cached': {
 			'url': 'http://localhost:3000/',
 			'selector': 'body',
@@ -41,52 +35,25 @@ module.exports = {
 			'engine': phantomjs,
 			'cache': false
 		},
-		'app-slimerjs': {
-			'url': 'http://localhost:3000/app',
-			'selector': 'body,.app',
-			'engine': slimerjs,
-			'cache': false
-		},
-		'app-slimerjs-cached': {
+		'app-phantomjs-cached': {
 			'url': 'http://localhost:3000/app',
 			'selector': 'body',
-			'engine': slimerjs,
-			'cache': true
+			'engine': phantomjs,
+			'cache': false
 		}
 	},
 	compares: {
-		'index-phantomjs-slimerjs': {
-			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
-			page1: 'index-phantomjs',
-			page2: 'index-slimerjs',
-			showHTML: false
-		},
 		'index-phantomjs-cached-phantomjs': {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'index-phantomjs-cached',
 			page2: 'index-phantomjs',
 			showHTML: false
 		},
-		'app-phantomjs-slimerjs': {
+		'app-phantomjs-cached-phantomjs': {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
-			page1: 'app-phantomjs',
-			page2: 'app-slimerjs',
+			page1: 'app-phantomjs-cached',
+			page2: 'app-phantomjs',
 			selector2: 'body',
-			showHTML: false
-		},
-		'app-slimerjs-cached-slimerjs': {
-			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
-			page1: 'app-slimerjs-cached',
-			page2: 'app-slimerjs',
-			selector2: 'body',
-			showHTML: false
-		},
-		'app-slimerjs-cached-slimerjs-app': {
-			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
-			page1: 'app-slimerjs-cached',
-			selector1: 'body',
-			page2: 'app-slimerjs',
-			selector2: '.app',
 			showHTML: false
 		}
 	}
