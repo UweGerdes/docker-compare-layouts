@@ -33,7 +33,8 @@ RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
 				gulp \
 				phantomjs-prebuilt \
 				slimerjs && \
-	sed -i -e "s/MaxVersion=5.\.\*/MaxVersion=55.*/" /usr/lib/node_modules/slimerjs/src/application.ini && \
+	echo "changing slimerjs MaxVersion to $(firefox --version | sed -r "s/[^0-9.]+([0-9]+)\..+/\1/").*" && \
+	sed -i -e "s/MaxVersion=5.\.\*/MaxVersion=$(firefox --version | sed -r "s/[^0-9.]+([0-9]+)\..+/\1/").*/" /usr/lib/node_modules/slimerjs/src/application.ini && \
 	npm cache clean
 
 WORKDIR ${NODE_HOME}
