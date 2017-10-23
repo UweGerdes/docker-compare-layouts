@@ -46,6 +46,8 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	catch (err) {
 		throw("FAIL: could not read file " + configFile);
 	}
+	subdir = 'results/' + config.destDir + '/' + pageKey;
+	console.log('subdir: ' + subdir);
 	if (config.pages[pageKey]) {
 		var page = config.pages[pageKey];
 		url = page.url;
@@ -81,6 +83,14 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 } else {
 	throw("FAIL: configFile and pageKey have to be provided");
 }
+
+console.log('subdir: ' + subdir);
+if (fs.makeDirectory(subdir)) {
+	console.log('created ' + subdir);
+} else {
+	throw 'can\'t create "' + subdir + '"';
+}
+
 casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
 
 // event handling
@@ -231,6 +241,13 @@ casper.thenOpen(url, function() {
 });
 
 Object.keys(viewports).forEach(function(viewport) {
+	subdir = fs.absolute(".") + '/results/' + config.destDir + '/' + pageKey + '/' + viewport;
+	console.log('subdir: ' + subdir);
+	if (fs.makeDirectory(subdir)) {
+		console.log('created ' + subdir);
+	} else {
+		throw 'can\'t create "' + subdir + '"';
+	}
 	casper.then(function() {
 		casper.viewport(viewports[viewport].width, viewports[viewport].height);
 	});
@@ -250,11 +267,6 @@ Object.keys(viewports).forEach(function(viewport) {
 		});
 	});
 	casper.then(function() {
-		subdir = fs.absolute(".") + '/results/' + config.destDir + '/' + pageKey + '/' + viewport;
-		console.log('subdir: ' + subdir);
-		if (!fs.makeTree(subdir)) {
-			throw 'can\'t create "' + subdir + '"';
-		}
 		Object.keys(results).forEach(function(selector) {
 			var result = results[selector];
 			var name = safeFilename(selector);

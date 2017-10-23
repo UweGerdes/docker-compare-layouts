@@ -215,6 +215,11 @@ function saveResults(results) {
 
 var results = {};
 var compares = [];
+
+if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir);
+}
+
 Object.keys(config.compares).forEach(function(compareKey) {
   Object.keys(config.viewports).forEach(function(viewport) {
     compares.push({'compareKey': compareKey, 'viewport': viewport});
