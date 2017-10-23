@@ -241,12 +241,12 @@ casper.thenOpen(url, function() {
 });
 
 Object.keys(viewports).forEach(function(viewport) {
-	subdir = fs.absolute(".") + '/results/' + config.destDir + '/' + pageKey + '/' + viewport;
-	console.log('subdir: ' + subdir);
-	if (fs.makeDirectory(subdir)) {
-		console.log('created ' + subdir);
+	var savedir = subdir + '/' + viewport;
+	console.log('savedir: ' + savedir);
+	if (fs.makeDirectory(savedir)) {
+		console.log('created ' + savedir);
 	} else {
-		throw 'can\'t create "' + subdir + '"';
+		throw 'can\'t create "' + savedir + '"';
 	}
 	casper.then(function() {
 		casper.viewport(viewports[viewport].width, viewports[viewport].height);
@@ -277,24 +277,24 @@ Object.keys(viewports).forEach(function(viewport) {
 				} else {
 					html = casper.getHTML(selector, true);
 				}
-				fs.write(subdir + '/' + name + '.html', html);
-				casper.echo(subdir + '/' + name + '.html' + ' saved', 'INFO');
-				fs.write(subdir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
-				casper.echo(subdir + '/' + name + '.json' + ' saved', 'INFO');
+				fs.write(savedir + '/' + name + '.html', html);
+				casper.echo(savedir + '/' + name + '.html' + ' saved', 'INFO');
+				fs.write(savedir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
+				casper.echo(savedir + '/' + name + '.json' + ' saved', 'INFO');
 				if (selector.indexOf('/') === 0) {
-					casper.captureSelector(subdir + '/' + name + '.png', x(selector), { format: 'png' });
+					casper.captureSelector(savedir + '/' + name + '.png', x(selector), { format: 'png' });
 				} else {
-					casper.captureSelector(subdir + '/' + name + '.png', selector, { format: 'png' });
+					casper.captureSelector(savedir + '/' + name + '.png', selector, { format: 'png' });
 				}
-				casper.echo(subdir + '/' + name + '.png' + ' saved', 'INFO');
+				casper.echo(savedir + '/' + name + '.png' + ' saved', 'INFO');
 			} else {
 				casper.echo('element not found: "' + selector + '"', 'ERROR');
 			}
 		});
-		fs.write(subdir + '/page.html', casper.getHTML(), 0);
-		casper.echo(subdir + '/page.html' + ' saved', 'INFO');
-		casper.capture(subdir + '/page.png', undefined, { format: 'png' });
-		casper.echo(subdir + '/page.png' + ' saved', 'INFO');
+		fs.write(savedir + '/page.html', casper.getHTML(), 0);
+		casper.echo(savedir + '/page.html' + ' saved', 'INFO');
+		casper.capture(savedir + '/page.png', undefined, { format: 'png' });
+		casper.echo(savedir + '/page.png' + ' saved', 'INFO');
 	});
 });
 casper.run(function() {
