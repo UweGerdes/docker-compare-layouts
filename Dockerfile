@@ -40,14 +40,11 @@ RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}/package.json && \
 WORKDIR ${NODE_HOME}
 
 RUN npm install && \
-	chown -R node:node ${NODE_HOME} && \
 	npm cache clean
 
 COPY . ${APP_HOME}
 
-RUN chown -R ${USER_NAME}:${USER_NAME} ${APP_HOME}
-
-RUN ls -l ${APP_HOME}
+RUN chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}
 
 WORKDIR ${APP_HOME}
 
