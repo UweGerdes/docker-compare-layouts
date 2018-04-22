@@ -11,6 +11,8 @@
  */
 'use strict';
 
+/* jshint esversion: 5, varstmt: false, phantom: true */
+
 /* globals document, XPathResult */
 
 var casper = require('casper').create(),

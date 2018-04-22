@@ -1,16 +1,11 @@
 /*
  * HTTP-Server for compare-layouts
  *
- * node server.js
- *
- * config files in ./config
- * result files in ./results
- *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
 'use strict';
 
-var fs = require('fs'),
+const fs = require('fs'),
 	fsTools = require('fs-tools'),
 	path = require('path'),
 	os = require('os'),
@@ -21,20 +16,19 @@ var fs = require('fs'),
 	dateFormat = require('dateformat'),
 	_eval = require('eval'),
 	obj2html = require('./bin/obj2html.js'),
-	interfaces = os.networkInterfaces(),
 	app = express();
 
-var livereloadPort = process.env.GULP_LIVERELOAD,
-	httpPort = process.env.COMPARE_LAYOUTS_HTTP || 3000;
+const livereloadPort = process.env.GULP_LIVERELOAD_PORT || 8081,
+	httpPort = process.env.COMPARE_LAYOUTS_HTTP || 8080;
 
-var configDir = path.join(__dirname, 'config'),
+const configDir = path.join(__dirname, 'config'),
 	resultsDir = path.join(__dirname, 'results');
 
 if (!fs.existsSync(resultsDir)) {
 	fs.mkdirSync(resultsDir);
 }
 
-var running = [],
+let running = [],
 	configs = [];
 
 // Log the requests
@@ -49,9 +43,9 @@ app.use(express.static(__dirname));
 
 // Handle requests for app view
 app.get('/app/:config?/:action?/:param?', function(req, res){
-	var list = getList(res);
-	var config = {};
-	var action = 'show';
+	const list = getList(res);
+	let config = {};
+	let action = 'show';
 	if (req.params.config) {
 		if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
 			config = getConfig(req.params.config);
@@ -75,10 +69,10 @@ app.get('/app/:config?/:action?/:param?', function(req, res){
 
 // Handle requests for app view
 app.get('/show/:config/:compare/:viewport', function(req, res){
-	var config = getConfig(req.params.config);
-	var compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
-	var result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.viewport ];
-	var page1,
+	const config = getConfig(req.params.config);
+	const compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
+	const result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.viewport ];
+	let page1,
 		page2;
 	if (result !== null && result !== undefined) {
 		page1 = config.data.pages[result.page1];
@@ -133,9 +127,9 @@ app.get('*', function(req, res){
 
 // Handle form POST requests for app view
 app.post('/app/:config?/:action?', function(req, res){
-	var list = getList(res);
-	var config = {};
-	var action = 'show';
+	const list = getList(res);
+	let config = {};
+	let action = 'show';
 	console.log('post: ' + req.params.config + ' ' + req.params.action);
 	if (req.params.config) {
 		if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
@@ -167,24 +161,17 @@ app.post('/app/:config?/:action?', function(req, res){
 
 // Fire it up!
 app.listen(httpPort);
-var addresses = [];
-for (var k in interfaces) {
-	for (var k2 in interfaces[k]) {
-		var address = interfaces[k][k2];
-		if (address.family === 'IPv4' && !address.internal) {
-			addresses.push(address.address);
-		}
-	}
-}
+
+let addresses = ipv4adresses();
 // console.log("IP address of container  :  " + addresses);
 console.log('compare-layouts server listening on http://' + addresses[0] + ':' + httpPort);
 
 // Model //
 // get list of configurations and result status
-function getList(res) {
+function getList() {
 	configs = [];
 	fs.readdirSync(configDir).forEach(function(fileName) {
-		var configName = fileName.replace(/\.js/, '');
+		const configName = fileName.replace(/\.js/, '');
 		configs.push(getItem(configName));
 	});
 	configs.forEach(function(config) {
@@ -196,11 +183,11 @@ function getList(res) {
 
 // get full config info
 function getItem(configName) {
-	var config = { name: configName };
+	let config = { name: configName };
 	config.data = getConfigData(configName);
 	config.lastRun = 'Keine Daten';
 	try {
-		var fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
+		const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
 		config.lastRun = dateFormat(fileStat.mtime, "dd.mm.yyyy, HH:MM:ss");
 	} catch (err) {
 		if (err.length > 0 && err.code != 'ENOENT') {
@@ -212,11 +199,11 @@ function getItem(configName) {
 
 // get data for config
 function getConfig(configName) {
-	var config = { name: configName };
+	let config = { name: configName };
 	config.file = getConfigFile(configName);
 	config.data = getConfigData(configName);
 	try {
-		var fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
+		const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
 		config.lastRun = dateFormat(fileStat.mtime, "dd.mm.yyyy, HH:MM:ss");
 	} catch (err) {
 		config.lastRun = 'Keine Daten im Verzeichnis ./results';
@@ -233,8 +220,8 @@ function getConfig(configName) {
 
 // get content of config file
 function getConfigFile(configName) {
-	var content = 'not found';
-	var configPath = path.join(configDir, configName + '.js');
+	let content = 'not found';
+	const configPath = path.join(configDir, configName + '.js');
 	if (fs.existsSync(configPath)) {
 		content = fs.readFileSync(configPath).toString();
 	}
@@ -243,9 +230,9 @@ function getConfigFile(configName) {
 
 // get data from config file
 function getConfigData(configName) {
-	var configData = '';
+	let configData = '';
 	try {
-		var configFileContent = getConfigFile(configName);
+		const configFileContent = getConfigFile(configName);
 		configData = _eval(configFileContent);
 	} catch (err) {
 		//config.error = err;
@@ -255,8 +242,8 @@ function getConfigData(configName) {
 
 // get log file content
 function getLogfile(destDir) {
-	var logfilePath = path.join(__dirname, 'results', destDir, 'console.log');
-	var logfileContent = "";
+	const logfilePath = path.join(__dirname, 'results', destDir, 'console.log');
+	let logfileContent = '';
 	try {
 		logfileContent = replaceAnsiColors(fs.readFileSync(logfilePath).toString().replace(/\n\n/g, '\n'));
 	} catch (err) {
@@ -267,7 +254,7 @@ function getLogfile(destDir) {
 
 // get result data
 function getResult(destDir) {
-	var result = {};
+	let result = {};
 	try {
 		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, 'index.json')));
 	} catch (err) {
@@ -278,7 +265,7 @@ function getResult(destDir) {
 
 // get compare data
 function getCompare(destDir, compare, viewport) {
-	var result = {};
+	let result = {};
 	try {
 		result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, compare, viewport + '.json')));
 		console.log('compare file found: ' + path.join(resultsDir, destDir, compare, viewport + '.json'));
@@ -305,9 +292,9 @@ function getSummary(config) {
 
 // start compare-layouts with config file
 function runConfigAsync(config, verbose, res) {
-	var destDir = path.join(__dirname, 'results', config.data.destDir);
-	var logfilePath = path.join(destDir, 'console.log');
-	var log = function (msg) {
+	const destDir = path.join(__dirname, 'results', config.data.destDir);
+	const logfilePath = path.join(destDir, 'console.log');
+	const log = function (msg) {
 		console.log(msg);
 		fs.appendFileSync(logfilePath, msg + '\n');
 		res.write(replaceAnsiColors(msg) + '\n');
@@ -320,8 +307,8 @@ function runConfigAsync(config, verbose, res) {
 	if (fs.existsSync(logfilePath)) {
 		fs.unlinkSync(logfilePath);
 	}
-	var configFilename = 'config/' + config.name + '.js';
-	var loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
+	const configFilename = 'config/' + config.name + '.js';
+	const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
 	loader.stdout.on('data', function(data) { log(data.toString().trim()); });
 	loader.stderr.on('data', function(data) { log(data.toString().trim()); });
 	loader.on('error', function(err) { log(' error: ' + err.toString().trim()); });
@@ -339,8 +326,8 @@ function runConfigAsync(config, verbose, res) {
 
 // delete results directory
 function clearResult(config, res) {
-	var destDir = path.join(__dirname, 'results', config.data.destDir);
-	var log = function (msg) {
+	const destDir = path.join(__dirname, 'results', config.data.destDir);
+	const log = function (msg) {
 		console.log(msg);
 		res.write(replaceAnsiColors(msg) + '\n');
 	};
@@ -361,9 +348,28 @@ function storeConfig(config,configData) {
 	}
 }
 
+// Get IP for console message
+function ipv4adresses() {
+  const addresses = [];
+  const interfaces = os.networkInterfaces();
+  for (let k in interfaces) {
+    if (interfaces.hasOwnProperty(k)) {
+      for (let k2 in interfaces[k]) {
+        if (interfaces[k].hasOwnProperty(k2)) {
+          const address = interfaces[k][k2];
+          if (address.family === 'IPv4' && !address.internal) {
+            addresses.push(address.address);
+          }
+        }
+      }
+    }
+  }
+  return addresses;
+}
+
 function replaceAnsiColors(string) {
-	var result = '';
-	var replaceTable = {
+	let result = '';
+	const replaceTable = {
 		 '0': 'none',
 		 '1': 'font-weight: bold',
 		 '4': 'text-decoration: underscore',

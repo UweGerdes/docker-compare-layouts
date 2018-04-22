@@ -34,7 +34,7 @@ var logMode = 0;
 var txtLog = [];
 var htmlLog = [];
 var watchFilesFor = {};
-var lifereloadPort = process.env.GULP_LIVERELOAD || 5082;
+var lifereloadPort = process.env.GULP_LIVERELOAD_PORT || 8081;
 
 /*
  * log only to console, not GUI
@@ -86,8 +86,7 @@ gulp.task('less', function () {
  */
 watchFilesFor.jshint = [
   path.join(baseDir, 'package.json'),
-  path.join(baseDir, '*.js'),
-  path.join(baseDir, 'js', '*.js')
+  path.join(baseDir, '**', '*.js')
 ];
 gulp.task('jshint', function(callback) {
   return gulp.src(watchFilesFor.jshint)

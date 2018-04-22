@@ -2,9 +2,9 @@
  * default configuration for compare-layouts
  */
 
-var slimerjs = 'slimerjs';
-var phantomjs = 'phantomjs';
-var server = 'http://localhost:8080/';
+const slimerjs = 'slimerjs';
+const phantomjs = 'phantomjs';
+const server = 'http://localhost:8080/';
 
 module.exports = {
 	destDir: 'default',

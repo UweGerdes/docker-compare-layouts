@@ -3,7 +3,7 @@
  */
 'use strict';
 
-/* globals document */
+/* jshint esversion: 5, varstmt: false, browser: true */
 
 var resultCompare = function() {
 	var image = document.getElementById('result-compare2-img');
