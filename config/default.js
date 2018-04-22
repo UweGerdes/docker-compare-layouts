@@ -2,8 +2,9 @@
  * default configuration for compare-layouts
  */
 
-// var slimerjs = 'slimerjs';
+var slimerjs = 'slimerjs';
 var phantomjs = 'phantomjs';
+var server = 'http://localhost:8080/';
 
 module.exports = {
 	destDir: 'default',
@@ -18,29 +19,35 @@ module.exports = {
 	},
 	pages: {
 		'index-phantomjs': {
-			'url': 'http://localhost:3000/',
+			'url': server,
 			'selector': 'body',
 			'engine': phantomjs,
 			'cache': false
 		},
 		'index-phantomjs-cached': {
-			'url': 'http://localhost:3000/',
+			'url': server,
 			'selector': 'body',
 			'engine': phantomjs,
 			'cache': true
 		},
 		'app-phantomjs': {
-			'url': 'http://localhost:3000/app',
+			'url': server + 'app',
 			'selector': 'body',
 			'engine': phantomjs,
 			'cache': false
 		},
 		'app-phantomjs-cached': {
-			'url': 'http://localhost:3000/app',
+			'url': server + 'app',
 			'selector': 'body',
 			'engine': phantomjs,
 			'cache': true
-		}
+		},
+		'app-slimerjs': {
+			'url': server + 'app',
+			'selector': 'body',
+			'engine': slimerjs,
+			'cache': false
+		},
 	},
 	compares: {
 		'index-phantomjs-cached-phantomjs': {
@@ -53,6 +60,13 @@ module.exports = {
 			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
 			page1: 'app-phantomjs-cached',
 			page2: 'app-phantomjs',
+			selector2: 'body',
+			showHTML: false
+		},
+		'app-phantomjs-slimerjs': {
+			compare: ['tagName', 'type', 'textContent', 'name', 'value'],
+			page1: 'app-phantomjs',
+			page2: 'app-slimerjs',
 			selector2: 'body',
 			showHTML: false
 		}

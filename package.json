@@ -1,7 +1,7 @@
 {
   "name": "compare-layouts",
   "description": "compare rendered html page elements",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "MIT",
   "keywords": [
     "compare",
@@ -15,29 +15,13 @@
     "name": "Uwe Gerdes",
     "email": "entwicklung@uwegerdes.de"
   },
-  "main": "server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/uwegerdes/docker-compare-layouts"
   },
-  "scripts": {
-    "start": "gulp",
-    "test": "gulp compare-layouts-selftest"
-  },
-  "files": [
-    "index.js",
-    "server.js",
-    "gulpfile.js",
-    "bin",
-    "views",
-    "css"
-  ],
-  "config": {
-    "port": "3000",
-    "livereload": "5082"
-  },
   "dependencies": {
     "body-parser": "^1.15.0",
+    "del": "^3.0.0",
     "dateformat": "^2.0.0",
     "ejs": "^2.4.1",
     "eval": "^0.1.1",
@@ -45,12 +29,11 @@
     "file-system": "^2.2.1",
     "fs-tools": "^0.3.0",
     "livereload": "^0.6.2",
+    "make-dir": "^1.2.0",
     "mkdirp": "^0.5.1",
     "morgan": "^1.7.0"
   },
   "devDependencies": {
-    "del": "^3.0.0",
-    "eval": "^0.1.1",
     "glob": "^7.0.6",
     "gulp": "^3.8.10",
     "gulp-autoprefixer": "^4.0.0",
@@ -67,5 +50,9 @@
     "jshint": "^2.9.3",
     "rename": "^1.0.3",
     "run-sequence": "^2.0.0"
+  },
+  "scripts": {
+    "start": "gulp",
+    "test": "gulp compare-layouts-selftest"
   }
 }

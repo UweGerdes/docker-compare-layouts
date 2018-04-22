@@ -85,11 +85,7 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 }
 
 console.log('subdir: ' + subdir);
-if (fs.makeDirectory(subdir)) {
-	console.log('created ' + subdir);
-} else {
-	throw 'can\'t create "' + subdir + '"';
-}
+fs.makeDirectory(subdir)
 
 casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
 
@@ -243,11 +239,7 @@ casper.thenOpen(url, function() {
 Object.keys(viewports).forEach(function(viewport) {
 	var savedir = subdir + '/' + viewport;
 	console.log('savedir: ' + savedir);
-	if (fs.makeDirectory(savedir)) {
-		console.log('created ' + savedir);
-	} else {
-		throw 'can\'t create "' + savedir + '"';
-	}
+	fs.makeDirectory(savedir);
 	casper.then(function() {
 		casper.viewport(viewports[viewport].width, viewports[viewport].height);
 	});

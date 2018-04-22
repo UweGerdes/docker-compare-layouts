@@ -12,8 +12,10 @@
 
 'use strict';
 
-var exec = require('child_process').exec,
+var del = require('del'),
+  exec = require('child_process').exec,
   fs = require('fs'),
+  makeDir = require('make-dir'),
   path = require('path'),
   styleTree = require('./bin/style-tree.js');
 
@@ -193,7 +195,7 @@ function compareStyleTree(comp) {
         compare.error = error;
         reject(compare);
       }
-      console.log(jsonFilename + ' saved');
+      if (verbose) {console.log(jsonFilename + ' saved');}
       compare.jsonFilename = jsonFilename;
       resolve(compare);
     });
@@ -218,12 +220,12 @@ var compares = [];
 
 var stats = fs.statSync(resultsDir);
 if (stats.isDirectory(resultsDir)) {
-    console.log('resultsDir: ' + resultsDir);
+  console.log('resultsDir: ' + resultsDir);
 }
 fs.accessSync(resultsDir, fs.constants.W_OK);
 
 if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir);
+  fs.mkdirSync(destDir);
 }
 
 Object.keys(config.compares).forEach(function(compareKey) {
@@ -231,42 +233,53 @@ Object.keys(config.compares).forEach(function(compareKey) {
     compares.push({'compareKey': compareKey, 'viewport': viewport});
   });
 });
-var promise = new Promise((resolve, reject) => { resolve(path.basename(__filename)); });
-promise = promise.then(function(response) {
-  console.log("Starting:", response);
-  return response;
-}).then(function(response) {
+
+del([path.join(destDir, '**')])
+.then(() => {
+  return makeDir(destDir);
+})
+.then(function(path) {
+  console.log("created:", path);
+  return path;
+})
+.then(function(response) {
   var pageKeys = Object.keys(config.pages);
   return Promise.all(
     pageKeys.map(loadPage)
   );
-}).then(function(pages) {
+})
+.then(function(pages) {
   results.pages = pages;
   return Promise.all(
     compares.map(compareData)
   );
-}).then(function(data) {
+})
+.then(function(data) {
   return Promise.all(
     Object.keys(config.compares).map(makeCompareDir)
   );
-}).then(function() {
+})
+.then(function() {
   return Promise.all(
     compares.map(compareImages)
   );
-}).then(function(compares) {
+})
+.then(function(compares) {
   results.compares = compares;
   return Promise.all(
     compares.map(compositeImages)
   );
-}).then(function(compares) {
+})
+.then(function(compares) {
   results.compares = compares;
   return Promise.all(
     compares.map(compareStyleTree)
   );
-});
-promise.then(function(compared) {
+})
+.then(function(compared) {
   saveResults(results.compares);
-}).catch(function(error) {
+})
+.catch(function(error) {
   console.error("Failed!", error);
 });
 

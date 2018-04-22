@@ -47,32 +47,26 @@ $ docker build -t uwegerdes/compare-layouts .
 For the development time a gulpfile.js is included to generate css from less and restart the server.
 
 ```bash
-$ docker run -it --rm \
+$ docker run -it \
 	-v $(pwd):/home/node/app \
-	-v $(pwd)/config:/home/node/app/config \
-	-v $(pwd)/results:/home/node/app/results \
-	-p 3001:3000 \
-	--name compare-layouts \
+	--name compare-layouts-dev \
 	uwegerdes/compare-layouts \
 	bash
-node@xxx: ~/dev$ gulp
 ```
 
-To look whats going on in the container use (perhaps start tasks that are not triggered by watch):
+To restart the container use:
 
 ```bash
-$ docker exec -it compare-layouts bash
+$ docker start -ai compare-layouts-dev
 ```
 
 ## Usage
 
-Start the docker container in your project test directory (with config and results directory):
+Start the docker container in your project test directory (with config directory):
 
 ```bash
-$ docker run -d --rm \
+$ docker run -d \
 	-v $(pwd)/config:/home/node/app/config \
-	-v $(pwd)/results:/home/node/app/results \
-	-p 3001:3000 \
 	--name compare-layouts \
 	uwegerdes/compare-layouts
 ```
@@ -82,9 +76,12 @@ The container starts in background, you might want to use some of these commands
 ```bash
 $ docker exec -it compare-layouts bash
 $ docker logs -f compare-layouts
-$ docker stop compare-layouts
-$ docker start compare-layouts
+```
 
+To restart the container use:
+
+```bash
+$ docker start -ai compare-layouts
 ```
 
 Open the server address listed in the output. Read content.
@@ -111,10 +108,6 @@ $ docker run -it --rm \
 
 You will find a lot of files (the cache for the server app) in a subdirectory of `./results/`.
 
-## SlimerJS vs. Firefox
+## Changelog
 
-SlimerJS has a version restriction that prevents it from using current Firefox versions. A quick hack is included in the Dockerfile:
-
-/usr/lib/node_modules/slimerjs/src/application.ini:
-	replace s/MaxVersion=52\.\*/MaxVersion=54.*/
-
+0.5.2 refactoring
