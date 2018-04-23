@@ -2,10 +2,12 @@
  * Laden von Styledaten einer HTML-Seite vom Browser
  * für Vergleich von HTML-Styles für Regressions- und Back-to-Back-Tests
  *
- * casperjs load-page-styles.js --configFile="../config/default.js" --pageKey="google-form-phantomjs"
+ * casperjs load-page-styles.js --configFile="../config/default.js"
+ *   --pageKey="google-form-phantomjs"
  *
  * additional argument to overwrite config settings:
- * --url=https://www.google.de --selector="form" --subdir=google-form --hover="#submit" --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
+ * --url=https://www.google.de --selector="form" --subdir=google-form --hover="#submit"
+ *   --blacklist="adserv,doubleclick" --whitelist="trustedhostname.de"
  *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
  */
@@ -16,282 +18,289 @@
 /* globals document, XPathResult */
 
 var casper = require('casper').create(),
-	x = require('casper').selectXPath,
-	fs = require('fs');
+  x = require('casper').selectXPath,
+  fs = require('fs');
 
 var config = null,
-	pageKey = '',
-	subdir = 'localhost',
-	url = 'http://localhost/',
-	domain = 'localhost',
-	viewports = {
-		'Tablet Portrait': { width:  768, height: 1024 }
-	},
-	hover = '',
-	whitelist = '',
-	blacklist = '',
-	uname = '',
-	pval = '',
-	timeout = 20000,
-	showExternalUrls = false;
+  pageKey = '',
+  subdir = 'localhost',
+  url = 'http://localhost/',
+  domain = 'localhost',
+  viewports = {
+    'Tablet Portrait': { width:  768, height: 1024 }
+  },
+  hover = '',
+  whitelist = '',
+  blacklist = '',
+  uname = '',
+  pval = '',
+  timeout = 20000,
+  showExternalUrls = false;
 
 var results = {};
 
 // evaluating arguments
 if (casper.cli.options.configFile && casper.cli.options.pageKey) {
-	var configFile = fs.absolute(casper.cli.options.configFile);
-	pageKey = casper.cli.options.pageKey;
-	//console.error('loading pageKey: ' + pageKey);
-	try {
-		config = require(configFile);
-	}
-	catch (err) {
-		throw('FAIL: could not read file ' + configFile);
-	}
-	subdir = 'results/' + config.destDir + '/' + pageKey;
-	console.log('subdir: ' + subdir);
-	if (config.pages[pageKey]) {
-		var page = config.pages[pageKey];
-		url = page.url;
-		domain = url.replace(/^https?:\/\/([^\/]+).*/, '$1');
-		var selectorList;
-		if (page.selectorList) {
-			selectorList = page.selectorList;
-		} else {
-			selectorList = page.selector.split(/,/);
-		}
-		if (page.hover) {
-			hover = page.hover;
-		}
-		if (page.credentials && page.credentials.length == 2) {
-			uname = page.credentials[0];
-			pval = page.credentials[1];
-		}
-	} else {
-		throw('FAIL: pageKey not found: ' + pageKey);
-	}
-	if (config.viewports) {
-		viewports = config.viewports;
-	}
-	if (config.blacklist && config.blacklist.length > 0) {
-		blacklist = config.blacklist;
-	}
-	if (config.whitelist && config.whitelist.length > 0) {
-		whitelist = config.whitelist;
-	}
+  var configFile = fs.absolute(casper.cli.options.configFile);
+  pageKey = casper.cli.options.pageKey;
+  //console.error('loading pageKey: ' + pageKey);
+  try {
+    config = require(configFile);
+  }
+  catch (err) {
+    throw('FAIL: could not read file ' + configFile);
+  }
+  subdir = 'results/' + config.destDir + '/' + pageKey;
+  console.log('subdir: ' + subdir);
+  if (config.pages[pageKey]) {
+    var page = config.pages[pageKey];
+    url = page.url;
+    domain = url.replace(/^https?:\/\/([^\/]+).*/, '$1');
+    var selectorList;
+    if (page.selectorList) {
+      selectorList = page.selectorList;
+    } else {
+      selectorList = page.selector.split(/,/);
+    }
+    if (page.hover) {
+      hover = page.hover;
+    }
+    if (page.credentials && page.credentials.length == 2) {
+      uname = page.credentials[0];
+      pval = page.credentials[1];
+    }
+  } else {
+    throw('FAIL: pageKey not found: ' + pageKey);
+  }
+  if (config.viewports) {
+    viewports = config.viewports;
+  }
+  if (config.blacklist && config.blacklist.length > 0) {
+    blacklist = config.blacklist;
+  }
+  if (config.whitelist && config.whitelist.length > 0) {
+    whitelist = config.whitelist;
+  }
 } else {
-	throw('FAIL: configFile and pageKey have to be provided');
+  throw('FAIL: configFile and pageKey have to be provided');
 }
 
 console.log('subdir: ' + subdir);
 fs.makeDirectory(subdir);
 
-casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
+casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (
+    hover !== '' ? '", hover:"' + hover : '') + '", saving in "' + subdir + '"', 'INFO');
 
 // event handling
-casper.on('remote.message', function(msg) {
-	this.echo('BROWSER: ' + msg.trim(), 'INFO');
+casper.on('remote.message', function (msg) {
+  this.echo('BROWSER: ' + msg.trim(), 'INFO');
 });
-casper.on('error', function(msg, backtrace) {
-	this.echo('ERROR: ' + msg, 'WARNING');
-	this.echo(JSON.stringify(backtrace, null, 4));
+casper.on('error', function (msg, backtrace) {
+  this.echo('ERROR: ' + msg, 'WARNING');
+  this.echo(JSON.stringify(backtrace, null, 4));
 });
-casper.on('http.status.404', function(resource) {
-	this.echo('ERROR 404: ' + resource.url, 'ERROR');
+casper.on('http.status.404', function (resource) {
+  this.echo('ERROR 404: ' + resource.url, 'ERROR');
 });
 
 // block external resources
-casper.options.onResourceRequested = function(C, requestData, request) {
-	if ( requestData.url.match(/https?:\/\//) && ( ! whitelistOk(requestData) || blacklistHit(requestData) ) ) {
-		if (showExternalUrls) {
-			casper.echo('skipped: ' + requestData.url, 'WARNING');
-		}
-		request.abort();
-	} else {
-		if (showExternalUrls) {
-			casper.echo('loading: ' + requestData.url, 'INFO');
-		}
-	}
+casper.options.onResourceRequested = function (C, requestData, request) {
+  if (requestData.url.match(/https?:\/\//) &&
+      (!whitelistOk(requestData) || blacklistHit(requestData))) {
+    if (showExternalUrls) {
+      casper.echo('skipped: ' + requestData.url, 'WARNING');
+    }
+    request.abort();
+  } else {
+    if (showExternalUrls) {
+      casper.echo('loading: ' + requestData.url, 'INFO');
+    }
+  }
 };
 
 casper.options.timeout = timeout;
 casper.options.onTimeout = function (timeout) {
-	casper.echo('TIMEOUT ' + timeout + 'ms without answer from server', 'ERROR');
+  casper.echo('TIMEOUT ' + timeout + 'ms without answer from server', 'ERROR');
 };
 //casper.options.waitTimeout = timeout;
 casper.options.onLoadError = function () {
-	casper.echo('LOAD ERROR', 'ERROR');
+  casper.echo('LOAD ERROR', 'ERROR');
 };
 
 function whitelistOk(requestData) {
-	var result = false;
-	if (requestData.url.indexOf(domain) > -1) {
-		result = true;
-	} else {
-		whitelist.split(/,\s*/).forEach(function(whitedomain){
-			if (requestData.url.indexOf(whitedomain) > -1) {
-				result = true;
-			}
-		});
-	}
-	return result;
+  var result = false;
+  if (requestData.url.indexOf(domain) > -1) {
+    result = true;
+  } else {
+    whitelist.split(/,\s*/).forEach(function (whitedomain) {
+      if (requestData.url.indexOf(whitedomain) > -1) {
+        result = true;
+      }
+    });
+  }
+  return result;
 }
 
 function blacklistHit(requestData) {
-	var result = false;
-	if (blacklist.length > 0) {
-		blacklist.split(/,\s*/).forEach(function(blackdomain){
-			if (requestData.url.indexOf(blackdomain) > -1) {
-				result = true;
-			}
-		});
-	}
-	return result;
+  var result = false;
+  if (blacklist.length > 0) {
+    blacklist.split(/,\s*/).forEach(function (blackdomain) {
+      if (requestData.url.indexOf(blackdomain) > -1) {
+        result = true;
+      }
+    });
+  }
+  return result;
 }
 
 // evaluated in browser
 function _getStyles(selector) {
-	var getStyles = function(element, pseudo) {
-		var styles = {};
-		var y = document.defaultView.getComputedStyle(element, pseudo);
-		for (var i=0; i < y.length; i++) {
-			styles[y[i]] = y.getPropertyValue(y[i]);
-		}
-		return styles;
-	};
-	var getElementInfo = function(element) {
-		var children = [];
-		if (document.defaultView.getComputedStyle(element,':before').getPropertyValue('content')) {
-			children.push({
-				tagName: element.tagName.toLowerCase() + ':before',
-				textContent: document.defaultView.getComputedStyle(element,':before').getPropertyValue('content'),
-				elementId: '',
-				cssclass: '',
-				type: '',
-				name: '',
-				value: '',
-				style: getStyles(element, ':before'),
-				_childElementCount : 0,
-				_childElementInfo : []
-			});
-		}
-		for (var j=0; j<element.childElementCount; j++) {
-			children.push(getElementInfo(element.children[j]));
-		}
-		var elementInfo = {
-			tagName: element.tagName.toLowerCase(),
-			elementId: element.getAttribute('id') || '',
-			cssclass: element.getAttribute('class') || '',
-			type: element.getAttribute('type') || '',
-			name: element.getAttribute('name') || '',
-			value: element.getAttribute('value') || '',
-			textContent: element.textContent.trim().replace(/[ \n\t]+/g, ' '),
-			style: getStyles(element, null),
-			_childElementCount : element.childElementCount,
-			_childElementInfo : children
-		};
-		if (document.defaultView.getComputedStyle(element,':after').getPropertyValue('content')) {
-			children.push({
-				tagName: element.tagName.toLowerCase() + ':after',
-				textContent: document.defaultView.getComputedStyle(element,':after').getPropertyValue('content'),
-				elementId: '',
-				cssclass: '',
-				type: '',
-				name: '',
-				value: '',
-				style: getStyles(element, ':after'),
-				_childElementCount : 0,
-				_childElementInfo : []
-			});
-		}
-		return elementInfo;
-	};
-	var elements = [];
-	var children = [];
-	if (selector.indexOf('/') === 0) {
-		children = document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-	} else {
-		children = document.querySelectorAll(selector);
-	}
-	for (var i=0; i<children.length; i++) {
-		var elementInfo = getElementInfo(children[i]);
-		elements.push(elementInfo);
-	}
-	return elements;
+  var getStyles = function (element, pseudo) {
+    var styles = {};
+    var y = document.defaultView.getComputedStyle(element, pseudo);
+    for (var i = 0; i < y.length; i++) {
+      styles[y[i]] = y.getPropertyValue(y[i]);
+    }
+    return styles;
+  };
+  var getElementInfo = function (element) {
+    var children = [];
+    var text = document.defaultView.getComputedStyle(element, ':before')
+        .getPropertyValue('content');
+    if (text) {
+      children.push({
+        tagName: element.tagName.toLowerCase() + ':before',
+        textContent: text,
+        elementId: '',
+        cssclass: '',
+        type: '',
+        name: '',
+        value: '',
+        style: getStyles(element, ':before'),
+        _childElementCount: 0,
+        _childElementInfo: []
+      });
+    }
+    for (var j = 0; j < element.childElementCount; j++) {
+      children.push(getElementInfo(element.children[j]));
+    }
+    var elementInfo = {
+      tagName: element.tagName.toLowerCase(),
+      elementId: element.getAttribute('id') || '',
+      cssclass: element.getAttribute('class') || '',
+      type: element.getAttribute('type') || '',
+      name: element.getAttribute('name') || '',
+      value: element.getAttribute('value') || '',
+      textContent: element.textContent.trim().replace(/[ \n\t]+/g, ' '),
+      style: getStyles(element, null),
+      _childElementCount: element.childElementCount,
+      _childElementInfo: children
+    };
+    text = document.defaultView.getComputedStyle(element, ':after').getPropertyValue('content');
+    if (text) {
+      children.push({
+        tagName: element.tagName.toLowerCase() + ':after',
+        textContent: text,
+        elementId: '',
+        cssclass: '',
+        type: '',
+        name: '',
+        value: '',
+        style: getStyles(element, ':after'),
+        _childElementCount: 0,
+        _childElementInfo: []
+      });
+    }
+    return elementInfo;
+  };
+  var elements = [];
+  var children = [];
+  if (selector.indexOf('/') === 0) {
+    children = document
+        .evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
+        .singleNodeValue;
+  } else {
+    children = document.querySelectorAll(selector);
+  }
+  for (var i = 0; i < children.length; i++) {
+    var elementInfo = getElementInfo(children[i]);
+    elements.push(elementInfo);
+  }
+  return elements;
 }
 
 // set test class for element
 function _setTestClass(selector) {
-	document.querySelector(selector || 'body').classList.add('test');
+  document.querySelector(selector || 'body').classList.add('test');
 }
 
 casper.start();
 
 if (uname.length > 0 && pval.length > 0) {
-	casper.setHttpAuth(uname, pval);
+  casper.setHttpAuth(uname, pval);
 }
 
-casper.thenOpen(url, function() {
-	this.echo('opening "' + url + '"', 'INFO');
+casper.thenOpen(url, function () {
+  this.echo('opening "' + url + '"', 'INFO');
 });
 
-Object.keys(viewports).forEach(function(viewport) {
-	var savedir = subdir + '/' + viewport;
-	console.log('savedir: ' + savedir);
-	fs.makeDirectory(savedir);
-	casper.then(function() {
-		casper.viewport(viewports[viewport].width, viewports[viewport].height);
-	});
-	selectorList.forEach(function(sel) {
-		casper.then(function() {
-			this.echo('searching for "' + sel + '"', 'INFO');
-			casper.evaluate(_setTestClass);
-		})
-		.then(function() {
-			if (hover !== '') {
-				this.echo('hover to "' + hover + '"', 'INFO');
-				casper.mouse.move(hover);
-			}
-		})
-		.then(function() {
-			results[sel] = this.evaluate(_getStyles, sel, hover); // evaluate in browser
-		});
-	});
-	casper.then(function() {
-		Object.keys(results).forEach(function(selector) {
-			var result = results[selector];
-			var name = safeFilename(selector);
-			if (result && result.length > 0) {
-				var html;
-				if (selector.indexOf('/') === 0) {
-					html = casper.getHTML(x(selector), true);
-				} else {
-					html = casper.getHTML(selector, true);
-				}
-				fs.write(savedir + '/' + name + '.html', html);
-				casper.echo(savedir + '/' + name + '.html' + ' saved', 'INFO');
-				fs.write(savedir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
-				casper.echo(savedir + '/' + name + '.json' + ' saved', 'INFO');
-				if (selector.indexOf('/') === 0) {
-					casper.captureSelector(savedir + '/' + name + '.png', x(selector), { format: 'png' });
-				} else {
-					casper.captureSelector(savedir + '/' + name + '.png', selector, { format: 'png' });
-				}
-				casper.echo(savedir + '/' + name + '.png' + ' saved', 'INFO');
-			} else {
-				casper.echo('element not found: "' + selector + '"', 'ERROR');
-			}
-		});
-		fs.write(savedir + '/page.html', casper.getHTML(), 0);
-		casper.echo(savedir + '/page.html' + ' saved', 'INFO');
-		casper.capture(savedir + '/page.png', undefined, { format: 'png' });
-		casper.echo(savedir + '/page.png' + ' saved', 'INFO');
-	});
+Object.keys(viewports).forEach(function (viewport) {
+  var savedir = subdir + '/' + viewport;
+  console.log('savedir: ' + savedir);
+  fs.makeDirectory(savedir);
+  casper.then(function () {
+    casper.viewport(viewports[viewport].width, viewports[viewport].height);
+  });
+  selectorList.forEach(function (sel) {
+    casper.then(function () {
+      this.echo('searching for "' + sel + '"', 'INFO');
+      casper.evaluate(_setTestClass);
+    })
+    .then(function () {
+      if (hover !== '') {
+        this.echo('hover to "' + hover + '"', 'INFO');
+        casper.mouse.move(hover);
+      }
+    })
+    .then(function () {
+      results[sel] = this.evaluate(_getStyles, sel, hover); // evaluate in browser
+    });
+  });
+  casper.then(function () {
+    Object.keys(results).forEach(function (selector) {
+      var result = results[selector];
+      var name = safeFilename(selector);
+      if (result && result.length > 0) {
+        var html;
+        if (selector.indexOf('/') === 0) {
+          html = casper.getHTML(x(selector), true);
+        } else {
+          html = casper.getHTML(selector, true);
+        }
+        fs.write(savedir + '/' + name + '.html', html);
+        casper.echo(savedir + '/' + name + '.html' + ' saved', 'INFO');
+        fs.write(savedir + '/' + name + '.json', JSON.stringify(result, undefined, 4), 0);
+        casper.echo(savedir + '/' + name + '.json' + ' saved', 'INFO');
+        if (selector.indexOf('/') === 0) {
+          casper.captureSelector(savedir + '/' + name + '.png', x(selector), { format: 'png' });
+        } else {
+          casper.captureSelector(savedir + '/' + name + '.png', selector, { format: 'png' });
+        }
+        casper.echo(savedir + '/' + name + '.png' + ' saved', 'INFO');
+      } else {
+        casper.echo('element not found: "' + selector + '"', 'ERROR');
+      }
+    });
+    fs.write(savedir + '/page.html', casper.getHTML(), 0);
+    casper.echo(savedir + '/page.html' + ' saved', 'INFO');
+    casper.capture(savedir + '/page.png', undefined, { format: 'png' });
+    casper.echo(savedir + '/page.png' + ' saved', 'INFO');
+  });
 });
-casper.run(function() {
-	this.exit();
+casper.run(function () {
+  this.exit();
 });
 
 function safeFilename(name) {
-	return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
+  return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
 }

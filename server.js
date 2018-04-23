@@ -36,18 +36,18 @@ app.use(logger('dev'));
 
 // work on post requests
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files
 app.use(express.static(__dirname));
 
 // Handle requests for app view
-app.get('/app/:config?/:action?/:param?', function(req, res){
+app.get('/app/:config?/:action?/:param?', (req, res) => {
   const list = getList(res);
-  let config = {};
+  let config = { };
   let action = 'show';
   if (req.params.config) {
-    if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
+    if (fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
       config = getConfig(req.params.config);
     } else {
       config.error = 'config file not found: ./config/' + req.params.config + '.js';
@@ -68,10 +68,10 @@ app.get('/app/:config?/:action?/:param?', function(req, res){
 });
 
 // Handle requests for app view
-app.get('/show/:config/:compare/:viewport', function(req, res){
+app.get('/show/:config/:compare/:viewport', (req, res) => {
   const config = getConfig(req.params.config);
   const compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
-  const result = getResult(config.data.destDir)[ req.params.compare + '_' + req.params.viewport ];
+  const result = getResult(config.data.destDir)[req.params.compare + '_' + req.params.viewport];
   let page1,
     page2;
   if (result !== null && result !== undefined) {
@@ -93,10 +93,10 @@ app.get('/show/:config/:compare/:viewport', function(req, res){
 });
 
 // Handle AJAX requests for run configs
-app.get('/run/:config/:verbose?', function(req, res){
+app.get('/run/:config/:verbose?', (req, res) => {
   console.log('starting ' + req.params.config);
   if (req.params.config == 'all') {
-    configs.forEach(function(config) {
+    configs.forEach((config) => {
       runConfigAsync(config, req.params.verbose, res);
     });
   } else {
@@ -105,9 +105,9 @@ app.get('/run/:config/:verbose?', function(req, res){
 });
 
 // Handle AJAX requests for run configs
-app.get('/clear/:config', function(req, res){
+app.get('/clear/:config', (req, res) => {
   if (req.params.config == 'all') {
-    configs.forEach(function(config) {
+    configs.forEach((config) => {
       clearResult(config, res);
     });
   } else {
@@ -116,23 +116,23 @@ app.get('/clear/:config', function(req, res){
 });
 
 // Route for root dir
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Route for everything else.
-app.get('*', function(req, res){
+app.get('*', (req, res) => {
   res.status(404).send('Sorry cant find that: ' + req.url);
 });
 
 // Handle form POST requests for app view
-app.post('/app/:config?/:action?', function(req, res){
+app.post('/app/:config?/:action?', (req, res) => {
   const list = getList(res);
-  let config = {};
+  let config = { };
   let action = 'show';
   console.log('post: ' + req.params.config + ' ' + req.params.action);
   if (req.params.config) {
-    if(fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
+    if (fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
       config = getConfig(req.params.config);
     } else {
       config.error = 'config file not found ./config/' + req.params.config + '.js';
@@ -144,7 +144,8 @@ app.post('/app/:config?/:action?', function(req, res){
         storeConfig(config, req.body.configfile);
         action = 'check';
       } else {
-        console.log('not written: ' + configDir + '/' + config.name + '.js\n' + JSON.stringify(req.body, null, 4));
+        console.log('not written: ' + configDir + '/' + config.name + '.js\n' +
+            JSON.stringify(req.body, null, 4));
         action = '';
       }
     }
@@ -170,11 +171,11 @@ console.log('compare-layouts server listening on http://' + addresses[0] + ':' +
 // get list of configurations and result status
 function getList() {
   configs = [];
-  fs.readdirSync(configDir).forEach(function(fileName) {
+  fs.readdirSync(configDir).forEach((fileName) => {
     const configName = fileName.replace(/\.js/, '');
     configs.push(getItem(configName));
   });
-  configs.forEach(function(config) {
+  configs.forEach((config) => {
     config.result = getResult(config.data.destDir);
     getSummary(config);
   });
@@ -245,7 +246,8 @@ function getLogfile(destDir) {
   const logfilePath = path.join(__dirname, 'results', destDir, 'console.log');
   let logfileContent = '';
   try {
-    logfileContent = replaceAnsiColors(fs.readFileSync(logfilePath).toString().replace(/\n\n/g, '\n'));
+    logfileContent = replaceAnsiColors(fs.readFileSync(logfilePath).toString()
+        .replace(/\n\n/g, '\n'));
   } catch (err) {
     // no log file
   }
@@ -254,7 +256,7 @@ function getLogfile(destDir) {
 
 // get result data
 function getResult(destDir) {
-  let result = {};
+  let result = { };
   try {
     result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, 'index.json')));
   } catch (err) {
@@ -265,12 +267,13 @@ function getResult(destDir) {
 
 // get compare data
 function getCompare(destDir, compare, viewport) {
-  let result = {};
+  const filename = path.join(resultsDir, destDir, compare, viewport + '.json');
+  let result = { };
   try {
-    result = JSON.parse(fs.readFileSync(path.join(resultsDir, destDir, compare, viewport + '.json')));
-    console.log('compare file found: ' + path.join(resultsDir, destDir, compare, viewport + '.json'));
+    result = JSON.parse(fs.readFileSync(filename));
+    console.log('compare file found: ' + filename);
   } catch (err) {
-    console.log('compare file not found: ' + path.join(resultsDir, destDir, compare, viewport + '.json'));
+    console.log('compare file not found: ' + filename);
     // probably file not found
   }
   return result;
@@ -282,7 +285,7 @@ function getSummary(config) {
   config.totalTests = 0;
   config.failedTests = 0;
   Object.keys(config.result).forEach((key) => {
-    if ( ! config.result[key].success ) {
+    if (!config.result[key].success) {
       config.success = false;
       config.failedTests++;
     }
@@ -309,10 +312,10 @@ function runConfigAsync(config, verbose, res) {
   }
   const configFilename = 'config/' + config.name + '.js';
   const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
-  loader.stdout.on('data', function(data) { log(data.toString().trim()); });
-  loader.stderr.on('data', function(data) { log(data.toString().trim()); });
-  loader.on('error', function(err) { log(' error: ' + err.toString().trim()); });
-  loader.on('close', function(code) {
+  loader.stdout.on('data', (data) => { log(data.toString().trim()); });
+  loader.stderr.on('data', (data) => { log(data.toString().trim()); });
+  loader.on('error', (err) => { log(' error: ' + err.toString().trim()); });
+  loader.on('close', (code) => {
     if (code > 0) {
       log('load ' + config.name + ' error, exit-code: ' + code);
     }
@@ -338,7 +341,7 @@ function clearResult(config, res) {
   res.end();
 }
 
-function storeConfig(config,configData) {
+function storeConfig(config, configData) {
   fs.writeFileSync(configDir + '/' + config.name + '.js', configData, 0);
   console.log('written: ' + configDir + '/' + config.name + '.js');
   config.file = getConfigFile(config.name);
@@ -367,15 +370,16 @@ function ipv4adresses() {
   return addresses;
 }
 
+// TOTO make module
 function replaceAnsiColors(string) {
   let result = '';
   const replaceTable = {
-     '0': 'none',
-     '1': 'font-weight: bold',
-     '4': 'text-decoration: underscore',
-     '5': 'text-decoration: blink',
-     '7': 'text-decoration: reverse',
-     '8': 'text-decoration: concealed',
+    '0': 'none',
+    '1': 'font-weight: bold',
+    '4': 'text-decoration: underscore',
+    '5': 'text-decoration: blink',
+    '7': 'text-decoration: reverse',
+    '8': 'text-decoration: concealed',
     '30': 'color: black',
     '31': 'color: red',
     '32': 'color: green',
@@ -393,14 +397,14 @@ function replaceAnsiColors(string) {
     '46': 'background-color: cyan',
     '47': 'background-color: white'
   };
-  string.toString().split(/(\x1B\[[0-9;]+m)/).forEach(function(part) {
+  string.toString().split(/(\x1B\[[0-9;]+m)/).forEach((part) => {
     if (part.match(/(\x1B\[[0-9;]+m)/)) {
       part = part.replace(/\x1B\[([0-9;]+)m/, '$1');
       if (part == '0') {
         result += '</span>';
       } else {
         result += '<span style="';
-        part.split(/(;)/).forEach(function(x) {
+        part.split(/(;)/).forEach((x) => {
           if (replaceTable[x]) {
             result += replaceTable[x];
           } else {
