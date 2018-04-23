@@ -38,6 +38,8 @@
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^5.0.0",
     "gulp-develop-server": "^0.5.2",
+    "gulp-jscs": "^4.1.0",
+    "gulp-jscs-stylish": "^1.4.0",
     "gulp-jshint": "^2.1.0",
     "gulp-less": "^3.5.0",
     "gulp-less-changed": "^1.3.4",
@@ -47,6 +49,8 @@
     "gulp-postmortem": "^1.0.5",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
+    "jscs": "^3.0.7",
+    "jscs-stylish": "^0.3.1",
     "jshint": "^2.9.5",
     "rename": "^1.0.4",
     "run-sequence": "^2.2.1"
