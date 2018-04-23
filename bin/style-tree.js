@@ -5,37 +5,35 @@
  */
 'use strict';
 
-/* jshint esversion: 5, varstmt: false */
-
-var totalError = false;
+let totalError = false;
+const errorProperties = ['cursor', 'background-color', 'font-weight'];
 
 function compare(element1, element2, properties) {
-	var errorProperties = ['cursor', 'background-color', 'font-weight'];
-	var result = [];
-	var what = {};
-	for(var i in properties) {
+	let result = [];
+	let what = {};
+	for(let i in properties) {
 		if (properties.hasOwnProperty(i)) {
-			what[properties[i]] = (element1[properties[i]] + "").trim();
+			what[properties[i]] = (element1[properties[i]] + '').trim();
 		}
 	}
-	var styleDifference = [];
-	var hasChildWithSameTextContent = false;
-	var ownTextContent = element1.textContent;
-	element1._childElementInfo.forEach(function(element) {
+	let styleDifference = [];
+	let hasChildWithSameTextContent = false;
+	let ownTextContent = element1.textContent;
+	element1._childElementInfo.forEach((element) => {
 		if (element.textContent == element1.textContent) {
 			hasChildWithSameTextContent = true;
 		}
-		ownTextContent = ownTextContent.replace(element.textContent, "");
+		ownTextContent = ownTextContent.replace(element.textContent, '');
 	});
-	var otherElement = search(element2, what);
+	const otherElement = search(element2, what);
 	if (otherElement) {
-		var errorList = [];
-		Object.keys(element1.style).forEach(function(key) {
-			var thisValue = normalize(element1.style[key]);
+		let errorList = [];
+		Object.keys(element1.style).forEach((key) => {
+			const thisValue = normalize(element1.style[key]);
 			if (otherElement.style.hasOwnProperty(key)) {
-				var otherValue = normalize(otherElement.style[key]);
+				const otherValue = normalize(otherElement.style[key]);
 				if (thisValue != otherValue) {
-					var styleDiff = {property: key, style1: thisValue, style2: otherValue};
+					const styleDiff = {property: key, style1: thisValue, style2: otherValue};
 					if (errorProperties.indexOf(key) > -1) {
 						styleDiff.error = true;
 						errorList.push(key);
@@ -77,10 +75,10 @@ function compare(element1, element2, properties) {
 			value1: element1.value,
 			textContent1: element1.textContent.trim(),
 			ownTextContent: element1.textContent.trim(),
-			error: "Element auf anderer Seite nicht gefunden - Suche nach: " + properties
+			error: 'Element auf anderer Seite nicht gefunden - Suche nach: ' + properties
 		});
 	}
-	element1._childElementInfo.forEach(function(element) {
+	element1._childElementInfo.forEach((element) => {
 		if (otherElement) {
 			result.push(compare(element, otherElement, properties));
 		} else {
@@ -91,17 +89,17 @@ function compare(element1, element2, properties) {
 }
 
 function search(element, what) {
-	var found;
-	element._childElementInfo.forEach(function(elem) {
-		var res = search(elem, what);
+	let found;
+	element._childElementInfo.forEach((elem) => {
+		const res = search(elem, what);
 		if (res !== undefined) {
 			found = res;
 		}
 	});
 	// TODO: success / found logic correct?
-	var success = true;
-	for(var key in what) {
-		if (!element.hasOwnProperty(key) || (element[key] + "").trim() !== what[key]) {
+	let success = true;
+	for(let key in what) {
+		if (!element.hasOwnProperty(key) || (element[key] + '').trim() !== what[key]) {
 			success = false;
 			break;
 		}
@@ -113,11 +111,11 @@ function search(element, what) {
 }
 
 function normalize(val) {
-	var colorNames = /(transparent|white|black)/;
-	var colorHex = /#([0-9A-za-z]{2})([0-9A-za-z]{2})([0-9A-za-z]{2})/;
-	var colorRgb = /rgb\(([0-9]+, ?[0-9]+, ?[0-9]+)\)/;
-	//var colorRgba = /rgba\([0-9]+, ?[0-9]+, ?[0-9]+, ?[0-9]+\)/;
-	var result = "";
+	const colorNames = /(transparent|white|black)/;
+	const colorHex = /#([0-9A-za-z]{2})([0-9A-za-z]{2})([0-9A-za-z]{2})/;
+	const colorRgb = /rgb\(([0-9]+, ?[0-9]+, ?[0-9]+)\)/;
+	//const colorRgba = /rgba\([0-9]+, ?[0-9]+, ?[0-9]+, ?[0-9]+\)/;
+	let result = '';
 	if (val.match(colorRgb)) {
 		result = 'rgba(' + RegExp.$1 + ', 255)';
 	} else if (val.match(colorHex)){
@@ -138,18 +136,18 @@ function normalize(val) {
 	return result.replace(/, +/g, ',');
 }
 
-module.exports = function(styleTree) {
+module.exports = (styleTree) => {
 	return {
-		getStyleTree: function() {
+		getStyleTree: () => {
 			return styleTree;
 		},
-		compareTo: function(other, properties) {
+		compareTo: (other, properties) => {
 			return compare(styleTree[0], other.getStyleTree()[0], properties);
 		},
-		search: function(what) {
+		search: (what) => {
 			return search(styleTree[0], what);
 		},
-		totalError: function() {
+		totalError: () => {
 			return totalError;
 		}
 	};

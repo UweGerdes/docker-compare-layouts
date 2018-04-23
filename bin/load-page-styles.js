@@ -41,12 +41,12 @@ var results = {};
 if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	var configFile = fs.absolute(casper.cli.options.configFile);
 	pageKey = casper.cli.options.pageKey;
-	//console.error("loading pageKey: " + pageKey);
+	//console.error('loading pageKey: ' + pageKey);
 	try {
 		config = require(configFile);
 	}
 	catch (err) {
-		throw("FAIL: could not read file " + configFile);
+		throw('FAIL: could not read file ' + configFile);
 	}
 	subdir = 'results/' + config.destDir + '/' + pageKey;
 	console.log('subdir: ' + subdir);
@@ -68,7 +68,7 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 			pval = page.credentials[1];
 		}
 	} else {
-		throw("FAIL: pageKey not found: " + pageKey);
+		throw('FAIL: pageKey not found: ' + pageKey);
 	}
 	if (config.viewports) {
 		viewports = config.viewports;
@@ -80,7 +80,7 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 		whitelist = config.whitelist;
 	}
 } else {
-	throw("FAIL: configFile and pageKey have to be provided");
+	throw('FAIL: configFile and pageKey have to be provided');
 }
 
 console.log('subdir: ' + subdir);
@@ -185,7 +185,7 @@ function _getStyles(selector) {
 			type: element.getAttribute('type') || '',
 			name: element.getAttribute('name') || '',
 			value: element.getAttribute('value') || '',
-			textContent: element.textContent.trim().replace(/[ \n\t]+/g, " "),
+			textContent: element.textContent.trim().replace(/[ \n\t]+/g, ' '),
 			style: getStyles(element, null),
 			_childElementCount : element.childElementCount,
 			_childElementInfo : children
@@ -293,5 +293,5 @@ casper.run(function() {
 });
 
 function safeFilename(name) {
-	return name.replace(/[ .?#/:\(\)<>|\\]/g, "_").trim();
+	return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
 }

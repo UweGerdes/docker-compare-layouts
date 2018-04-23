@@ -163,7 +163,7 @@ app.post('/app/:config?/:action?', function(req, res){
 app.listen(httpPort);
 
 let addresses = ipv4adresses();
-// console.log("IP address of container  :  " + addresses);
+// console.log('IP address of container  :  ' + addresses);
 console.log('compare-layouts server listening on http://' + addresses[0] + ':' + httpPort);
 
 // Model //
@@ -188,7 +188,7 @@ function getItem(configName) {
 	config.lastRun = 'Keine Daten';
 	try {
 		const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
-		config.lastRun = dateFormat(fileStat.mtime, "dd.mm.yyyy, HH:MM:ss");
+		config.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
 	} catch (err) {
 		if (err.length > 0 && err.code != 'ENOENT') {
 			console.log(configName + ' error: ' + JSON.stringify(err, null, 4));
@@ -204,7 +204,7 @@ function getConfig(configName) {
 	config.data = getConfigData(configName);
 	try {
 		const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
-		config.lastRun = dateFormat(fileStat.mtime, "dd.mm.yyyy, HH:MM:ss");
+		config.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
 	} catch (err) {
 		config.lastRun = 'Keine Daten im Verzeichnis ./results';
 		if (err.length > 0 && err.code != 'ENOENT') {
@@ -281,7 +281,7 @@ function getSummary(config) {
 	config.success = true;
 	config.totalTests = 0;
 	config.failedTests = 0;
-	Object.keys(config.result).forEach(function (key) {
+	Object.keys(config.result).forEach((key) => {
 		if ( ! config.result[key].success ) {
 			config.success = false;
 			config.failedTests++;
@@ -294,7 +294,7 @@ function getSummary(config) {
 function runConfigAsync(config, verbose, res) {
 	const destDir = path.join(__dirname, 'results', config.data.destDir);
 	const logfilePath = path.join(destDir, 'console.log');
-	const log = function (msg) {
+	const log = (msg) => {
 		console.log(msg);
 		fs.appendFileSync(logfilePath, msg + '\n');
 		res.write(replaceAnsiColors(msg) + '\n');
@@ -327,7 +327,7 @@ function runConfigAsync(config, verbose, res) {
 // delete results directory
 function clearResult(config, res) {
 	const destDir = path.join(__dirname, 'results', config.data.destDir);
-	const log = function (msg) {
+	const log = (msg) => {
 		console.log(msg);
 		res.write(replaceAnsiColors(msg) + '\n');
 	};

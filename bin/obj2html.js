@@ -9,7 +9,7 @@
 const ind = '\t';
 
 module.exports = {
-	toHtml: function(obj) {
+	toHtml: (obj) => {
 		return toHTML(obj, ind);
 	}
 };
@@ -18,7 +18,7 @@ function toHTML(obj, indent) {
 	let html = '';
 	if (type(obj) == 'Array') {
 		html += indent + '<ol>\n';
-		obj.forEach(function(obj) {
+		obj.forEach((obj) => {
 			html += indent + ind + '<li>\n';
 			html += toHTML(obj, indent + ind + ind);
 			html += indent + ind + '</li>\n';
@@ -26,7 +26,7 @@ function toHTML(obj, indent) {
 		html += indent + '</ol>\n';
 	} else if (type(obj) == 'Object') {
 		html += indent + '<dl>\n';
-		Object.keys(obj).forEach(function(key) {
+		Object.keys(obj).forEach((key) => {
 			html += indent + ind + '<dt class="' + key + '">' + key + '</dt>\n' + indent + ind +'<dd class="' + key + ' ' + type(obj[key]) + '">';
 			if (type(obj) == 'Array') {
 				html += '\n' + toHTML(obj[key], indent + ind + ind) + indent + ind;

@@ -5,7 +5,7 @@
  */
 'use strict';
 
-var exec = require('child_process').exec,
+const exec = require('child_process').exec,
   del = require('del'),
   fs = require('fs'),
   glob = require('glob'),
@@ -27,19 +27,20 @@ var exec = require('child_process').exec,
   runSequence = require('run-sequence')
   ;
 
-var baseDir = __dirname;
-var testLogfile = path.join(baseDir, 'tests.log');
-var testHtmlLogfile = path.join(baseDir, 'tests.html');
-var logMode = 0;
-var txtLog = [];
-var htmlLog = [];
-var watchFilesFor = {};
-var lifereloadPort = process.env.GULP_LIVERELOAD_PORT || 8081;
+const baseDir = __dirname,
+  testLogfile = path.join(baseDir, 'tests.log'),
+  testHtmlLogfile = path.join(baseDir, 'tests.html'),
+  lifereloadPort = process.env.GULP_LIVERELOAD_PORT || 8081;
+
+let logMode = 0,
+  txtLog = [],
+  htmlLog = [],
+  watchFilesFor = {};
 
 /*
  * log only to console, not GUI
  */
-var log = notify.withReporter(function (options, callback) {
+const log = notify.withReporter((options, callback) => {
   callback();
 });
 
@@ -49,10 +50,10 @@ var log = notify.withReporter(function (options, callback) {
 watchFilesFor['less-lint'] = [
   path.join(baseDir, 'less', '**', '*.less')
 ];
-gulp.task('less-lint', function () {
+gulp.task('less-lint', () => {
   return gulp.src( watchFilesFor['less-lint'] )
-    .pipe(lesshint())  // enforce style guide
-    .on('error', function (err) {})
+    .pipe(lesshint())  // TODO enforce style guide
+    .on('error', log.onError({ message:  'Error: <%= error.message %>' , title: 'LESS Error'}))
     .pipe(lesshint.reporter())
     ;
 });
@@ -61,11 +62,11 @@ watchFilesFor.less = [
   path.join(baseDir, 'less', 'app.less'),
   path.join(baseDir, 'less', '**', '*.less')
 ];
-gulp.task('less', function () {
-  var dest = function(filename) {
+gulp.task('less', () => {
+  const dest = function(filename) {
     return path.join(path.dirname(path.dirname(filename)), 'css');
   };
-  var src = watchFilesFor.less.filter(function(el){return el.indexOf('**') == -1; });
+  const src = watchFilesFor.less.filter(function(el){return el.indexOf('**') == -1; });
   return gulp.src( src )
     .pipe(lessChanged({
       getOutputFileName: function(file) {
@@ -88,7 +89,7 @@ watchFilesFor.jshint = [
   path.join(baseDir, 'package.json'),
   path.join(baseDir, '**', '*.js')
 ];
-gulp.task('jshint', function(callback) {
+gulp.task('jshint', function() {
   return gulp.src(watchFilesFor.jshint)
     .pipe(jshint())
     .pipe(jshint.reporter('default'))
@@ -98,25 +99,25 @@ gulp.task('jshint', function(callback) {
 watchFilesFor['compare-layouts-default'] = [
   path.join(baseDir, 'config', 'default.js'),
   path.join(baseDir, 'index.js'),
-  path.join(baseDir, 'bin', 'load-page-styles.js')
+  path.join(baseDir, 'bin', '*.js')
 ];
 gulp.task('compare-layouts-default', function(callback) {
   del( [
       path.join(baseDir, 'results', 'default', '*.png'),
       path.join(baseDir, 'results', 'default', '**', 'index.json')
     ], { force: true } );
-  var loader = exec('node index.js config/default.js',
+  const loader = exec('node index.js config/default.js',
     { cwd: baseDir },
-    function (err, stdout, stderr) {
-      logExecResults(err, stdout, stderr);
+    (err, stdout, stderr) => {
+      logExecResults(err, stdout, stderr); // TODO remove stderr
       callback();
     }
   );
   loader.stdout.on('data', function(data) { if(!data.match(/PASS/)) { console.log(data.trim()); } });
 });
 
-// helper functions
-var logExecResults = function (err, stdout, stderr) {
+// TODO refactor helper functions
+const logExecResults = function (err, stdout) {
   logTxt (stdout.replace(/\u001b\[[^m]+m/g, '').match(/[^\n]*FAIL [^\n]+/g));
   logHtml(stdout.replace(/\u001b\[[^m]+m/g, '').match(/[^\n]*FAIL [^0-9][^\n]+/g));
   if (err) {
@@ -124,32 +125,32 @@ var logExecResults = function (err, stdout, stderr) {
   }
 };
 
-var logTxt = function (msg) {
+const logTxt = function (msg) {
   if (logMode === 1 && msg){
-    var txtMsg = msg.join('\n');
+    const txtMsg = msg.join('\n');
     txtLog.push(txtMsg);
   }
 };
 
-var logHtml = function (msg) {
+const logHtml = function (msg) {
   if (logMode === 1 && msg){
-    var htmlMsg = msg.join('<br />')
+    const htmlMsg = msg.join('<br />')
             .replace(/FAIL ([^ ]+) ([^ :]+)/, 'FAIL ./results/$1/$22.png')
             .replace(/([^ ]+\/[^ ]+\.png)/g, '<a href="$1">$1</a>');
-    var errorClass = htmlMsg.indexOf('FAIL') > -1 ? ' class="fail"' : ' class="success"';
+    const errorClass = htmlMsg.indexOf('FAIL') > -1 ? ' class="fail"' : ' class="success"';
     htmlLog.push('\t<li' + errorClass + '>' + htmlMsg + '</li>');
   }
 };
 
-var writeTxtLog = function () {
+const writeTxtLog = function () {
   if (txtLog.length > 0) {
     fs.writeFileSync(testLogfile, txtLog.join('\n') + '\n');
   }
 };
 
-var writeHtmlLog = function () {
+const writeHtmlLog = function () {
   if (htmlLog.length > 0) {
-    var html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8" />\n' +
+    let html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8" />\n' +
         '<title>Testergebnisse</title>\n' +
         '<link href="compare-layouts/css/index.css" rel="stylesheet" />\n' +
         '</head>\n<body><h1>Testergebnisse</h1>\n<ul>\n';
@@ -296,14 +297,20 @@ gulp.task('default', function(callback) {
     callback);
 });
 
+// Get IP for console message
+// TODO make class
 function ipv4adresses() {
-  var addresses = [];
-  var interfaces = os.networkInterfaces();
-  for (var k in interfaces) {
-    for (var k2 in interfaces[k]) {
-      var address = interfaces[k][k2];
-      if (address.family === 'IPv4' && !address.internal) {
-        addresses.push(address.address);
+  const addresses = [];
+  const interfaces = os.networkInterfaces();
+  for (let k in interfaces) {
+    if (interfaces.hasOwnProperty(k)) {
+      for (let k2 in interfaces[k]) {
+        if (interfaces[k].hasOwnProperty(k2)) {
+          const address = interfaces[k][k2];
+          if (address.family === 'IPv4' && !address.internal) {
+            addresses.push(address.address);
+          }
+        }
       }
     }
   }

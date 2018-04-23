@@ -42,7 +42,7 @@ function loadPage(pageKey) {
     if (page.engine) {
       args.unshift('--engine="' + page.engine + '"');
       if (page.engine == 'slimerjs') {
-        if (process.platform == "linux") {
+        if (process.platform == 'linux') {
 //        cmd = 'xvfb-run -a -e /dev/stdout casperjs';
           cmd = 'xvfb-run -a casperjs';
         }
@@ -124,7 +124,7 @@ function compareData(result) {
 function compareImages(result) {
   return new Promise(function(resolve) {
     exec('compare -metric AE "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compareFilename,
-      function (error, stdout, stderr) {
+      (error, stdout, stderr) => {
         //if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
         if (stderr == '0') {
           if (verbose) { console.log(result.compareFilename + ' saved'); }
@@ -142,7 +142,7 @@ function compareImages(result) {
 function compositeImages(result) {
   return new Promise(function(resolve) {
     exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
-      function (error, stdout, stderr) {
+      (error, stdout, stderr) => {
         //logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
         if (stderr.length === 0) {
           if (verbose) { console.log(result.compositeFilename + ' saved'); }
@@ -186,7 +186,7 @@ function compareStyleTree(comp) {
 
 function saveResults(results) {
   let output = {};
-  results.forEach(function (result) {
+  results.forEach((result) => {
     output[result.compareKey + '_' + result.viewport] = result;
   });
   fs.writeFile(path.join(destDir,  'index.json'), JSON.stringify(output, null, 4), function(error) {
@@ -221,7 +221,7 @@ del([path.join(destDir, '**')])
   return makeDir(destDir);
 })
 .then(function(path) {
-  console.log("created:", path);
+  console.log('created:', path);
   return path;
 })
 .then(function() {
@@ -262,7 +262,7 @@ del([path.join(destDir, '**')])
   saveResults(results.compares);
 })
 .catch(function(error) {
-  console.error("Failed!", error);
+  console.error('Failed!', error);
 });
 
 function chkCacheFile(file) {
@@ -275,5 +275,5 @@ function chkCacheFile(file) {
 }
 
 function safeFilename(name) {
-  return name.replace(/[ .?#/:\(\)<>|\\]/g, "_").trim();
+  return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
 }
