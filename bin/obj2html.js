@@ -6,7 +6,7 @@
  */
 'use strict';
 
-var ind = '\t';
+const ind = '\t';
 
 module.exports = {
 	toHtml: function(obj) {
@@ -15,7 +15,7 @@ module.exports = {
 };
 
 function toHTML(obj, indent) {
-	var html = '';
+	let html = '';
 	if (type(obj) == 'Array') {
 		html += indent + '<ol>\n';
 		obj.forEach(function(obj) {

@@ -12,54 +12,33 @@
 
 'use strict';
 
-var del = require('del'),
+const del = require('del'),
   exec = require('child_process').exec,
   fs = require('fs'),
   makeDir = require('make-dir'),
   path = require('path'),
   styleTree = require('./bin/style-tree.js');
 
-var configFile = 'config/default.js',
-  config = null;
-
-config = require('./' + configFile);
-var resultsDir = './results';
-var destDir = path.join(resultsDir, config.destDir);
-
-var verbose = process.argv.indexOf('-v') > -1;
-
-function getFile(filename) {
-  console.log('reading: ' + filename);
-  return new Promise(
-    function(resolve, reject) {
-      fs.readFile(filename, function(error, data) {
-        if (error) {
-          reject(Error(error.code));
-        }
-        resolve(data.toString());
-      });
-    }
-  );
-}
-
-function getJSON(filename) {
-  return getFile(filename).then(JSON.parse);
-}
+const configFile = 'config/default.js',
+  config = require('./' + configFile),
+  resultsDir = './results',
+  destDir = path.join(resultsDir, config.destDir),
+  verbose = process.argv.indexOf('-v') > -1;
 
 function loadPage(pageKey) {
-  var page = config.pages[pageKey];
+  const page = config.pages[pageKey];
   if (page.cache && chkCacheFile(path.join(destDir, pageKey, Object.keys(config.viewports)[0], 'page.png'))) {
     console.log('cached page  ' + pageKey + ': ' + page.url);
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve({'pageKey': pageKey, 'status': 'cached'});
     });
   }
   return new Promise(function(resolve, reject) {
-    var args = [
+    let args = [
       './bin/load-page-styles.js',
       '--configFile="' + configFile + '"',
       '--pageKey="' + pageKey + '"'];
-    var cmd = 'casperjs';
+    let cmd = 'casperjs';
     if (page.engine) {
       args.unshift('--engine="' + page.engine + '"');
       if (page.engine == 'slimerjs') {
@@ -70,9 +49,9 @@ function loadPage(pageKey) {
       }
     }
     console.log('loading page ' + pageKey + ': ' + page.url);
-    var loader = exec(cmd + ' ' + args.join(' '), function(error, stdout, stderr) {
+    const loader = exec(cmd + ' ' + args.join(' '), function(error, stdout, stderr) {
       if (verbose || stdout.indexOf('element not found') > -1) {
-        console.log(pageKey + ': ' + stdout.trim());
+        console.log(pageKey + ': ' + stdout.trim() + (stderr ? '\n' + cmd + ' stderr: ' + stderr.trim() : ''));
       }
     });
     loader.stderr.on('data', function(stderr) {
@@ -97,25 +76,27 @@ function makeCompareDir(compareKey) {
     fs.mkdir(path.join(destDir,  safeFilename(compareKey)),function(error) {
       if (error) {
         console.log('makeCompareDir ' + compareKey + ' error: ' + error);
+        // TODO reject?
       }
-      return new Promise(function(resolve, reject) {
+      return new Promise(function(resolve) {
         resolve(compareKey);
       });
     });
   } else {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(compareKey);
     });
   }
 }
 
 function compareData(result) {
-  return new Promise(function(resolve, reject) {
-    var compareKey = result.compareKey;
-    var viewport = result.viewport;
-    var compare = config.compares[compareKey];
-    var page1 = config.pages[compare.page1];
-    var page2 = config.pages[compare.page2];
+  return new Promise(function(resolve) {
+    const compareKey = result.compareKey;
+    const viewport = result.viewport;
+    const compare = config.compares[compareKey];
+    const page1 = config.pages[compare.page1];
+    const page2 = config.pages[compare.page2];
+    // TODO refactor
     result.name = compareKey;
     result.viewport = viewport;
     result.page1 = page1;
@@ -141,7 +122,7 @@ function compareData(result) {
 }
 
 function compareImages(result) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     exec('compare -metric AE "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compareFilename,
       function (error, stdout, stderr) {
         //if (verbose) { logExecResult('compare', null, stdout, stderr.replace(/ @.+/, '').replace(/^0$/, '')); }
@@ -159,7 +140,7 @@ function compareImages(result) {
 }
 
 function compositeImages(result) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     exec('composite -compose difference "' + result.baseFilename1 + '.png" "' + result.baseFilename2 + '.png" ' + result.compositeFilename,
       function (error, stdout, stderr) {
         //logExecResult('composite', null, stdout, stderr.replace(/ @.+/, ''));
@@ -177,17 +158,18 @@ function compositeImages(result) {
 }
 
 function compareStyleTree(comp) {
-  var compareKey = comp.compareKey;
-  var viewport = comp.viewport;
-  var compare = config.compares[compareKey];
-  var page1 = config.pages[compare.page1];
-  var selector1 = compare.selector1 ? compare.selector1 : page1.selector;
-  var page2 = config.pages[compare.page2];
-  var selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-  var styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json'))));
-  var styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
-  var compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-  var jsonFilename = path.join(destDir,  safeFilename(compareKey),  viewport + '.json');
+  // TODO refactor
+  const compareKey = comp.compareKey;
+  const viewport = comp.viewport;
+  const compare = config.compares[compareKey];
+  const page1 = config.pages[compare.page1];
+  const selector1 = compare.selector1 ? compare.selector1 : page1.selector;
+  const page2 = config.pages[compare.page2];
+  const selector2 = compare.selector2 ? compare.selector2 : page2.selector;
+  const styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page1,  viewport,  safeFilename(selector1) + '.json'))));
+  const styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,  compare.page2,  viewport,  safeFilename(selector2) + '.json'))));
+  const compareResult = styleTree1.compareTo(styleTree2, compare.compare);
+  const jsonFilename = path.join(destDir,  safeFilename(compareKey),  viewport + '.json');
   return new Promise(function(resolve, reject) {
     fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), function(error) {
       if(error) {
@@ -215,10 +197,10 @@ function saveResults(results) {
   });
 }
 
-var results = {};
-var compares = [];
+let results = {};
+let compares = [];
 
-var stats = fs.statSync(resultsDir);
+const stats = fs.statSync(resultsDir);
 if (stats.isDirectory(resultsDir)) {
   console.log('resultsDir: ' + resultsDir);
 }
@@ -242,8 +224,8 @@ del([path.join(destDir, '**')])
   console.log("created:", path);
   return path;
 })
-.then(function(response) {
-  var pageKeys = Object.keys(config.pages);
+.then(function() {
+  const pageKeys = Object.keys(config.pages);
   return Promise.all(
     pageKeys.map(loadPage)
   );
@@ -254,7 +236,7 @@ del([path.join(destDir, '**')])
     compares.map(compareData)
   );
 })
-.then(function(data) {
+.then(function() {
   return Promise.all(
     Object.keys(config.compares).map(makeCompareDir)
   );
@@ -276,35 +258,12 @@ del([path.join(destDir, '**')])
     compares.map(compareStyleTree)
   );
 })
-.then(function(compared) {
+.then(function() {
   saveResults(results.compares);
 })
 .catch(function(error) {
   console.error("Failed!", error);
 });
-
-function makePath(directoryPath) {
-  const directory = path.normalize(directoryPath);
-  return new Promise((resolve, reject) => {
-    fs.stat(directory, (error) => {
-      if (error) {
-        if (error.code === 'ENOENT') {
-          fs.mkdir(directory, (error) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(directory);
-            }
-          });
-        } else {
-          reject(error);
-        }
-      } else {
-        resolve(directory);
-      }
-    });
-  });
-}
 
 function chkCacheFile(file) {
   try {

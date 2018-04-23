@@ -70,9 +70,6 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 	} else {
 		throw("FAIL: pageKey not found: " + pageKey);
 	}
-	if (config.widths && config.widths.length > 0) {
-		widths = config.widths;
-	}
 	if (config.viewports) {
 		viewports = config.viewports;
 	}
@@ -87,7 +84,7 @@ if (casper.cli.options.configFile && casper.cli.options.pageKey) {
 }
 
 console.log('subdir: ' + subdir);
-fs.makeDirectory(subdir)
+fs.makeDirectory(subdir);
 
 casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (hover !== '' ? '", hover:"' + hover : '' ) + '", saving in "' + subdir + '"', 'INFO');
 
@@ -153,7 +150,7 @@ function blacklistHit(requestData) {
 }
 
 // evaluated in browser
-function _getStyles(selector, hover) {
+function _getStyles(selector) {
 	var getStyles = function(element, pseudo) {
 		var styles = {};
 		var y = document.defaultView.getComputedStyle(element, pseudo);

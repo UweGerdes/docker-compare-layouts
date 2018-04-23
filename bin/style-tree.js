@@ -5,6 +5,8 @@
  */
 'use strict';
 
+/* jshint esversion: 5, varstmt: false */
+
 var totalError = false;
 
 function compare(element1, element2, properties) {
@@ -12,7 +14,9 @@ function compare(element1, element2, properties) {
 	var result = [];
 	var what = {};
 	for(var i in properties) {
-		what[properties[i]] = (element1[properties[i]] + "").trim();
+		if (properties.hasOwnProperty(i)) {
+			what[properties[i]] = (element1[properties[i]] + "").trim();
+		}
 	}
 	var styleDifference = [];
 	var hasChildWithSameTextContent = false;
