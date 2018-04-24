@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <title>Compare Layouts <%= result.page1.url %> <%= result.selector1 %> &lt;=&gt; <%= result.page2.url %> <%= result.selector1 %></title>
 <link href="/css/app.css" rel="stylesheet" />
+<script src="/js/result-compare.js"></script>
 </head>
 <body>
 <div class="result">
@@ -18,7 +19,6 @@
 		<div class="result-compare2"><img src="/<%= result.baseFilename2 %>.png" id="result-compare2-img" /></div>
 		<div id="result-compare-sensor" class="result-compare-sensor"></div>
 	</div>
-	<script src="/js/result-compare.js"></script>
 	<br />
 	<% if (result.compareImagesStderr && result.compareImagesStderr.indexOf('a') > 0) { %>
 		<h3><%= result.compareImagesStderr.replace(/ `.+/, '') %></h3>
