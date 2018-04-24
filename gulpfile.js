@@ -53,7 +53,7 @@ watchFilesFor['less-lint'] = [
 ];
 gulp.task('less-lint', () => {
   return gulp.src(watchFilesFor['less-lint'])
-    .pipe(lesshint())  // TODO enforce style guide
+    .pipe(lesshint())
     .on('error', log.onError({ message:  'Error: <%= error.message %>', title: 'LESS Error' }))
     .pipe(lesshint.reporter())
     ;

@@ -1,0 +1,15 @@
+{
+  "decimalZero": "none",
+  "finalNewline": true,
+  "hexLength": {
+    "style": "long"
+  },
+  "spaceAfterPropertyColon": {
+    "enabled": true,
+    "style": "one_space"
+  },
+  "zeroUnit": {
+    "style": "keep_unit"
+  }
+}
+
