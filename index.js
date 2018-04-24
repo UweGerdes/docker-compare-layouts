@@ -76,11 +76,11 @@ function loadPage(pageKey) {
 function makeCompareDir(compareKey) {
   if (!fs.existsSync(path.join(destDir, safeFilename(compareKey)))) {
     fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => {
-      if (error) {
-        console.log('makeCompareDir ' + compareKey + ' error: ' + error);
-        // TODO reject?
-      }
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
+        if (error) {
+          console.log('makeCompareDir ' + compareKey + ' error: ' + error);
+          reject('makeCompareDir ' + compareKey + ' error: ' + error);
+        }
         resolve(compareKey);
       });
     });
@@ -98,31 +98,31 @@ function compareData(result) {
     const compare = config.compares[compareKey];
     const page1 = config.pages[compare.page1];
     const page2 = config.pages[compare.page2];
-    // TODO refactor
-    result.name = compareKey;
-    result.viewport = viewport;
-    result.page1 = page1;
-    result.page2 = page2;
-    result.subdir1 = compare.page1;
-    result.subdir2 = compare.page2;
-    result.selector1 = compare.selector1 ? compare.selector1 : page1.selector;
-    result.selector2 = compare.selector2 ? compare.selector2 : page2.selector;
-    result.baseFilename1 = path.join(destDir, compare.page1, viewport,
-        safeFilename(result.selector1));
-    result.baseFilename2 = path.join(destDir, compare.page2, viewport,
-        safeFilename(result.selector2));
-    result.htmlFilename1 = [destDir, compare.page1, viewport,
-        safeFilename(result.selector1)].join('/');
-    result.htmlFilename2 = [destDir, compare.page2, viewport,
-        safeFilename(result.selector2)].join('/');
-    result.exists1 = chkCacheFile(result.baseFilename1 + '.json');
-    result.exists2 = chkCacheFile(result.baseFilename2 + '.json');
-    result.success = true;
-    result.path = path.join(destDir, safeFilename(compareKey), viewport);
-    result.compareFilename = result.path + '_compare.png';
-    result.compositeFilename = result.path + '_composite.png';
-    result.jsonFilename = result.path + '.json';
-    result.htmlFilename = result.path + '.html';
+    const selector1 = compare.selector1 ? compare.selector1 : page1.selector;
+    const selector2 = compare.selector2 ? compare.selector2 : page2.selector;
+    const baseFilename1 = path.join(destDir, compare.page1, viewport, safeFilename(selector1));
+    const baseFilename2 = path.join(destDir, compare.page2, viewport, safeFilename(selector2));
+    const basePath = path.join(destDir, safeFilename(compareKey), viewport);
+    Object.assign(result, {
+      name: compareKey,
+      viewport: viewport,
+      page1: page1,
+      page2: page2,
+      subdir1: compare.page1,
+      subdir2: compare.page2,
+      selector1: selector1,
+      selector2: selector2,
+      baseFilename1: baseFilename1,
+      baseFilename2: baseFilename2,
+      exists1: chkCacheFile(baseFilename1 + '.json'),
+      exists2: chkCacheFile(baseFilename2 + '.json'),
+      success: true,
+      path: basePath,
+      compareFilename: basePath + '_compare.png',
+      compositeFilename: basePath + '_composite.png',
+      jsonFilename: basePath + '.json',
+      htmlFilename: basePath + '.html'
+    });
     resolve(result);
   });
 }
@@ -164,20 +164,17 @@ function compositeImages(result) {
 }
 
 function compareStyleTree(comp) {
-  // TODO refactor
-  const compareKey = comp.compareKey;
-  const viewport = comp.viewport;
-  const compare = config.compares[compareKey];
+  const compare = config.compares[comp.compareKey];
   const page1 = config.pages[compare.page1];
   const selector1 = compare.selector1 ? compare.selector1 : page1.selector;
   const page2 = config.pages[compare.page2];
   const selector2 = compare.selector2 ? compare.selector2 : page2.selector;
   const styleTree1 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,
-    compare.page1, viewport, safeFilename(selector1) + '.json'))));
+    compare.page1, comp.viewport, safeFilename(selector1) + '.json'))));
   const styleTree2 = styleTree(JSON.parse(fs.readFileSync(path.join(destDir,
-    compare.page2, viewport, safeFilename(selector2) + '.json'))));
+    compare.page2, comp.viewport, safeFilename(selector2) + '.json'))));
   const compareResult = styleTree1.compareTo(styleTree2, compare.compare);
-  const jsonFilename = path.join(destDir, safeFilename(compareKey), viewport + '.json');
+  const jsonFilename = path.join(destDir, safeFilename(comp.compareKey), comp.viewport + '.json');
   return new Promise((resolve, reject) => {
     fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), (error) => {
       if (error) {
@@ -209,16 +206,6 @@ function saveResults(results) {
 
 let results = { };
 let compares = [];
-
-const stats = fs.statSync(resultsDir);
-if (stats.isDirectory(resultsDir)) {
-  console.log('resultsDir: ' + resultsDir);
-}
-fs.accessSync(resultsDir, fs.constants.W_OK);
-
-if (!fs.existsSync(destDir)) {
-  fs.mkdirSync(destDir);
-}
 
 Object.keys(config.compares).forEach((compareKey) => {
   Object.keys(config.viewports).forEach((viewport) => {

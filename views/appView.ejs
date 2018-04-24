@@ -23,7 +23,7 @@
 				xmlhttp.open("GET", "/run/all" + verbose, true);
 				xmlhttp.responseType = 'text';
 				xmlhttp.onload = function(e) {
-					response.innerHTML += xmlhttp.responseText;
+					document.location.reload();
 				}
 				xmlhttp.onreadystatechange = function() {
 					if (xmlhttp.readyState == 4 && xmlhttp.status == 200){
@@ -45,7 +45,7 @@
 				xmlhttp.open("GET", "/run/" + config + verbose, true);
 				xmlhttp.responseType = 'text';
 				xmlhttp.onload = function(e) {
-					response.innerHTML += xmlhttp.responseText;
+					document.location.reload();
 				}
 				xmlhttp.onreadystatechange = function() {
 					if (xmlhttp.readyState == 4 && xmlhttp.status == 200){

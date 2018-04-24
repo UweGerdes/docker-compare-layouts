@@ -96,7 +96,6 @@ function search(element, what) {
       found = res;
     }
   });
-  // TODO: success / found logic correct?
   let success = true;
   for (let key in what) {
     if (!element.hasOwnProperty(key) || (element[key] + '').trim() !== what[key]) {

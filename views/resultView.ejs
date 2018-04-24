@@ -14,8 +14,8 @@
 		<h4 class="result-compare-label2"><%= result.page2.engine %> <%= result.page2.url %> "<%= result.selector2 %>"</h4>
 	</div>
 	<div id="result-compare" class="result-compare" style="width:<%= config.data.viewports[viewport].width %>px; height:<%= config.data.viewports[viewport].height %>px">
-		<div class="result-compare1"><img src="/<%= result.htmlFilename1 %>.png" /></div>
-		<div class="result-compare2"><img src="/<%= result.htmlFilename2 %>.png" id="result-compare2-img" /></div>
+		<div class="result-compare1"><img src="/<%= result.baseFilename1 %>.png" /></div>
+		<div class="result-compare2"><img src="/<%= result.baseFilename2 %>.png" id="result-compare2-img" /></div>
 		<div id="result-compare-sensor" class="result-compare-sensor"></div>
 	</div>
 	<script src="/js/result-compare.js"></script>
