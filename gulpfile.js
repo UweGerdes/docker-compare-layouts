@@ -23,9 +23,9 @@ const exec = require('child_process').exec,
   notify = require('gulp-notify'),
   postMortem = require('gulp-postmortem'),
   path = require('path'),
-  os = require('os'),
   rename = require('rename'),
-  runSequence = require('run-sequence')
+  runSequence = require('run-sequence'),
+  ipv4addresses = require('./bin/ipv4addresses.js')
   ;
 
 const baseDir = __dirname,
@@ -243,7 +243,8 @@ gulp.task('watch', () => {
     gulp.watch(watchFilesFor[task], [task]);
   });
   gulpLivereload.listen({ port: lifereloadPort, delay: 2000 });
-  console.log('gulp livereload listening on http://' + ipv4adresses()[0] + ':' + lifereloadPort);
+  console.log('gulp livereload listening on http://' +
+    ipv4addresses.get()[0] + ':' + lifereloadPort);
 });
 
 /*
@@ -256,26 +257,6 @@ gulp.task('default', (callback) => {
     'server-postMortem',
     callback);
 });
-
-// Get IP for console message
-// TODO make class
-function ipv4adresses() {
-  const addresses = [];
-  const interfaces = os.networkInterfaces();
-  for (let k in interfaces) {
-    if (interfaces.hasOwnProperty(k)) {
-      for (let k2 in interfaces[k]) {
-        if (interfaces[k].hasOwnProperty(k2)) {
-          const address = interfaces[k][k2];
-          if (address.family === 'IPv4' && !address.internal) {
-            addresses.push(address.address);
-          }
-        }
-      }
-    }
-  }
-  return addresses;
-}
 
 module.exports = {
   gulp: gulp,

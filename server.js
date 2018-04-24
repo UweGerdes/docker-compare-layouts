@@ -8,13 +8,13 @@
 const fs = require('fs'),
   fsTools = require('fs-tools'),
   path = require('path'),
-  os = require('os'),
   exec = require('child_process').exec,
   express = require('express'),
   bodyParser = require('body-parser'),
   logger = require('morgan'),
   dateFormat = require('dateformat'),
   _eval = require('eval'),
+  ipv4addresses = require('./bin/ipv4addresses.js'),
   obj2html = require('./bin/obj2html.js'),
   app = express();
 
@@ -162,10 +162,8 @@ app.post('/app/:config?/:action?', (req, res) => {
 
 // Fire it up!
 app.listen(httpPort);
-
-let addresses = ipv4adresses();
-// console.log('IP address of container  :  ' + addresses);
-console.log('compare-layouts server listening on http://' + addresses[0] + ':' + httpPort);
+console.log('compare-layouts server listening on http://' +
+  ipv4addresses.get()[0] + ':' + httpPort);
 
 // Model //
 // get list of configurations and result status
@@ -349,25 +347,6 @@ function storeConfig(config, configData) {
   if (config.data.length === 0) {
     config.error = 'Syntax error in config file.';
   }
-}
-
-// Get IP for console message
-function ipv4adresses() {
-  const addresses = [];
-  const interfaces = os.networkInterfaces();
-  for (let k in interfaces) {
-    if (interfaces.hasOwnProperty(k)) {
-      for (let k2 in interfaces[k]) {
-        if (interfaces[k].hasOwnProperty(k2)) {
-          const address = interfaces[k][k2];
-          if (address.family === 'IPv4' && !address.internal) {
-            addresses.push(address.address);
-          }
-        }
-      }
-    }
-  }
-  return addresses;
 }
 
 // TOTO make module
