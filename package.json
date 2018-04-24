@@ -48,8 +48,6 @@
     "gulp-livereload": "^3.8.1",
     "gulp-notify": "^3.2.0",
     "gulp-postmortem": "^1.0.5",
-    "gulp-uglify": "^3.0.0",
-    "gulp-util": "^3.0.8",
     "jscs": "^3.0.7",
     "jscs-stylish": "^0.3.1",
     "jshint": "^2.9.5",

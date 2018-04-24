@@ -22,8 +22,6 @@ const exec = require('child_process').exec,
   gulpLivereload = require('gulp-livereload'),
   notify = require('gulp-notify'),
   postMortem = require('gulp-postmortem'),
-  uglify = require('gulp-uglify'),
-  gutil = require('gulp-util'), // TODO remove
   path = require('path'),
   os = require('os'),
   rename = require('rename'),
@@ -79,7 +77,6 @@ gulp.task('less', () => {
     .pipe(less())
     .on('error', log.onError({ message:  'Error: <%= error.message %>', title: 'LESS Error' }))
     .pipe(autoprefixer('last 3 version', 'safari 5', 'ie 8', 'ie 9', 'ios 6', 'android 4'))
-    .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
     .pipe(gulp.dest((file) => { return dest(file.path); }))
     .pipe(log({ message: 'written: <%= file.path %>', title: 'Gulp less' }))
     ;
