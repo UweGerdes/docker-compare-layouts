@@ -29,14 +29,9 @@ const exec = require('child_process').exec,
   ;
 
 const baseDir = __dirname,
-  testLogfile = path.join(baseDir, 'tests.log'),
-  testHtmlLogfile = path.join(baseDir, 'tests.html'),
   lifereloadPort = process.env.GULP_LIVERELOAD_PORT || 8081;
 
-let logMode = 0,
-  txtLog = [],
-  htmlLog = [],
-  watchFilesFor = {};
+let watchFilesFor = {};
 
 /*
  * log only to console, not GUI
@@ -122,77 +117,22 @@ gulp.task('compare-layouts-default', (callback) => {
       path.join(baseDir, 'results', 'default', '*.png'),
       path.join(baseDir, 'results', 'default', '**', 'index.json')
     ], { force: true });
-  const loader = exec('node index.js config/default.js',
-    { cwd: baseDir },
-    (err, stdout, stderr) => {
-      logExecResults(err, stdout, stderr); // TODO remove stderr
-      callback();
+  const loader = exec('node index.js config/default.js', { cwd: baseDir });
+  loader.stdout.on('data', (data) => {
+    console.log(data.toString().trim());
+  });
+  loader.stderr.on('data', (data) => {
+    console.log('stderr: ' + data.toString().trim());
+  });
+  loader.on('error', (err) => {
+    console.log('error: ' + err.toString().trim());
+  });
+  loader.on('close', (code) => {
+    if (code > 0) {
+      console.log('compare-layouts-default error, exit-code: ' + code);
     }
-  );
-  loader.stdout.on('data', (data) => { if (!data.match(/PASS/)) { console.log(data.trim()); } });
-});
-
-// TODO refactor helper functions
-const logExecResults = (err, stdout) => {
-  logTxt(stdout.replace(/\u001b\[[^m]+m/g, '').match(/[^\n]*FAIL [^\n]+/g));
-  logHtml(stdout.replace(/\u001b\[[^m]+m/g, '').match(/[^\n]*FAIL [^0-9][^\n]+/g));
-  if (err) {
-    console.log('error: ' + err.toString());
-  }
-};
-
-const logTxt = (msg) => {
-  if (logMode === 1 && msg) {
-    const txtMsg = msg.join('\n');
-    txtLog.push(txtMsg);
-  }
-};
-
-const logHtml = (msg) => {
-  if (logMode === 1 && msg) {
-    const htmlMsg = msg.join('<br />')
-            .replace(/FAIL ([^ ]+) ([^ :]+)/, 'FAIL ./results/$1/$22.png')
-            .replace(/([^ ]+\/[^ ]+\.png)/g, '<a href="$1">$1</a>');
-    const errorClass = htmlMsg.indexOf('FAIL') > -1 ? ' class="fail"' : ' class="success"';
-    htmlLog.push('\t<li' + errorClass + '>' + htmlMsg + '</li>');
-  }
-};
-
-const writeTxtLog = () => {
-  if (txtLog.length > 0) {
-    fs.writeFileSync(testLogfile, txtLog.join('\n') + '\n');
-  }
-};
-
-const writeHtmlLog = () => {
-  if (htmlLog.length > 0) {
-    let html = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8" />\n' +
-        '<title>Testergebnisse</title>\n' +
-        '<link href="compare-layouts/css/index.css" rel="stylesheet" />\n' +
-        '</head>\n<body><h1>Testergebnisse</h1>\n<ul>\n';
-    html += htmlLog.join('\n');
-    html += '</ul>\n</body>\n</html>';
-    fs.writeFileSync(testHtmlLogfile, html);
-  }
-};
-
-gulp.task('clearTestLog', () => {
-  del([testLogfile, testHtmlLogfile], { force: true });
-  logMode = 1;
-});
-
-gulp.task('logTestResults', (callback) => {
-  if (txtLog.length > 0) {
-    console.log('######################## TEST RESULTS ########################');
-    console.log(txtLog.join('\n'));
-  } else {
-    console.log('######################## TEST SUCCESS ########################');
-    logTxt(['SUCCESS gulp tests']);
-  }
-  writeTxtLog();
-  writeHtmlLog();
-  logMode = 0;
-  callback();
+    callback();
+  });
 });
 
 // start responsive-check server
@@ -207,6 +147,7 @@ gulp.task('server:start', () => {
 gulp.task('server:stop', () => {
   server.kill();
 });
+
 // restart server if server.js changed
 watchFilesFor.server = [
   path.join(baseDir, 'server.js')
@@ -222,6 +163,7 @@ gulp.task('server', () => {
     }
   });
 });
+
 /*
  * gulp postmortem task to stop server on termination of gulp
  */
@@ -265,10 +207,10 @@ gulp.task('compare-layouts-selftest-success', () => {
       'Desktop', 'body.html'))) {
     throw 'no data files created';
   }
-  if (!fs.existsSync(path.join(baseDir, 'results', 'default', 'index.json'))) {
-    console.log('data files created but no result summary created');
-  } else {
+  if (fs.existsSync(path.join(baseDir, 'results', 'default', 'index.json'))) {
     console.log('result summary successfully created (with compare differences)');
+  } else {
+    console.log('data files created but no result summary created');
   }
 });
 
