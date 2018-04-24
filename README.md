@@ -54,6 +54,8 @@ $ docker run -it \
 	bash
 ```
 
+Run `gulp` or `npm test` in the container.
+
 To restart the container use:
 
 ```bash

@@ -210,7 +210,8 @@ gulp.task('compare-layouts-selftest-success', () => {
   if (fs.existsSync(path.join(baseDir, 'results', 'default', 'index.json'))) {
     console.log('result summary successfully created (with compare differences)');
   } else {
-    console.log('data files created but no result summary created');
+    console.error('ERROR: no result summary created');
+    process.exitCode = 1;
   }
 });
 
