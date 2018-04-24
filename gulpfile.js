@@ -129,7 +129,7 @@ gulp.task('compare-layouts-default', (callback) => {
   });
   loader.on('close', (code) => {
     if (code > 0) {
-      console.log('compare-layouts-default error, exit-code: ' + code);
+      console.log('compare-layouts-default exit-code: ' + code);
     }
     callback();
   });
