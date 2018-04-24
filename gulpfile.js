@@ -15,6 +15,7 @@ const exec = require('child_process').exec,
   jscs = require('gulp-jscs'),
   jscsStylish = require('gulp-jscs-stylish'),
   jshint = require('gulp-jshint'),
+  jsonlint = require('gulp-jsonlint'),
   lessChanged = require('gulp-less-changed'),
   less = require('gulp-less'),
   lesshint = require('gulp-lesshint'),
@@ -22,7 +23,7 @@ const exec = require('child_process').exec,
   notify = require('gulp-notify'),
   postMortem = require('gulp-postmortem'),
   uglify = require('gulp-uglify'),
-  gutil = require('gulp-util'),
+  gutil = require('gulp-util'), // TODO remove
   path = require('path'),
   os = require('os'),
   rename = require('rename'),
@@ -88,7 +89,6 @@ gulp.task('less', () => {
  * jshint javascript files
  */
 watchFilesFor.jshint = [
-  path.join(baseDir, 'package.json'),
   path.join(baseDir, '**', '*.js')
 ];
 gulp.task('jshint', () => {
@@ -97,6 +97,21 @@ gulp.task('jshint', () => {
     .pipe(jscs())
     .pipe(jscsStylish.combineWithHintResults())
     .pipe(jshint.reporter('jshint-stylish'))
+    ;
+});
+
+/*
+ * lint json files
+ */
+watchFilesFor.jsonlint = [
+  path.join(baseDir, '.jshintrc'),
+  path.join(baseDir, '.jscsrc'),
+  path.join(baseDir, '*.json')
+];
+gulp.task('jsonlint', function () {
+  return gulp.src(watchFilesFor.jsonlint)
+    .pipe(jsonlint())
+    .pipe(jsonlint.reporter())
     ;
 });
 
@@ -267,6 +282,7 @@ gulp.task('build', (callback) => {
   runSequence('less-lint',
     'less',
     'jshint',
+    'jsonlint',
     callback);
 });
 

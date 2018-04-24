@@ -41,6 +41,7 @@
     "gulp-jscs": "^4.1.0",
     "gulp-jscs-stylish": "^1.4.0",
     "gulp-jshint": "^2.1.0",
+    "gulp-jsonlint": "^1.2.1",
     "gulp-less": "^3.5.0",
     "gulp-less-changed": "^1.3.4",
     "gulp-lesshint": "^5.0.0",
