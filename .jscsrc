@@ -2,6 +2,17 @@
     "preset": "airbnb",
     "disallowMultipleVarDecl": false,
     "disallowQuotedKeysInObjects": false,
+    "extract": ["*.htm", "*.html"],
+    "jsDoc": {
+        "checkAnnotations": {
+            "preset": "jsdoc3",
+            "extra": {
+                "boomer": false
+            }
+        },
+        "checkTypes": "strictNativeCase",
+        "enforceExistence": "exceptExports"
+    },
     "requirePaddingNewLinesAfterBlocks": false,
     "requirePaddingNewLinesBeforeLineComments": false,
     "requireShorthandArrowFunctions": false,
