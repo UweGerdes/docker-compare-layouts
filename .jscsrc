@@ -4,14 +4,17 @@
     "disallowQuotedKeysInObjects": false,
     "extract": ["*.htm", "*.html"],
     "jsDoc": {
-        "checkAnnotations": {
-            "preset": "jsdoc3",
-            "extra": {
-                "boomer": false
-            }
-        },
-        "checkTypes": "strictNativeCase",
-        "enforceExistence": "exceptExports"
+        "checkAnnotations": true,
+        "checkParamExistence": true,
+        "checkParamNames": true,
+        "checkReturnTypes": true,
+        "checkTypes": true,
+        "enforceExistence": true,
+        "requireHyphenBeforeDescription": true,
+        "requireNewlineAfterDescription": true,
+        "requireParamTypes": true,
+        "requireReturnDescription": true,
+        "requireReturnTypes": true
     },
     "requirePaddingNewLinesAfterBlocks": false,
     "requirePaddingNewLinesBeforeLineComments": false,
