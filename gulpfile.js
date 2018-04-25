@@ -34,12 +34,12 @@ const baseDir = __dirname,
 
 let watchFilesFor = {};
 
-/***
- * less files lint and style check
- */
 watchFilesFor['less-lint'] = [
   path.join(baseDir, 'less', '**', '*.less')
 ];
+/**
+ * less-lint: files lint and style check
+ */
 gulp.task('less-lint', () => {
   return gulp.src(watchFilesFor['less-lint'])
     .pipe(lesshint())
@@ -48,38 +48,42 @@ gulp.task('less-lint', () => {
     ;
 });
 
-/**
- * generate css from less
- */
 watchFilesFor.less = [
   path.join(baseDir, 'less', 'app.less'),
   path.join(baseDir, 'less', '**', '*.less')
 ];
+/**
+ * less: generate css from less
+ */
 gulp.task('less', () => {
-  const dest = (filename) => {
+  const dest = (filename) => { // jscs:ignore jsDoc
     return path.join(path.dirname(path.dirname(filename)), 'css');
   };
-  const src = watchFilesFor.less.filter((el) => { return el.indexOf('**') == -1; });
+  const src = watchFilesFor.less.filter((el) => { // jscs:ignore jsDoc
+    return el.indexOf('**') == -1;
+  });
   return gulp.src(src)
     .pipe(lessChanged({
-      getOutputFileName: (file) => {
+      getOutputFileName: (file) => { // jscs:ignore jsDoc
         return rename(file, { dirname: dest(file), extname: '.css' });
       }
     }))
     .pipe(less())
     .on('error', log.onError({ message:  'Error: <%= error.message %>', title: 'LESS Error' }))
     .pipe(autoprefixer('last 3 version', 'safari 5', 'ie 8', 'ie 9', 'ios 6', 'android 4'))
-    .pipe(gulp.dest((file) => { return dest(file.path); }))
+    .pipe(gulp.dest((file) => { // jscs:ignore jsDoc
+      return dest(file.path);
+    }))
     .pipe(log({ message: 'written: <%= file.path %>', title: 'Gulp less' }))
     ;
 });
 
-/**
- * jshint javascript files
- */
 watchFilesFor.jshint = [
   path.join(baseDir, '**', '*.js')
 ];
+/**
+ * jshint: javascript files
+ */
 gulp.task('jshint', () => {
   return gulp.src(watchFilesFor.jshint)
     .pipe(gulpChangedInPlace({ howToDetermineDifference: 'modification-time' }))
@@ -90,15 +94,15 @@ gulp.task('jshint', () => {
     ;
 });
 
-/**
- * lint json files
- */
 watchFilesFor.jsonlint = [
   path.join(baseDir, '.jshintrc'),
   path.join(baseDir, '.jscsrc'),
   path.join(baseDir, '*.json')
 ];
-gulp.task('jsonlint', function () {
+/**
+ * jsonlint: lint json files
+ */
+gulp.task('jsonlint', () => {
   return gulp.src(watchFilesFor.jsonlint)
     .pipe(jsonlint())
     .pipe(jsonlint.reporter())
@@ -110,22 +114,27 @@ watchFilesFor['compare-layouts-default'] = [
   path.join(baseDir, 'index.js'),
   path.join(baseDir, 'bin', '*.js')
 ];
+/**
+ * compare-layouts-default: test task
+ *
+ * @param {function} callback - gulp callback
+ */
 gulp.task('compare-layouts-default', (callback) => {
   del([
       path.join(baseDir, 'results', 'default', '*.png'),
       path.join(baseDir, 'results', 'default', '**', 'index.json')
     ], { force: true });
   const loader = exec('node index.js config/default.js', { cwd: baseDir });
-  loader.stdout.on('data', (data) => {
+  loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
     console.log(data.toString().trim());
   });
-  loader.stderr.on('data', (data) => {
+  loader.stderr.on('data', (data) => { // jscs:ignore jsDoc
     console.log('stderr: ' + data.toString().trim());
   });
-  loader.on('error', (err) => {
+  loader.on('error', (err) => { // jscs:ignore jsDoc
     console.log('error: ' + err.toString().trim());
   });
-  loader.on('close', (code) => {
+  loader.on('close', (code) => { // jscs:ignore jsDoc
     if (code > 0) {
       console.log('compare-layouts-default exit-code: ' + code);
     }
@@ -133,7 +142,9 @@ gulp.task('compare-layouts-default', (callback) => {
   });
 });
 
-// start responsive-check server
+/**
+ * server:start
+ */
 gulp.task('server:start', () => {
   server.listen({
       path: path.join(baseDir, 'server.js'),
@@ -142,20 +153,26 @@ gulp.task('server:start', () => {
     }
   );
 });
+
+/**
+ * server:stop
+ */
 gulp.task('server:stop', () => {
   server.kill();
 });
 
-// restart server if server.js changed
 watchFilesFor.server = [
   path.join(baseDir, 'server.js')
 ];
+/**
+ * server: restart if server.js changed
+ */
 gulp.task('server', () => {
-  server.changed((error) => {
+  server.changed((error) => { // jscs:ignore jsDoc
     if (error) {
-      console.log('responsive-check server.js restart error: ' + JSON.stringify(error, null, 4));
+      console.log('server.js restart error: ' + JSON.stringify(error, null, 4));
     } else {
-      console.log('responsive-check server.js restarted');
+      console.log('server.js restarted');
       gulp.src(watchFilesFor.server)
         .pipe(gulpLivereload({ quiet: true }));
     }
@@ -163,7 +180,7 @@ gulp.task('server', () => {
 });
 
 /**
- * gulp postmortem task to stop server on termination of gulp
+ * server-postMortem: stop server on termination of gulp
  */
 gulp.task('server-postMortem', () => {
   return gulp.src(watchFilesFor.server)
@@ -171,22 +188,24 @@ gulp.task('server-postMortem', () => {
     ;
 });
 
-/**
- * livereload server and task
- */
 watchFilesFor.livereload = [
   path.join(baseDir, 'views', '*.ejs'),
   path.join(baseDir, 'css', '*.css'),
   path.join(baseDir, 'js', '*.js'),
   path.join(baseDir, 'results', '**', 'index.json')
 ];
+/**
+ * livereload: watch task
+ */
 gulp.task('livereload', () => {
   gulp.src(watchFilesFor.livereload)
     .pipe(gulpLivereload({ quiet: true }));
 });
 
 /**
- * compare-layouts selftest task
+ * compare-layouts-selftest: start server, build, run test, stop server, check result
+ *
+ * @param {function} callback - gulp callback
  */
 gulp.task('compare-layouts-selftest', (callback) => {
   runSequence('server:start',
@@ -198,7 +217,7 @@ gulp.task('compare-layouts-selftest', (callback) => {
 });
 
 /**
- * compare-layouts selftest check result task
+ * compare-layouts-selftest-success: check result task
  */
 gulp.task('compare-layouts-selftest-success', () => {
   if (!fs.existsSync(path.join(baseDir, 'results', 'default', 'index-phantomjs',
@@ -214,7 +233,9 @@ gulp.task('compare-layouts-selftest-success', () => {
 });
 
 /**
- * run all build tasks
+ * build: run all build tasks
+ *
+ * @param {function} callback - gulp callback
  */
 gulp.task('build', (callback) => {
   runSequence('less-lint',
@@ -225,12 +246,12 @@ gulp.task('build', (callback) => {
 });
 
 /**
- * watch task
+ * watch: everything in watchFilesFor, start livereload server
  */
 gulp.task('watch', () => {
-  Object.keys(watchFilesFor).forEach((task) => {
-    watchFilesFor[task].forEach((filename) => {
-      glob(filename, (err, files) => {
+  Object.keys(watchFilesFor).forEach((task) => { // jscs:ignore jsDoc
+    watchFilesFor[task].forEach((filename) => { // jscs:ignore jsDoc
+      glob(filename, (err, files) => { // jscs:ignore jsDoc
         if (err) {
           console.log(filename + ' error: ' + JSON.stringify(err, null, 4));
         }
@@ -247,7 +268,9 @@ gulp.task('watch', () => {
 });
 
 /**
- * default task: run all build tasks and watch
+ * default: run all build tasks and watch
+ *
+ * @param {function} callback - gulp callback
  */
 gulp.task('default', (callback) => {
   runSequence('build',
@@ -257,14 +280,15 @@ gulp.task('default', (callback) => {
     callback);
 });
 
-// jscs:disable jsDoc
-/*
- * log only to console, not GUI
+/**
+ * helper function: log only to console, not GUI
+ *
+ * @param {Object} options - configuration
+ * @param {function} callback - gulp callback
  */
 const log = notify.withReporter((options, callback) => {
   callback();
 });
-// jscs:enable
 
 module.exports = {
   gulp: gulp,
