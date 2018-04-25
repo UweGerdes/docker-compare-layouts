@@ -37,6 +37,7 @@
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^5.0.0",
+    "gulp-changed-in-place": "^2.3.0",
     "gulp-develop-server": "^0.5.2",
     "gulp-jscs": "^4.1.0",
     "gulp-jscs-stylish": "^1.4.0",

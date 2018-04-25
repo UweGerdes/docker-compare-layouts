@@ -1,4 +1,4 @@
-/*
+/**
  * gulpfile for compare-layouts
  *
  * (c) Uwe Gerdes, entwicklung@uwegerdes.de
@@ -11,6 +11,7 @@ const exec = require('child_process').exec,
   glob = require('glob'),
   gulp = require('gulp'),
   autoprefixer = require('gulp-autoprefixer'),
+  gulpChangedInPlace = require('gulp-changed-in-place'),
   server = require('gulp-develop-server'),
   jscs = require('gulp-jscs'),
   jscsStylish = require('gulp-jscs-stylish'),
@@ -33,14 +34,7 @@ const baseDir = __dirname,
 
 let watchFilesFor = {};
 
-/*
- * log only to console, not GUI
- */
-const log = notify.withReporter((options, callback) => {
-  callback();
-});
-
-/*
+/***
  * less files lint and style check
  */
 watchFilesFor['less-lint'] = [
@@ -54,6 +48,9 @@ gulp.task('less-lint', () => {
     ;
 });
 
+/**
+ * generate css from less
+ */
 watchFilesFor.less = [
   path.join(baseDir, 'less', 'app.less'),
   path.join(baseDir, 'less', '**', '*.less')
@@ -77,7 +74,7 @@ gulp.task('less', () => {
     ;
 });
 
-/*
+/**
  * jshint javascript files
  */
 watchFilesFor.jshint = [
@@ -85,6 +82,7 @@ watchFilesFor.jshint = [
 ];
 gulp.task('jshint', () => {
   return gulp.src(watchFilesFor.jshint)
+    .pipe(gulpChangedInPlace({ howToDetermineDifference: 'modification-time' }))
     .pipe(jshint())
     .pipe(jscs())
     .pipe(jscsStylish.combineWithHintResults())
@@ -92,7 +90,7 @@ gulp.task('jshint', () => {
     ;
 });
 
-/*
+/**
  * lint json files
  */
 watchFilesFor.jsonlint = [
@@ -164,7 +162,7 @@ gulp.task('server', () => {
   });
 });
 
-/*
+/**
  * gulp postmortem task to stop server on termination of gulp
  */
 gulp.task('server-postMortem', () => {
@@ -173,7 +171,7 @@ gulp.task('server-postMortem', () => {
     ;
 });
 
-/*
+/**
  * livereload server and task
  */
 watchFilesFor.livereload = [
@@ -187,7 +185,7 @@ gulp.task('livereload', () => {
     .pipe(gulpLivereload({ quiet: true }));
 });
 
-/*
+/**
  * compare-layouts selftest task
  */
 gulp.task('compare-layouts-selftest', (callback) => {
@@ -199,7 +197,7 @@ gulp.task('compare-layouts-selftest', (callback) => {
     callback);
 });
 
-/*
+/**
  * compare-layouts selftest check result task
  */
 gulp.task('compare-layouts-selftest-success', () => {
@@ -215,7 +213,7 @@ gulp.task('compare-layouts-selftest-success', () => {
   }
 });
 
-/*
+/**
  * run all build tasks
  */
 gulp.task('build', (callback) => {
@@ -226,7 +224,7 @@ gulp.task('build', (callback) => {
     callback);
 });
 
-/*
+/**
  * watch task
  */
 gulp.task('watch', () => {
@@ -248,7 +246,7 @@ gulp.task('watch', () => {
     ipv4addresses.get()[0] + ':' + lifereloadPort);
 });
 
-/*
+/**
  * default task: run all build tasks and watch
  */
 gulp.task('default', (callback) => {
@@ -258,6 +256,15 @@ gulp.task('default', (callback) => {
     'server-postMortem',
     callback);
 });
+
+// jscs:disable jsDoc
+/*
+ * log only to console, not GUI
+ */
+const log = notify.withReporter((options, callback) => {
+  callback();
+});
+// jscs:enable
 
 module.exports = {
   gulp: gulp,
