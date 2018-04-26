@@ -41,7 +41,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files
 app.use(express.static(__dirname));
 
-// Handle requests for app view
+/**
+ * Handle requests for app view
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('/app/:config?/:action?/:param?', (req, res) => {
   const list = getList(res);
   let config = { };
@@ -67,7 +72,12 @@ app.get('/app/:config?/:action?/:param?', (req, res) => {
   });
 });
 
-// Handle requests for app view
+/**
+ * Handle requests for app view
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('/show/:config/:compare/:viewport', (req, res) => {
   const config = getConfig(req.params.config);
   const compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
@@ -92,11 +102,16 @@ app.get('/show/:config/:compare/:viewport', (req, res) => {
   });
 });
 
-// Handle AJAX requests for run configs
+/**
+ * Handle AJAX requests for run configs
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('/run/:config/:verbose?', (req, res) => {
   console.log('starting ' + req.params.config);
   if (req.params.config == 'all') {
-    configs.forEach((config) => {
+    configs.forEach((config) => { // jscs:ignore jsDoc
       runConfigAsync(config, req.params.verbose, res);
     });
   } else {
@@ -104,10 +119,15 @@ app.get('/run/:config/:verbose?', (req, res) => {
   }
 });
 
-// Handle AJAX requests for run configs
+/**
+ * Handle AJAX requests for run configs
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('/clear/:config', (req, res) => {
   if (req.params.config == 'all') {
-    configs.forEach((config) => {
+    configs.forEach((config) => { // jscs:ignore jsDoc
       clearResult(config, res);
     });
   } else {
@@ -115,17 +135,32 @@ app.get('/clear/:config', (req, res) => {
   }
 });
 
-// Route for root dir
+/**
+ * Route for root dir
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Route for everything else.
+/**
+ * Route for everything else.
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.get('*', (req, res) => {
   res.status(404).send('Sorry cant find that: ' + req.url);
 });
 
-// Handle form POST requests for app view
+/**
+ * Handle form POST requests for app view
+ *
+ * @param {Object} req - request
+ * @param {Object} res - result
+ */
 app.post('/app/:config?/:action?', (req, res) => {
   const list = getList(res);
   let config = { };
@@ -166,21 +201,27 @@ console.log('compare-layouts server listening on http://' +
   ipv4addresses.get()[0] + ':' + httpPort);
 
 // Model //
-// get list of configurations and result status
+/**
+ * get list of configurations and result status
+ */
 function getList() {
   configs = [];
-  fs.readdirSync(configDir).forEach((fileName) => {
+  fs.readdirSync(configDir).forEach((fileName) => { // jscs:ignore jsDoc
     const configName = fileName.replace(/\.js/, '');
     configs.push(getItem(configName));
   });
-  configs.forEach((config) => {
+  configs.forEach((config) => { // jscs:ignore jsDoc
     config.result = getResult(config.data.destDir);
     getSummary(config);
   });
   return configs;
 }
 
-// get full config info
+/**
+ * get full config info
+ *
+ * @param {String} configName - base name of configuration file
+ */
 function getItem(configName) {
   let config = { name: configName };
   config.data = getConfigData(configName);
@@ -196,7 +237,11 @@ function getItem(configName) {
   return config;
 }
 
-// get data for config
+/**
+ * get data for config
+ *
+ * @param {String} configName - base name of configuration file
+ */
 function getConfig(configName) {
   let config = { name: configName };
   config.file = getConfigFile(configName);
@@ -217,7 +262,11 @@ function getConfig(configName) {
   return config;
 }
 
-// get content of config file
+/**
+ * get content of config file
+ *
+ * @param {String} configName - base name of configuration file
+ */
 function getConfigFile(configName) {
   let content = 'not found';
   const configPath = path.join(configDir, configName + '.js');
@@ -227,7 +276,11 @@ function getConfigFile(configName) {
   return content;
 }
 
-// get data from config file
+/**
+ * get data from config file
+ *
+ * @param {String} configName - base name of configuration file
+ */
 function getConfigData(configName) {
   let configData = '';
   try {
@@ -239,7 +292,11 @@ function getConfigData(configName) {
   return configData;
 }
 
-// get log file content
+/**
+ * get log file content
+ *
+ * @param {String} destDir - destination directory for results
+ */
 function getLogfile(destDir) {
   const logfilePath = path.join(__dirname, 'results', destDir, 'console.log');
   let logfileContent = '';
@@ -252,7 +309,11 @@ function getLogfile(destDir) {
   return logfileContent;
 }
 
-// get result data
+/**
+ * get result data
+ *
+ * @param {String} destDir - destination directory for results
+ */
 function getResult(destDir) {
   let result = { };
   try {
@@ -263,7 +324,13 @@ function getResult(destDir) {
   return result;
 }
 
-// get compare data
+/**
+ * get compare data
+ *
+ * @param {String} destDir - destination directory for results
+ * @param {Object} compare - data
+ * @param {String} viewport - viewport name
+ */
 function getCompare(destDir, compare, viewport) {
   const filename = path.join(resultsDir, destDir, compare, viewport + '.json');
   let result = { };
@@ -277,12 +344,16 @@ function getCompare(destDir, compare, viewport) {
   return result;
 }
 
-// calculate result summary
+/**
+ * calculate result summary
+ *
+ * @param {Object} config - configuration
+ */
 function getSummary(config) {
   config.success = true;
   config.totalTests = 0;
   config.failedTests = 0;
-  Object.keys(config.result).forEach((key) => {
+  Object.keys(config.result).forEach((key) => { // jscs:ignore jsDoc
     if (!config.result[key].success) {
       config.success = false;
       config.failedTests++;
@@ -291,11 +362,17 @@ function getSummary(config) {
   });
 }
 
-// start compare-layouts with config file
+/**
+ * start compare-layouts with config file
+ *
+ * @param {Object} config - configuration
+ * @param {Boolean} verbose - make more output
+ * @param {Object} res - result
+ */
 function runConfigAsync(config, verbose, res) {
   const destDir = path.join(__dirname, 'results', config.data.destDir);
   const logfilePath = path.join(destDir, 'console.log');
-  const log = (msg) => {
+  const log = (msg) => { // jscs:ignore jsDoc
     console.log(msg);
     fs.appendFileSync(logfilePath, msg + '\n');
     res.write(replaceAnsiColors(msg) + '\n');
@@ -310,10 +387,10 @@ function runConfigAsync(config, verbose, res) {
   }
   const configFilename = 'config/' + config.name + '.js';
   const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
-  loader.stdout.on('data', (data) => { log(data.toString().trim()); });
-  loader.stderr.on('data', (data) => { log(data.toString().trim()); });
-  loader.on('error', (err) => { log(' error: ' + err.toString().trim()); });
-  loader.on('close', (code) => {
+  loader.stdout.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
+  loader.stderr.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
+  loader.on('error', (err) => { log(' error: ' + err.toString().trim()); }); // jscs:ignore jsDoc
+  loader.on('close', (code) => { // jscs:ignore jsDoc
     if (code > 0) {
       log('load ' + config.name + ' error, exit-code: ' + code);
     }
@@ -325,10 +402,15 @@ function runConfigAsync(config, verbose, res) {
   });
 }
 
-// delete results directory
+/**
+ * delete results directory
+ *
+ * @param {Object} config - configuration
+ * @param {Object} res - result
+ */
 function clearResult(config, res) {
   const destDir = path.join(__dirname, 'results', config.data.destDir);
-  const log = (msg) => {
+  const log = (msg) => { // jscs:ignore jsDoc
     console.log(msg);
     res.write(replaceAnsiColors(msg) + '\n');
   };
@@ -339,6 +421,12 @@ function clearResult(config, res) {
   res.end();
 }
 
+/**
+ * save configuration
+ *
+ * @param {Object} config - configuration
+ * @param {Object} configData - data
+ */
 function storeConfig(config, configData) {
   fs.writeFileSync(configDir + '/' + config.name + '.js', configData, 0);
   console.log('written: ' + configDir + '/' + config.name + '.js');
@@ -349,7 +437,12 @@ function storeConfig(config, configData) {
   }
 }
 
-// TOTO make module
+// TODO make module
+/**
+ * replace ANSI colors with style
+ *
+ * @param {String} string - to convert
+ */
 function replaceAnsiColors(string) {
   let result = '';
   const replaceTable = {
@@ -376,14 +469,14 @@ function replaceAnsiColors(string) {
     '46': 'background-color: cyan',
     '47': 'background-color: white'
   };
-  string.toString().split(/(\x1B\[[0-9;]+m)/).forEach((part) => {
+  string.toString().split(/(\x1B\[[0-9;]+m)/).forEach((part) => { // jscs:ignore jsDoc
     if (part.match(/(\x1B\[[0-9;]+m)/)) {
       part = part.replace(/\x1B\[([0-9;]+)m/, '$1');
       if (part == '0') {
         result += '</span>';
       } else {
         result += '<span style="';
-        part.split(/(;)/).forEach((x) => {
+        part.split(/(;)/).forEach((x) => { // jscs:ignore jsDoc
           if (replaceTable[x]) {
             result += replaceTable[x];
           } else {

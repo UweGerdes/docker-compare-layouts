@@ -25,16 +25,21 @@ const configFile = 'config/default.js',
   destDir = path.join(resultsDir, config.destDir),
   verbose = process.argv.indexOf('-v') > -1;
 
+/**
+ * load page
+ *
+ * @param {String} pageKey - configuration page key
+ */
 function loadPage(pageKey) {
   const page = config.pages[pageKey];
   if (page.cache && chkCacheFile(path.join(destDir, pageKey,
         Object.keys(config.viewports)[0], 'page.png'))) {
     console.log('cached page  ' + pageKey + ': ' + page.url);
-    return new Promise((resolve) => {
+    return new Promise((resolve) => { // jscs:ignore jsDoc
       resolve({ 'pageKey': pageKey, 'status': 'cached' });
     });
   }
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     let args = [
       './bin/load-page-styles.js',
       '--configFile="' + configFile + '"',
@@ -50,19 +55,21 @@ function loadPage(pageKey) {
       }
     }
     console.log('loading page ' + pageKey + ': ' + page.url);
-    const loader = exec(cmd + ' ' + args.join(' '), (error, stdout, stderr) => {
-      if (verbose || stdout.indexOf('element not found') > -1) {
-        console.log(pageKey + ': ' + stdout.trim() +
-            (stderr ? '\n' + cmd + ' stderr: ' + stderr.trim() : ''));
+    const loader = exec(cmd + ' ' + args.join(' '),
+      (error, stdout, stderr) => { // jscs:ignore jsDoc
+        if (verbose || stdout.indexOf('element not found') > -1) {
+          console.log(pageKey + ': ' + stdout.trim() +
+              (stderr ? '\n' + cmd + ' stderr: ' + stderr.trim() : ''));
+        }
       }
-    });
-    loader.stderr.on('data', (stderr) => {
+    );
+    loader.stderr.on('data', (stderr) => { // jscs:ignore jsDoc
       console.log(pageKey + ' stderr: ' + stderr.trim());
     });
-    loader.on('error', (error) => {
+    loader.on('error', (error) => { // jscs:ignore jsDoc
       console.log(pageKey + ' error: ' + error);
     });
-    loader.on('close', (error) => {
+    loader.on('close', (error) => { // jscs:ignore jsDoc
       console.log('loaded page ' + pageKey + ': ' + page.url);
       if (error > 0) {
         reject({ 'pageKey': pageKey, 'status': 'error', 'exitcode': error });
@@ -73,10 +80,15 @@ function loadPage(pageKey) {
   });
 }
 
+/**
+ * make directory for compare result
+ *
+ * @param {String} compareKey - configuration compare key
+ */
 function makeCompareDir(compareKey) {
   if (!fs.existsSync(path.join(destDir, safeFilename(compareKey)))) {
-    fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => {
-      return new Promise((resolve, reject) => {
+    fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => { // jscs:ignore jsDoc
+      return new Promise((resolve, reject) => { // jscs:ignore jsDoc
         if (error) {
           console.log('makeCompareDir ' + compareKey + ' error: ' + error);
           reject('makeCompareDir ' + compareKey + ' error: ' + error);
@@ -85,14 +97,19 @@ function makeCompareDir(compareKey) {
       });
     });
   } else {
-    return new Promise((resolve) => {
+    return new Promise((resolve) => { // jscs:ignore jsDoc
       resolve(compareKey);
     });
   }
 }
 
+/**
+ * compare data
+ *
+ * @param {Object} result - compare result
+ */
 function compareData(result) {
-  return new Promise((resolve) => {
+  return new Promise((resolve) => { // jscs:ignore jsDoc
     const compareKey = result.compareKey;
     const viewport = result.viewport;
     const compare = config.compares[compareKey];
@@ -127,11 +144,16 @@ function compareData(result) {
   });
 }
 
+/**
+ * compare images
+ *
+ * @param {Object} result - compare result
+ */
 function compareImages(result) {
-  return new Promise((resolve) => {
+  return new Promise((resolve) => { // jscs:ignore jsDoc
     exec('compare -metric AE "' + result.baseFilename1 + '.png" "' +
         result.baseFilename2 + '.png" ' + result.compareFilename,
-      (error, stdout, stderr) => {
+      (error, stdout, stderr) => { // jscs:ignore jsDoc
         if (stderr == '0') {
           if (verbose) { console.log(result.compareFilename + ' saved'); }
         } else {
@@ -145,11 +167,16 @@ function compareImages(result) {
   });
 }
 
+/**
+ * composite images
+ *
+ * @param {Object} result - compare result
+ */
 function compositeImages(result) {
-  return new Promise((resolve) => {
+  return new Promise((resolve) => { // jscs:ignore jsDoc
     exec('composite -compose difference "' + result.baseFilename1 + '.png" "' +
         result.baseFilename2 + '.png" ' + result.compositeFilename,
-      (error, stdout, stderr) => {
+      (error, stdout, stderr) => { // jscs:ignore jsDoc
         if (stderr.length === 0) {
           if (verbose) { console.log(result.compositeFilename + ' saved'); }
         } else {
@@ -163,6 +190,11 @@ function compositeImages(result) {
   });
 }
 
+/**
+ * compare styles
+ *
+ * @param {Object} comp - compare result
+ */
 function compareStyleTree(comp) {
   const compare = config.compares[comp.compareKey];
   const page1 = config.pages[compare.page1];
@@ -175,44 +207,54 @@ function compareStyleTree(comp) {
     compare.page2, comp.viewport, safeFilename(selector2) + '.json'))));
   const compareResult = styleTree1.compareTo(styleTree2, compare.compare);
   const jsonFilename = path.join(destDir, safeFilename(comp.compareKey), comp.viewport + '.json');
-  return new Promise((resolve, reject) => {
-    fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4), (error) => {
-      if (error) {
-        console.log(jsonFilename + ' error: ' + error);
-        compare.error = error;
-        reject(compare);
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
+    fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4),
+      (error) => { // jscs:ignore jsDoc
+        if (error) {
+          console.log(jsonFilename + ' error: ' + error);
+          compare.error = error;
+          reject(compare);
+        }
+        if (verbose) {
+          console.log(jsonFilename + ' saved');
+        }
+        compare.jsonFilename = jsonFilename;
+        resolve(compare);
       }
-      if (verbose) {
-        console.log(jsonFilename + ' saved');
-      }
-      compare.jsonFilename = jsonFilename;
-      resolve(compare);
-    });
+    );
   });
 }
 
+/**
+ * save results
+ *
+ * @param {Object} results - compare results
+ */
 function saveResults(results) {
   let output = { };
-  results.forEach((result) => {
+  results.forEach((result) => { // jscs:ignore jsDoc
     output[result.compareKey + '_' + result.viewport] = result;
   });
-  fs.writeFile(path.join(destDir, 'index.json'), JSON.stringify(output, null, 4), (error) => {
-    if (error) {
-      return console.log(path.join(destDir, 'index.json') + ' error: ' + error);
+  fs.writeFile(path.join(destDir, 'index.json'), JSON.stringify(output, null, 4),
+    (error) => { // jscs:ignore jsDoc
+      if (error) {
+        return console.log(path.join(destDir, 'index.json') + ' error: ' + error);
+      }
+      console.log('result in: ' + path.join(destDir, 'index.json'));
     }
-    console.log('result in: ' + path.join(destDir, 'index.json'));
-  });
+  );
 }
 
 let results = { };
 let compares = [];
 
-Object.keys(config.compares).forEach((compareKey) => {
-  Object.keys(config.viewports).forEach((viewport) => {
+Object.keys(config.compares).forEach((compareKey) => { // jscs:ignore jsDoc
+  Object.keys(config.viewports).forEach((viewport) => { // jscs:ignore jsDoc
     compares.push({ 'compareKey': compareKey, 'viewport': viewport });
   });
 });
 
+// jscs:disable jsDoc
 del([path.join(destDir, '**')])
 .then(() => {
   return makeDir(destDir);
@@ -261,7 +303,13 @@ del([path.join(destDir, '**')])
 .catch((error) => {
   console.error('Failed!', error);
 });
+// jscs:enable jsDoc
 
+/**
+ * check if file is already cached
+ *
+ * @param {String} file - file name
+ */
 function chkCacheFile(file) {
   try {
     return fs.lstatSync(file).isFile();
@@ -271,6 +319,11 @@ function chkCacheFile(file) {
   return false;
 }
 
+/**
+ * get a safe filename (no os specific chars
+ *
+ * @param {String} name - file name
+ */
 function safeFilename(name) {
   return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
 }
