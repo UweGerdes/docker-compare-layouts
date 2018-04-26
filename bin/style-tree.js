@@ -8,6 +8,13 @@
 let totalError = false;
 const errorProperties = ['cursor', 'background-color', 'font-weight'];
 
+/**
+ * compare two object trees
+ *
+ * @param {Object} element1 - DOM element
+ * @param {Object} element2 - DOM element
+ * @param {Object} properties - list to compare
+ */
 function compare(element1, element2, properties) {
   let result = [];
   let what = {};
@@ -19,7 +26,7 @@ function compare(element1, element2, properties) {
   let styleDifference = [];
   let hasChildWithSameTextContent = false;
   let ownTextContent = element1.textContent;
-  element1._childElementInfo.forEach((element) => {
+  element1._childElementInfo.forEach((element) => { // jscs:ignore jsDoc
     if (element.textContent == element1.textContent) {
       hasChildWithSameTextContent = true;
     }
@@ -28,7 +35,7 @@ function compare(element1, element2, properties) {
   const otherElement = search(element2, what);
   if (otherElement) {
     let errorList = [];
-    Object.keys(element1.style).forEach((key) => {
+    Object.keys(element1.style).forEach((key) => { // jscs:ignore jsDoc
       const thisValue = normalize(element1.style[key]);
       if (otherElement.style.hasOwnProperty(key)) {
         const otherValue = normalize(otherElement.style[key]);
@@ -78,7 +85,7 @@ function compare(element1, element2, properties) {
       error: 'Element auf anderer Seite nicht gefunden - Suche nach: ' + properties
     });
   }
-  element1._childElementInfo.forEach((element) => {
+  element1._childElementInfo.forEach((element) => { // jscs:ignore jsDoc
     if (otherElement) {
       result.push(compare(element, otherElement, properties));
     } else {
@@ -88,9 +95,15 @@ function compare(element1, element2, properties) {
   return result;
 }
 
+/**
+ * search for correspontig element
+ *
+ * @param {Object} element - DOM element
+ * @param {Object} what - list of keys
+ */
 function search(element, what) {
   let found;
-  element._childElementInfo.forEach((elem) => {
+  element._childElementInfo.forEach((elem) => { // jscs:ignore jsDoc
     const res = search(elem, what);
     if (res !== undefined) {
       found = res;
@@ -109,6 +122,11 @@ function search(element, what) {
   return found;
 }
 
+/**
+ * normalize value - better compare if different representations are read from style tree
+ *
+ * @param {Object} val - style attribute value
+ */
 function normalize(val) {
   const colorNames = /(transparent|white|black)/;
   const colorHex = /#([0-9A-za-z]{2})([0-9A-za-z]{2})([0-9A-za-z]{2})/;
@@ -136,6 +154,7 @@ function normalize(val) {
   return result.replace(/, +/g, ',');
 }
 
+// jscs:disable jsDoc
 module.exports = (styleTree) => {
   return {
     getStyleTree: () => {
@@ -152,3 +171,4 @@ module.exports = (styleTree) => {
     }
   };
 };
+// jscs:enable jsDoc
