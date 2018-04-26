@@ -92,18 +92,24 @@ casper.echo('loading: ' + url + ', selector: "' + selectorList.join(',') + (
     hover !== '' ? '", hover:"' + hover : '') + '", saving in "' + subdir + '"', 'INFO');
 
 // event handling
-casper.on('remote.message', function (msg) {
+casper.on('remote.message', function (msg) { // jscs:ignore jsDoc
   this.echo('BROWSER: ' + msg.trim(), 'INFO');
 });
-casper.on('error', function (msg, backtrace) {
+casper.on('error', function (msg, backtrace) { // jscs:ignore jsDoc
   this.echo('ERROR: ' + msg, 'WARNING');
   this.echo(JSON.stringify(backtrace, null, 4));
 });
-casper.on('http.status.404', function (resource) {
+casper.on('http.status.404', function (resource) { // jscs:ignore jsDoc
   this.echo('ERROR 404: ' + resource.url, 'ERROR');
 });
 
-// block external resources
+/**
+ * intercept loading of external resources
+ *
+ * @param {Object} C - unused
+ * @param {Object} requestData - data
+ * @param {Object} request - request
+ */
 casper.options.onResourceRequested = function (C, requestData, request) {
   if (requestData.url.match(/https?:\/\//) &&
       (!whitelistOk(requestData) || blacklistHit(requestData))) {
@@ -119,20 +125,25 @@ casper.options.onResourceRequested = function (C, requestData, request) {
 };
 
 casper.options.timeout = timeout;
-casper.options.onTimeout = function (timeout) {
+casper.options.onTimeout = function (timeout) { // jscs:ignore jsDoc
   casper.echo('TIMEOUT ' + timeout + 'ms without answer from server', 'ERROR');
 };
 //casper.options.waitTimeout = timeout;
-casper.options.onLoadError = function () {
+casper.options.onLoadError = function () { // jscs:ignore jsDoc
   casper.echo('LOAD ERROR', 'ERROR');
 };
 
+/**
+ * allow external resources
+ *
+ * @param {Object} requestData - data
+ */
 function whitelistOk(requestData) {
   var result = false;
   if (requestData.url.indexOf(domain) > -1) {
     result = true;
   } else {
-    whitelist.split(/,\s*/).forEach(function (whitedomain) {
+    whitelist.split(/,\s*/).forEach(function (whitedomain) { // jscs:ignore jsDoc
       if (requestData.url.indexOf(whitedomain) > -1) {
         result = true;
       }
@@ -141,10 +152,15 @@ function whitelistOk(requestData) {
   return result;
 }
 
+/**
+ * disallow external resources
+ *
+ * @param {Object} requestData - data
+ */
 function blacklistHit(requestData) {
   var result = false;
   if (blacklist.length > 0) {
-    blacklist.split(/,\s*/).forEach(function (blackdomain) {
+    blacklist.split(/,\s*/).forEach(function (blackdomain) { // jscs:ignore jsDoc
       if (requestData.url.indexOf(blackdomain) > -1) {
         result = true;
       }
@@ -153,9 +169,13 @@ function blacklistHit(requestData) {
   return result;
 }
 
-// evaluated in browser
+/**
+ * evaluated in browser
+ *
+ * @param {String} selector - css selector
+ */
 function _getStyles(selector) {
-  var getStyles = function (element, pseudo) {
+  var getStyles = function (element, pseudo) { // jscs:ignore jsDoc
     var styles = {};
     var y = document.defaultView.getComputedStyle(element, pseudo);
     for (var i = 0; i < y.length; i++) {
@@ -163,7 +183,7 @@ function _getStyles(selector) {
     }
     return styles;
   };
-  var getElementInfo = function (element) {
+  var getElementInfo = function (element) { // jscs:ignore jsDoc
     var children = [];
     var text = document.defaultView.getComputedStyle(element, ':before')
         .getPropertyValue('content');
@@ -229,7 +249,11 @@ function _getStyles(selector) {
   return elements;
 }
 
-// set test class for element
+/**
+ * set test class for element or for body
+ *
+ * @param {String} selector - css selector
+ */
 function _setTestClass(selector) {
   document.querySelector(selector || 'body').classList.add('test');
 }
@@ -239,7 +263,7 @@ casper.start();
 if (uname.length > 0 && pval.length > 0) {
   casper.setHttpAuth(uname, pval);
 }
-
+// jscs:disable jsDoc
 casper.thenOpen(url, function () {
   this.echo('opening "' + url + '"', 'INFO');
 });
@@ -297,10 +321,17 @@ Object.keys(viewports).forEach(function (viewport) {
     casper.echo(savedir + '/page.png' + ' saved', 'INFO');
   });
 });
+
 casper.run(function () {
   this.exit();
 });
+// jscs:enable jsDoc
 
+/**
+ * get a safe filename (no os specific chars
+ *
+ * @param {String} name - file name
+ */
 function safeFilename(name) {
   return name.replace(/[ .?#/:\(\)<>|\\]/g, '_').trim();
 }

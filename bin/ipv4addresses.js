@@ -5,7 +5,7 @@
 const os = require('os');
 
 module.exports = {
-  get: () => {
+  get: () => { // jscs:ignore jsDoc
     const addresses = [];
     const interfaces = os.networkInterfaces();
     for (let k in interfaces) {
