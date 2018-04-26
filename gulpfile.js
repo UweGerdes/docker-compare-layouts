@@ -110,9 +110,9 @@ gulp.task('jsonlint', () => {
 });
 
 watchFilesFor['compare-layouts-default'] = [
-//  path.join(baseDir, 'config', 'default.js'),
-//  path.join(baseDir, 'index.js'),
-//  path.join(baseDir, 'bin', '*.js')
+  path.join(baseDir, 'config', 'default.js'),
+  path.join(baseDir, 'index.js'),
+  path.join(baseDir, 'bin', '*.js')
 ];
 /**
  * compare-layouts-default: test task
