@@ -6,6 +6,9 @@
 /* jshint esversion: 5, varstmt: false, browser: true */
 /* exported runAll, run, clear */
 
+/**
+ * run all configurations
+ */
 function runAll() {
   var app = document.getElementById('app');
   app.className = 'running runall app';
@@ -15,12 +18,17 @@ function runAll() {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('GET', '/run/all' + verbose, true);
   xmlhttp.responseType = 'text';
-  xmlhttp.onload = function () {
+  xmlhttp.onload = function () { // jscs:ignore jsDoc
     document.location.reload();
   };
   xmlhttp.send();
 }
 
+/**
+ * run a configuration
+ *
+ * @param {String} config - config name
+ */
 function run(config) {
   var main = document.getElementById('app');
   main.className = 'running app';
@@ -30,10 +38,10 @@ function run(config) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('GET', '/run/' + config + verbose, true);
   xmlhttp.responseType = 'text';
-  xmlhttp.onload = function () {
+  xmlhttp.onload = function () { // jscs:ignore jsDoc
     document.location.reload();
   };
-  xmlhttp.onreadystatechange = function () {
+  xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
       //response.innerHTML = xmlhttp.responseText;
       if (xmlhttp.responseText.indexOf('starting') != 0) {
@@ -44,6 +52,11 @@ function run(config) {
   xmlhttp.send();
 }
 
+/**
+ * clear results directory
+ *
+ * @param {String} config - config name
+ */
 function clear(config) {
   var main = document.getElementById('app');
   main.className = 'clear app';
@@ -53,7 +66,7 @@ function clear(config) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('GET', '/clear/' + config + verbose, true);
   xmlhttp.responseType = 'text';
-  xmlhttp.onreadystatechange = function () {
+  xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
       response.innerHTML = xmlhttp.responseText;
       main.className = 'app';
