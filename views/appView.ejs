@@ -112,7 +112,13 @@
     <div class="footer">
     </div>
 <% if (typeof livereloadPort != "undefined") { %>
-  <script>document.write('<scr' + 'ipt src="http://' + (location.host || 'localhost').split(':')[0] + ':<%= livereloadPort %>/livereload.js"></scr' + 'ipt>')</script>
+	<script language="JavaScript">
+		if (location.host.split(':')[1] === '8080') {
+			var script = document.createElement('script');
+			script.setAttribute('src', 'http://' + location.host.split(':')[0] + ':<%= livereloadPort %>/livereload.js');
+			document.body.appendChild(script);
+		}
+	</script>
 <% } %>
   </body>
 </html>
