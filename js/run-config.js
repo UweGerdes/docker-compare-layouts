@@ -19,7 +19,7 @@ function runAll() {
   xmlhttp.open('GET', '/run/all' + verbose, true);
   xmlhttp.responseType = 'text';
   xmlhttp.onload = function () { // jscs:ignore jsDoc
-    document.location.reload();
+    console.log('document.location.reload()');
   };
   xmlhttp.send();
 }
@@ -39,7 +39,7 @@ function run(config) {
   xmlhttp.open('GET', '/run/' + config + verbose, true);
   xmlhttp.responseType = 'text';
   xmlhttp.onload = function () { // jscs:ignore jsDoc
-    document.location.reload();
+    console.log('document.location.reload()');
   };
   xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {

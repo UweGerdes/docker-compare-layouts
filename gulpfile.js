@@ -121,9 +121,10 @@ watchFilesFor['compare-layouts-default'] = [
  * @param {function} callback - gulp callback
  */
 gulp.task('compare-layouts-default', (callback) => {
+  const resultsDir = path.join('results', 'default');
   del([
-      path.join(baseDir, 'results', 'default', '*.png'),
-      path.join(baseDir, 'results', 'default', '**', 'index.json')
+      path.join(baseDir, resultsDir, '*.png'),
+      path.join(baseDir, resultsDir, '**', 'index.json')
     ], { force: true });
   const loader = exec('node index.js default.js', { cwd: baseDir });
   loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
@@ -139,6 +140,8 @@ gulp.task('compare-layouts-default', (callback) => {
     if (code > 0) {
       logConsole.info('compare-layouts-default exit-code: ' + code);
     }
+    console.log('livereload ' + resultsDir);
+    gulpLivereload.changed({ path: resultsDir, quiet: true });
     callback();
   });
 });
@@ -192,13 +195,13 @@ gulp.task('server-postMortem', () => {
 watchFilesFor.livereload = [
   path.join(baseDir, 'views', '*.ejs'),
   path.join(baseDir, 'css', '*.css'),
-  path.join(baseDir, 'js', '*.js'),
-  path.join(baseDir, 'results', '**', 'index.json')
+  path.join(baseDir, 'js', '*.js')
 ];
 /**
  * livereload: watch task
  */
 gulp.task('livereload', () => {
+  console.log('livereload task');
   gulp.src(watchFilesFor.livereload)
     .pipe(gulpLivereload({ quiet: true }));
 });
