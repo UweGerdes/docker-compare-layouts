@@ -13,7 +13,7 @@ const bodyParser = require('body-parser'),
   express = require('express'),
   fs = require('fs'),
   fsTools = require('fs-tools'),
-  logger = require('morgan'),
+  morgan = require('morgan'),
   path = require('path'),
   ipv4addresses = require('./bin/ipv4addresses.js'),
   obj2html = require('./bin/obj2html.js'),
@@ -33,8 +33,18 @@ if (!fs.existsSync(resultsDir)) {
 let running = [],
   configs = [];
 
-// Log the requests
-app.use(logger('dev'));
+/**
+ * Weberver logging
+ *
+ * using log format starting with [time]
+ */
+if (process.env.VERBOSE !== 'false') {
+  morgan.token('time', () => { // jscs:ignore jsDoc
+    return dateFormat(new Date(), 'HH:MM:ss');
+  });
+  app.use(morgan('[' + chalk.gray(':time') + '] ' +
+    ':method :status :url :res[content-length] - :response-time ms'));
+}
 
 // work on post requests
 app.use(bodyParser.json());
