@@ -26,7 +26,8 @@ const exec = require('child_process').exec,
   path = require('path'),
   rename = require('rename'),
   runSequence = require('run-sequence'),
-  ipv4addresses = require('./bin/ipv4addresses.js')
+  ipv4addresses = require('./bin/ipv4addresses.js'),
+  logConsole = require('./bin/log.js')
   ;
 
 const baseDir = __dirname,
@@ -124,19 +125,19 @@ gulp.task('compare-layouts-default', (callback) => {
       path.join(baseDir, 'results', 'default', '*.png'),
       path.join(baseDir, 'results', 'default', '**', 'index.json')
     ], { force: true });
-  const loader = exec('node index.js config/default.js', { cwd: baseDir });
+  const loader = exec('node index.js default.js', { cwd: baseDir });
   loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
-    console.log(data.toString().trim());
+    logConsole.info(data.toString().trim());
   });
   loader.stderr.on('data', (data) => { // jscs:ignore jsDoc
-    console.log('stderr: ' + data.toString().trim());
+    logConsole.info('stderr: ' + data.toString().trim());
   });
   loader.on('error', (err) => { // jscs:ignore jsDoc
-    console.log('error: ' + err.toString().trim());
+    logConsole.info('error: ' + err.toString().trim());
   });
   loader.on('close', (code) => { // jscs:ignore jsDoc
     if (code > 0) {
-      console.log('compare-layouts-default exit-code: ' + code);
+      logConsole.info('compare-layouts-default exit-code: ' + code);
     }
     callback();
   });
@@ -148,7 +149,7 @@ gulp.task('compare-layouts-default', (callback) => {
 gulp.task('server:start', () => {
   server.listen({
       path: path.join(baseDir, 'server.js'),
-      env: { GULP_LIVERELOAD: lifereloadPort, VERBOSE: false },
+      env: { GULP_LIVERELOAD: lifereloadPort, VERBOSE: false, FORCE_COLOR: 1 },
       cwd: baseDir
     }
   );
@@ -170,9 +171,9 @@ watchFilesFor.server = [
 gulp.task('server', () => {
   server.changed((error) => { // jscs:ignore jsDoc
     if (error) {
-      console.log('server.js restart error: ' + JSON.stringify(error, null, 4));
+      logConsole.info('server.js restart error: ' + JSON.stringify(error, null, 4));
     } else {
-      console.log('server.js restarted');
+      logConsole.info('server.js restarted');
       gulp.src(watchFilesFor.server)
         .pipe(gulpLivereload({ quiet: true }));
     }
@@ -225,7 +226,7 @@ gulp.task('compare-layouts-selftest-success', () => {
     throw 'no data files created';
   }
   if (fs.existsSync(path.join(baseDir, 'results', 'default', 'index.json'))) {
-    console.log('result summary successfully created (with compare differences)');
+    logConsole.info('result summary successfully created (with compare differences)');
   } else {
     console.error('ERROR: no result summary created');
     process.exitCode = 1;
@@ -253,17 +254,17 @@ gulp.task('watch', () => {
     watchFilesFor[task].forEach((filename) => { // jscs:ignore jsDoc
       glob(filename, (err, files) => { // jscs:ignore jsDoc
         if (err) {
-          console.log(filename + ' error: ' + JSON.stringify(err, null, 4));
+          logConsole.info(filename + ' error: ' + JSON.stringify(err, null, 4));
         }
         if (files.length === 0) {
-          console.log(filename + ' not found');
+          logConsole.info(filename + ' not found');
         }
       });
     });
     gulp.watch(watchFilesFor[task], [task]);
   });
   gulpLivereload.listen({ port: lifereloadPort, delay: 2000 });
-  console.log('gulp livereload listening on http://' +
+  logConsole.info('gulp livereload listening on http://' +
     ipv4addresses.get()[0] + ':' + lifereloadPort);
 });
 
