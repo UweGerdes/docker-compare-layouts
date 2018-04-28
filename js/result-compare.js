@@ -9,7 +9,7 @@
  * add mouse move handler for result image compare
  */
 var resultCompare = function () {
-  var image = document.getElementById('result-compare2-img');
+  var container = document.getElementById('result-compare2');
   var sensor = document.getElementById('result-compare-sensor');
   var width = sensor.getBoundingClientRect().width;
   var left = sensor.getBoundingClientRect().left;
@@ -17,7 +17,7 @@ var resultCompare = function () {
 
   function mousemoveHandler(e) { // jscs:ignore jsDoc
     var value = (e.clientX - left) / width;
-    image.style.opacity = value;
+    container.style.opacity = value;
     sensor.style.backgroundPosition = ((width * value) - 3) + 'px 0px';
   }
 };
