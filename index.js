@@ -19,7 +19,8 @@ const del = require('del'),
   path = require('path'),
   styleTree = require('./bin/style-tree.js');
 
-const configFile = 'config/default.js',
+const configName = process.argv.slice(2).filter(word => word.match(/^[^-].+\.js$/)),
+  configFile = 'config/' + configName,
   config = require('./' + configFile),
   resultsDir = './results',
   destDir = path.join(resultsDir, config.destDir),
