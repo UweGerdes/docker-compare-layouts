@@ -19,7 +19,12 @@ const del = require('del'),
   path = require('path'),
   styleTree = require('./bin/style-tree.js');
 
-const configName = process.argv.slice(2).filter(word => word.match(/^[^-].+\.js$/)),
+/**
+ * get config name from args and get the config file
+ *
+ * @param {String} arg - single argument string - find not -someting but .js or .json
+ */
+const configName = process.argv.slice(2).filter(arg => arg.match(/^[^-].+\.js(on)?$/)),
   configFile = 'config/' + configName,
   config = require('./' + configFile),
   resultsDir = './results',
@@ -40,6 +45,7 @@ function loadPage(pageKey) {
       resolve({ 'pageKey': pageKey, 'status': 'cached' });
     });
   }
+  del(path.join(destDir, pageKey));
   return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     let args = [
       './bin/load-page-styles.js',
@@ -87,21 +93,24 @@ function loadPage(pageKey) {
  * @param {String} compareKey - configuration compare key
  */
 function makeCompareDir(compareKey) {
-  if (!fs.existsSync(path.join(destDir, safeFilename(compareKey)))) {
-    fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => { // jscs:ignore jsDoc
-      return new Promise((resolve, reject) => { // jscs:ignore jsDoc
-        if (error) {
-          console.log('makeCompareDir ' + compareKey + ' error: ' + error);
-          reject('makeCompareDir ' + compareKey + ' error: ' + error);
-        }
+  del(path.join(destDir, safeFilename(compareKey))).
+  then(() => { // jscs:ignore jsDoc
+    if (!fs.existsSync(path.join(destDir, safeFilename(compareKey)))) {
+      fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => { // jscs:ignore jsDoc
+        return new Promise((resolve, reject) => { // jscs:ignore jsDoc
+          if (error) {
+            console.log('makeCompareDir ' + compareKey + ' error: ' + error);
+            reject('makeCompareDir ' + compareKey + ' error: ' + error);
+          }
+          resolve(compareKey);
+        });
+      });
+    } else {
+      return new Promise((resolve) => { // jscs:ignore jsDoc
         resolve(compareKey);
       });
-    });
-  } else {
-    return new Promise((resolve) => { // jscs:ignore jsDoc
-      resolve(compareKey);
-    });
-  }
+    }
+  });
 }
 
 /**
@@ -256,12 +265,9 @@ Object.keys(config.compares).forEach((compareKey) => { // jscs:ignore jsDoc
 });
 
 // jscs:disable jsDoc
-del([path.join(destDir, '**')])
-.then(() => {
-  return makeDir(destDir);
-})
+makeDir(destDir)
 .then((path) => {
-  console.log('created:', path);
+  console.log('Results in:', path);
   return path;
 })
 .then(() => {
