@@ -21,4 +21,6 @@ var resultCompare = function () {
     sensor.style.backgroundPosition = ((width * value) - 3) + 'px 0px';
   }
 };
+
 resultCompare();
+
