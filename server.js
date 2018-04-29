@@ -30,8 +30,7 @@ if (!fs.existsSync(resultsDir)) {
   fs.mkdirSync(resultsDir);
 }
 
-let running = [],
-  configs = [];
+let running = [];
 
 /**
  * Weberver logging
@@ -60,7 +59,7 @@ app.use(express.static(__dirname));
  * @param {Object} res - result
  */
 app.get('/app/:config?/:action?/:param?', (req, res) => {
-  const list = getList(res);
+  const configs = getConfigs();
   let config = { };
   let action = 'show';
   if (req.params.config) {
@@ -75,7 +74,7 @@ app.get('/app/:config?/:action?/:param?', (req, res) => {
     }
   }
   res.render('appView.ejs', {
-    list: list,
+    configs: configs,
     config: config,
     action: action,
     livereloadPort: livereloadPort,
@@ -123,7 +122,9 @@ app.get('/show/:config/:compare/:viewport', (req, res) => {
 app.get('/run/:config/:verbose?', (req, res) => {
   console.log('starting ' + req.params.config);
   if (req.params.config == 'all') {
+    const configs = getConfigs();
     configs.forEach((config) => { // jscs:ignore jsDoc
+      console.log('starting ' + config);
       runConfigAsync(config, req.params.verbose, res);
     });
   } else {
@@ -139,6 +140,7 @@ app.get('/run/:config/:verbose?', (req, res) => {
  */
 app.get('/clear/:config', (req, res) => {
   if (req.params.config == 'all') {
+    const configs = getConfigs();
     configs.forEach((config) => { // jscs:ignore jsDoc
       clearResult(config, res);
     });
@@ -174,7 +176,7 @@ app.get('*', (req, res) => {
  * @param {Object} res - result
  */
 app.post('/app/:config?/:action?', (req, res) => {
-  const list = getList(res);
+  const configs = getConfigs();
   let config = { };
   let action = 'show';
   logConsole.info('post: ' + req.params.config + ' ' + req.params.action);
@@ -198,7 +200,7 @@ app.post('/app/:config?/:action?', (req, res) => {
     }
   }
   res.render('appView.ejs', {
-    list: list,
+    configs: configs,
     config: config,
     action: action,
     livereloadPort: livereloadPort,
@@ -216,8 +218,8 @@ logConsole.info('compare-layouts server listening on ' +
 /**
  * get list of configurations and result status
  */
-function getList() {
-  configs = [];
+function getConfigs() {
+  let configs = [];
   fs.readdirSync(configDir).forEach((fileName) => { // jscs:ignore jsDoc
     const configName = fileName.replace(/\.js/, '');
     configs.push(getItem(configName));
