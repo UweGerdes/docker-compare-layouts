@@ -11,7 +11,7 @@ const exec = require('child_process').exec,
   glob = require('glob'),
   gulp = require('gulp'),
   autoprefixer = require('gulp-autoprefixer'),
-  gulpChangedInPlace = require('gulp-changed-in-place'),
+  changedInPlace = require('gulp-changed-in-place'),
   server = require('gulp-develop-server'),
   jscs = require('gulp-jscs'),
   jscsStylish = require('gulp-jscs-stylish'),
@@ -20,7 +20,7 @@ const exec = require('child_process').exec,
   lessChanged = require('gulp-less-changed'),
   less = require('gulp-less'),
   lesshint = require('gulp-lesshint'),
-  gulpLivereload = require('gulp-livereload'),
+  livereload = require('gulp-livereload'),
   notify = require('gulp-notify'),
   postMortem = require('gulp-postmortem'),
   path = require('path'),
@@ -87,7 +87,7 @@ watchFilesFor.jshint = [
  */
 gulp.task('jshint', () => {
   return gulp.src(watchFilesFor.jshint)
-    .pipe(gulpChangedInPlace({ howToDetermineDifference: 'modification-time' }))
+    .pipe(changedInPlace({ howToDetermineDifference: 'modification-time' }))
     .pipe(jshint())
     .pipe(jscs())
     .pipe(jscsStylish.combineWithHintResults())
@@ -140,8 +140,7 @@ gulp.task('compare-layouts-default', (callback) => {
     if (code > 0) {
       logConsole.info('compare-layouts-default exit-code: ' + code);
     }
-    console.log('livereload ' + resultsDir);
-    gulpLivereload.changed({ path: resultsDir, quiet: true });
+    livereload.changed({ path: resultsDir, quiet: true });
     callback();
   });
 });
@@ -178,7 +177,7 @@ gulp.task('server', () => {
     } else {
       logConsole.info('server.js restarted');
       gulp.src(watchFilesFor.server)
-        .pipe(gulpLivereload({ quiet: true }));
+        .pipe(livereload({ quiet: true }));
     }
   });
 });
@@ -201,9 +200,8 @@ watchFilesFor.livereload = [
  * livereload: watch task
  */
 gulp.task('livereload', () => {
-  console.log('livereload task');
   gulp.src(watchFilesFor.livereload)
-    .pipe(gulpLivereload({ quiet: true }));
+    .pipe(livereload({ quiet: true }));
 });
 
 /**
@@ -266,7 +264,7 @@ gulp.task('watch', () => {
     });
     gulp.watch(watchFilesFor[task], [task]);
   });
-  gulpLivereload.listen({ port: lifereloadPort, delay: 2000 });
+  livereload.listen({ port: lifereloadPort, delay: 2000 });
   logConsole.info('gulp livereload listening on http://' +
     ipv4addresses.get()[0] + ':' + lifereloadPort);
 });
