@@ -19,23 +19,28 @@
 		<div id="result-compare-sensor" class="result-compare-sensor"></div>
 	</div>
 	<br />
-	<% if (result.compareImagesStderr && result.compareImagesStderr.indexOf('a') > 0) { %>
-		<h3><%= result.compareImagesStderr.replace(/ `.+/, '') %></h3>
+	<% if (result.compareImagesStderr == "0") { %>
+		<h2>Screenshots sind identisch</h2>
 		<br />
 	<% } else { %>
-		<% if (result.compareImagesStderr != "0") { %>
-			<h2>Unterschiede</h2>
+		<h2>Unterschiede</h2>
+		<% if (result.compareImagesStderr && !result.compareImagesStderr.match(/^[0-9]+$/)) { %>
+			<h3><%= result.compareImagesStderr %></h3>
+			<br />
+		<% } else { %>
 			<h3>Maske</h3>
 			<div class="imageDiff"><img src="/<%= result.compareFilename %>" /></div>
 			<br />
-		<% } else { %>
-			<h2>Screenshots sind identisch</h2>
+		<% } %>
+		<% if (result.compositeImagesStderr) { %>
+			<h3><%= result.compositeImagesStderr.replace(/ `.+/, '') %></h3>
 			<br />
 		<% } %>
-	<% } %>
-	<% if (result.compareImagesStderr != "0") { %>
-		<h3>Differenz</h3>
-		<div class="imageDiff composite"><img src="/<%= result.compositeFilename %>" /></div><br />
+		<% if (result.compositeFilename != "") { %>
+			<h3>Differenz</h3>
+			<div class="imageDiff composite"><img src="/<%= result.compositeFilename %>" /></div>
+			<br />
+		<% } %>
 	<% } %>
 	<div class="compareResult">
 		<h2>Style-Unterschiede</h2>

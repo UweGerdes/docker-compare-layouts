@@ -138,14 +138,17 @@ function compareImages(result) {
     exec('compare -metric AE "' + result.baseFilename1 + '.png" "' +
         result.baseFilename2 + '.png" ' + result.compareFilename,
       (error, stdout, stderr) => { // jscs:ignore jsDoc
-        if (stderr == '0') {
+        if (stderr.match(/^[0-9]+$/)) {
+          result.compareImagesStderr = stderr;
           if (verbose) { console.log(result.compareFilename + ' saved'); }
+          if (stderr != '0') {
+            result.success = false;
+          }
         } else {
-          console.log(stderr);
+          result.compareImagesStderr = stderr.replace(/[^ ]+ @.+/, '');
           result.compareFilename = '';
           result.success = false;
         }
-        result.compareImagesStderr = stderr;
         resolve(result);
       }
     );
@@ -165,10 +168,10 @@ function compositeImages(result) {
         if (stderr.length === 0) {
           if (verbose) { console.log(result.compositeFilename + ' saved'); }
         } else {
+          result.compositeImagesStderr = 'stderr: ' + stderr;
           result.compositeFilename = '';
           result.success = false;
         }
-        result.compositeImagesStderr = stderr;
         resolve(result);
       }
     );
@@ -223,9 +226,10 @@ function saveResults(results) {
   fs.writeFile(path.join(destDir, 'index.json'), JSON.stringify(output, null, 4),
     (error) => { // jscs:ignore jsDoc
       if (error) {
-        return console.log(path.join(destDir, 'index.json') + ' error: ' + error);
+        console.log(path.join(destDir, 'index.json') + ' error: ' + error);
+      } else {
+        console.log('result in: ' + path.join(destDir, 'index.json'));
       }
-      console.log('result in: ' + path.join(destDir, 'index.json'));
     }
   );
 }
@@ -258,7 +262,6 @@ makeDir(destDir)
   );
 })
 .then(() => {
-  console.log('start del');
   return Promise.all(
     Object.keys(config.compares).map((compareKey) => {
       return del(path.join(destDir, safeFilename(compareKey)));
@@ -266,7 +269,6 @@ makeDir(destDir)
   );
 })
 .then(() => {
-  console.log('start mkDir');
   return Promise.all(
     Object.keys(config.compares).map((compareKey) => {
       return makeDir(path.join(destDir, safeFilename(compareKey)));
@@ -274,7 +276,6 @@ makeDir(destDir)
   );
 })
 .then(() => {
-  console.log('start compareImages');
   return Promise.all(
     compares.map(compareImages)
   );

@@ -10,8 +10,8 @@
  * run all configurations
  */
 function runAll() {
-  var app = document.getElementById('app');
-  app.className = 'running runall app';
+  var main = document.getElementById('app');
+  main.className = 'running runall app';
   var response = document.getElementById('response');
   response.innerHTML = '';
   var verbose = document.params.verbose.checked ? '/verbose' : '';
@@ -20,6 +20,14 @@ function runAll() {
   xmlhttp.responseType = 'text';
   xmlhttp.onload = function () { // jscs:ignore jsDoc
     document.location.reload();
+  };
+  xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      response.innerHTML = xmlhttp.responseText;
+      if (xmlhttp.responseText.indexOf('starting') != 0) {
+        main.className = 'app';
+      }
+    }
   };
   xmlhttp.send();
 }
@@ -43,7 +51,7 @@ function run(config) {
   };
   xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      //response.innerHTML = xmlhttp.responseText;
+      response.innerHTML = xmlhttp.responseText;
       if (xmlhttp.responseText.indexOf('starting') != 0) {
         main.className = 'app';
       }
@@ -66,11 +74,8 @@ function clear(config) {
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('GET', '/clear/' + config + verbose, true);
   xmlhttp.responseType = 'text';
-  xmlhttp.onreadystatechange = function () { // jscs:ignore jsDoc
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      response.innerHTML = xmlhttp.responseText;
-      main.className = 'app';
-    }
+  xmlhttp.onload = function () { // jscs:ignore jsDoc
+    document.location.reload();
   };
   xmlhttp.send();
 }
