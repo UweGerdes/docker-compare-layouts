@@ -88,32 +88,6 @@ function loadPage(pageKey) {
 }
 
 /**
- * make directory for compare result
- *
- * @param {String} compareKey - configuration compare key
- */
-function makeCompareDir(compareKey) {
-  del(path.join(destDir, safeFilename(compareKey))).
-  then(() => { // jscs:ignore jsDoc
-    if (!fs.existsSync(path.join(destDir, safeFilename(compareKey)))) {
-      fs.mkdir(path.join(destDir, safeFilename(compareKey)), (error) => { // jscs:ignore jsDoc
-        return new Promise((resolve, reject) => { // jscs:ignore jsDoc
-          if (error) {
-            console.log('makeCompareDir ' + compareKey + ' error: ' + error);
-            reject('makeCompareDir ' + compareKey + ' error: ' + error);
-          }
-          resolve(compareKey);
-        });
-      });
-    } else {
-      return new Promise((resolve) => { // jscs:ignore jsDoc
-        resolve(compareKey);
-      });
-    }
-  });
-}
-
-/**
  * compare data
  *
  * @param {Object} result - compare result
@@ -167,6 +141,7 @@ function compareImages(result) {
         if (stderr == '0') {
           if (verbose) { console.log(result.compareFilename + ' saved'); }
         } else {
+          console.log(stderr);
           result.compareFilename = '';
           result.success = false;
         }
@@ -283,11 +258,23 @@ makeDir(destDir)
   );
 })
 .then(() => {
+  console.log('start del');
   return Promise.all(
-    Object.keys(config.compares).map(makeCompareDir)
+    Object.keys(config.compares).map((compareKey) => {
+      return del(path.join(destDir, safeFilename(compareKey)));
+    })
   );
 })
 .then(() => {
+  console.log('start mkDir');
+  return Promise.all(
+    Object.keys(config.compares).map((compareKey) => {
+      return makeDir(path.join(destDir, safeFilename(compareKey)));
+    })
+  );
+})
+.then(() => {
+  console.log('start compareImages');
   return Promise.all(
     compares.map(compareImages)
   );
