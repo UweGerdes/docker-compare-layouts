@@ -28,7 +28,8 @@ RUN apt-get update && \
 	rm -rf /var/lib/apt/lists/* && \
 	npm install -g \
 				casperjs \
-				gulp && \
+				gulp \
+				nodemon && \
 	npm install -g git+https://github.com/laurentj/slimerjs.git && \
 	npm install && \
 	chown -R ${USER_NAME}:${USER_NAME} ${NODE_HOME}

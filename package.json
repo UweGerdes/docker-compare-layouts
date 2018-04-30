@@ -58,6 +58,8 @@
   },
   "scripts": {
     "start": "gulp",
+    "dev": "nodemon --watch gulpfile.js --exitcrash --delay 2 --exec gulp",
+    "dev-quiet": "nodemon --watch gulpfile.js --quiet --exitcrash --delay 2 --exec gulp",
     "test": "gulp compare-layouts-selftest"
   }
 }
