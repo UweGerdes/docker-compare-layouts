@@ -80,7 +80,10 @@ gulp.task('less', () => {
 });
 
 watchFilesFor.jshint = [
-  path.join(baseDir, '**', '*.js')
+  path.join(baseDir, '*.js'),
+  path.join(baseDir, 'bin', '*.js'),
+  path.join(baseDir, 'config', '*.js'),
+  path.join(baseDir, 'js', '*.js')
 ];
 /**
  * jshint: javascript files
@@ -145,6 +148,85 @@ gulp.task('compare-layouts-default', (callback) => {
   });
 });
 
+watchFilesFor['test-compare-layouts'] = [
+  path.join(baseDir, 'config', 'modules', '**', '*.ejs'),
+  path.join(baseDir, 'config', 'modules', '**', 'compare-layouts', '*.js')
+];
+/**
+ * #### testing
+ *
+ * @param {function} callback - gulp callback
+ */
+gulp.task('test-compare-layouts', (callback) => {
+  getFilenames(watchFilesFor['test-compare-layouts'])
+  .then(getRecentFile)
+  .then((filename) => { // jscs:ignore jsDoc
+    console.log('filename', filename);
+    return filename;
+  })
+  .then(getRequest)
+  .then((result) => { // jscs:ignore jsDoc
+    console.log('result', result);
+    return result;
+  })
+  .then(() => { // jscs:ignore jsDoc
+    callback();
+  })
+  ;
+});
+
+/**
+ * get list of files for glob pattern
+ *
+ * @private
+ * @param {function} paths - patterns for paths
+ */
+const getFilenames = (paths) => {
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
+    paths.forEach((path) => { // jscs:ignore jsDoc
+      glob(path, (error, files) => { // jscs:ignore jsDoc
+        if (error) {
+          reject(error);
+        } else {
+          resolve(files);
+        }
+      });
+    });
+  });
+};
+
+/**
+ * get newest file from glob list - synchronous
+ *
+ * @param {array} files - list with glob paths
+ */
+function getRecentFile(files) {
+  let newest = null;
+  let bestTime = 0;
+  for (let i = 0; i < files.length; i++) {
+    const fileTime = fs.statSync(files[i]).mtime.getTime();
+    if (fileTime > bestTime) {
+      newest = files[i];
+      bestTime = fileTime;
+    }
+  }
+  return new Promise((resolve) => { // jscs:ignore jsDoc
+    resolve(newest);
+  });
+}
+
+/**
+ * get request with
+ *
+ * @param {array} file - list with glob paths
+ */
+function getRequest(file) {
+  return new Promise((resolve) => { // jscs:ignore jsDoc
+    const testPath = file.replace(/(.+)\/views\/(.+)\.[^.]+?$/, '$1/tests/compare-layouts/$2.js');
+    resolve(testPath);
+  });
+}
+
 /**
  * server:start
  */
@@ -165,7 +247,8 @@ gulp.task('server:stop', () => {
 });
 
 watchFilesFor.server = [
-  path.join(baseDir, 'server.js')
+  path.join(baseDir, 'server.js'),
+  path.join(baseDir, 'bin', 'configs.js')
 ];
 /**
  * server: restart if server.js changed
