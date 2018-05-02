@@ -24,9 +24,8 @@ const del = require('del'),
  *
  * @param {String} arg - single argument string - find not -someting but .js or .json
  */
-const configName = process.argv.slice(2).filter(arg => arg.match(/^[^-].+\.js(on)?$/)),
-  configFile = 'config/' + configName,
-  config = require('./' + configFile),
+const configFile = process.argv.slice(2).filter(arg => arg.match(/^[^-].+\.js(on)?$/)),
+  config = require('./config/' + configFile[0]),
   resultsDir = './results',
   destDir = path.join(resultsDir, config.destDir),
   verbose = process.argv.indexOf('-v') > -1;
@@ -49,7 +48,7 @@ function loadPage(pageKey) {
   return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     let args = [
       './bin/load-page-styles.js',
-      '--configFile="' + configFile + '"',
+      '--configFile=config/"' + configFile + '"',
       '--pageKey="' + pageKey + '"'];
     let cmd = 'casperjs';
     if (page.engine) {

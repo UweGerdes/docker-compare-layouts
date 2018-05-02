@@ -13,6 +13,8 @@ const bodyParser = require('body-parser'),
   express = require('express'),
   fs = require('fs'),
   fsTools = require('fs-tools'),
+  glob = require('glob'),
+  makeDir = require('make-dir'),
   morgan = require('morgan'),
   path = require('path'),
   ipv4addresses = require('./bin/ipv4addresses.js'),
@@ -58,19 +60,16 @@ app.use(express.static(__dirname));
  * @param {Object} req - request
  * @param {Object} res - result
  */
-app.get('/app/:config?/:action?/:param?', (req, res) => {
+app.get(/^\/app\/(.+)$/, (req, res) => {
   const configs = getConfigs();
   let config = { };
-  let action = 'show';
-  if (req.params.config) {
-    if (fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
-      config = getConfig(req.params.config);
+  const action = req.query.action || 'show';
+  if (req.params[0]) {
+    if (fs.existsSync(path.join(configDir, req.params[0] + '.js'))) {
+      config = getConfig(req.params[0]);
     } else {
-      config.error = 'config file not found: ./config/' + req.params.config + '.js';
-      logConsole.info('config file not found: ./config/' + req.params.config + '.js');
-    }
-    if (req.params.action) {
-      action = req.params.action;
+      config.error = 'config file not found: ./config/' + req.params[0] + '.js';
+      logConsole.info('config file not found: ./config/' + req.params[0] + '.js');
     }
   }
   res.render('appView.ejs', {
@@ -89,10 +88,10 @@ app.get('/app/:config?/:action?/:param?', (req, res) => {
  * @param {Object} req - request
  * @param {Object} res - result
  */
-app.get('/show/:config/:compare/:viewport', (req, res) => {
-  const config = getConfig(req.params.config);
-  const compare = getCompare(config.data.destDir, req.params.compare, req.params.viewport);
-  const result = getResult(config.data.destDir)[req.params.compare + '_' + req.params.viewport];
+app.get(/^\/show\/(.+?)\/([^/]+)\/([^/]+)$/, (req, res) => {
+  const config = getConfig(req.params[0]);
+  const compare = getCompare(config.data.destDir, req.params[1], req.params[2]);
+  const result = getResult(config.data.destDir)[req.params[1] + '_' + req.params[2]];
   let page1,
     page2;
   if (result !== null && result !== undefined) {
@@ -106,7 +105,7 @@ app.get('/show/:config/:compare/:viewport', (req, res) => {
     page1: page1,
     page2: page2,
     result: result,
-    viewport: req.params.viewport,
+    viewport: req.params[2],
     livereloadPort: livereloadPort,
     httpPort: httpPort,
     running: running
@@ -119,16 +118,15 @@ app.get('/show/:config/:compare/:viewport', (req, res) => {
  * @param {Object} req - request
  * @param {Object} res - result
  */
-app.get('/run/:config/:verbose?', (req, res) => {
-  console.log('starting ' + req.params.config);
-  if (req.params.config == 'all') {
+app.get(/^\/run\/(.+?)(\/verbose)?$/, (req, res) => {
+  if (req.params[0] == 'all') {
     const configs = getConfigs();
     configs.forEach((config) => { // jscs:ignore jsDoc
       console.log('starting ' + config);
-      runConfigAsync(config, req.params.verbose, res);
+      runConfigAsync(config, req.params[1], res);
     });
   } else {
-    runConfigAsync(getConfig(req.params.config), req.params.verbose, res);
+    runConfigAsync(getConfig(req.params[0]), req.params[1], res);
   }
 });
 
@@ -138,14 +136,14 @@ app.get('/run/:config/:verbose?', (req, res) => {
  * @param {Object} req - request
  * @param {Object} res - result
  */
-app.get('/clear/:config', (req, res) => {
-  if (req.params.config == 'all') {
+app.get(/^\/clear\/(.+)$/, (req, res) => {
+  if (req.params[0] == 'all') {
     const configs = getConfigs();
     configs.forEach((config) => { // jscs:ignore jsDoc
       clearResult(config, res);
     });
   } else {
-    clearResult(getConfig(req.params.config), res);
+    clearResult(getConfig(req.params[0]), res);
   }
 });
 
@@ -220,7 +218,13 @@ logConsole.info('compare-layouts server listening on ' +
  */
 function getConfigs() {
   let configs = [];
-  fs.readdirSync(configDir).forEach((fileName) => { // jscs:ignore jsDoc
+  const filenames = glob.sync(
+    '{' + path.join('*.js') +
+    ',' + path.join('**', 'compare-layouts', '*.js') +
+    '}',
+    { cwd: configDir }
+  );
+  filenames.forEach((fileName) => { // jscs:ignore jsDoc
     const configName = fileName.replace(/\.js/, '');
     configs.push(getItem(configName));
   });
@@ -346,6 +350,7 @@ function getResult(destDir) {
  * @param {String} viewport - viewport name
  */
 function getCompare(destDir, compare, viewport) {
+  console.log(resultsDir, destDir, compare, viewport + '.json');
   const filename = path.join(resultsDir, destDir, compare, viewport + '.json');
   let result = { };
   try {
@@ -392,7 +397,7 @@ function runConfigAsync(config, verbose, res) {
     res.write(replaceAnsiColors(msg) + '\n');
   };
   if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir);
+    makeDir.sync(destDir);
   }
   log('server started ' + config.name);
   running.push(config.name);

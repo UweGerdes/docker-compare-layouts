@@ -1,0 +1,4 @@
+# keep directory for docker volume mount
+*
+!.gitignore
+
