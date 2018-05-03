@@ -62,19 +62,19 @@ app.use(express.static(__dirname));
  */
 app.get(/^\/app\/(.+)$/, (req, res) => {
   const configs = getConfigs();
-  let config = { };
+  let data = { };
   const action = req.query.action || 'show';
   if (req.params[0]) {
     if (fs.existsSync(path.join(configDir, req.params[0] + '.js'))) {
-      config = getConfig(req.params[0]);
+      data = getConfig(req.params[0]);
     } else {
-      config.error = 'config file not found: ./config/' + req.params[0] + '.js';
+      data.error = 'config file not found: ./config/' + req.params[0] + '.js';
       logConsole.info('config file not found: ./config/' + req.params[0] + '.js');
     }
   }
   res.render('appView.ejs', {
     configs: configs,
-    config: config,
+    config: data,
     action: action,
     livereloadPort: livereloadPort,
     httpPort: httpPort,
@@ -89,18 +89,18 @@ app.get(/^\/app\/(.+)$/, (req, res) => {
  * @param {Object} res - result
  */
 app.get(/^\/show\/(.+?)\/([^/]+)\/([^/]+)$/, (req, res) => {
-  const config = getConfig(req.params[0]);
-  const compare = getCompare(config.data.destDir, req.params[1], req.params[2]);
-  const result = getResult(config.data.destDir)[req.params[1] + '_' + req.params[2]];
+  const data = getConfig(req.params[0]);
+  const compare = getCompare(data.data.destDir, req.params[1], req.params[2]);
+  const result = getResult(data.data.destDir)[req.params[1] + '_' + req.params[2]];
   let page1,
     page2;
   if (result !== null && result !== undefined) {
-    page1 = config.data.pages[result.page1];
-    page2 = config.data.pages[result.page2];
+    page1 = data.data.pages[result.page1];
+    page2 = data.data.pages[result.page2];
   }
 
   res.render('resultView.ejs', {
-    config: config,
+    config: data,
     compare: obj2html.toHtml(compare),
     page1: page1,
     page2: page2,
@@ -121,9 +121,9 @@ app.get(/^\/show\/(.+?)\/([^/]+)\/([^/]+)$/, (req, res) => {
 app.get(/^\/run\/(.+?)(\/verbose)?$/, (req, res) => {
   if (req.params[0] == 'all') {
     const configs = getConfigs();
-    configs.forEach((config) => { // jscs:ignore jsDoc
-      console.log('starting ' + config);
-      runConfigAsync(config, req.params[1], res);
+    configs.forEach((data) => { // jscs:ignore jsDoc
+      console.log('starting ' + data);
+      runConfigAsync(data, req.params[1], res);
     });
   } else {
     runConfigAsync(getConfig(req.params[0]), req.params[1], res);
@@ -139,8 +139,8 @@ app.get(/^\/run\/(.+?)(\/verbose)?$/, (req, res) => {
 app.get(/^\/clear\/(.+)$/, (req, res) => {
   if (req.params[0] == 'all') {
     const configs = getConfigs();
-    configs.forEach((config) => { // jscs:ignore jsDoc
-      clearResult(config, res);
+    configs.forEach((data) => { // jscs:ignore jsDoc
+      clearResult(data, res);
     });
   } else {
     clearResult(getConfig(req.params[0]), res);
@@ -175,23 +175,23 @@ app.get('*', (req, res) => {
  */
 app.post('/app/:config?/:action?', (req, res) => {
   const configs = getConfigs();
-  let config = { };
+  let data = { };
   let action = 'show';
   logConsole.info('post: ' + req.params.config + ' ' + req.params.action);
   if (req.params.config) {
     if (fs.existsSync(path.join(configDir, req.params.config + '.js'))) {
-      config = getConfig(req.params.config);
+      data = getConfig(req.params.config);
     } else {
-      config.error = 'config file not found ./config/' + req.params.config + '.js';
+      data.error = 'config file not found ./config/' + req.params.config + '.js';
       logConsole.info('config file not found: ./config/' + req.params.config + '.js');
     }
     if (req.params.action) {
       action = req.params.action;
       if (action == 'edit' && req.body.configfile) {
-        storeConfig(config, req.body.configfile);
+        storeConfig(data, req.body.configfile);
         action = 'check';
       } else {
-        logConsole.info('not written: ' + configDir + '/' + config.name + '.js\n' +
+        logConsole.info('not written: ' + configDir + '/' + data.name + '.js\n' +
             JSON.stringify(req.body, null, 4));
         action = '';
       }
@@ -199,7 +199,7 @@ app.post('/app/:config?/:action?', (req, res) => {
   }
   res.render('appView.ejs', {
     configs: configs,
-    config: config,
+    config: data,
     action: action,
     livereloadPort: livereloadPort,
     httpPort: httpPort,
@@ -227,9 +227,9 @@ function getConfigs() {
     const configName = fileName.replace(/(\.\/)?(config\/)?(.+)\.js/, '$3');
     configs.push(getItem(configName));
   });
-  configs.forEach((config) => { // jscs:ignore jsDoc
-    config.result = getResult(config.data.destDir);
-    getSummary(config);
+  configs.forEach((data) => { // jscs:ignore jsDoc
+    data.result = getResult(data.data.destDir);
+    getSummary(data);
   });
   return configs;
 }
@@ -240,18 +240,18 @@ function getConfigs() {
  * @param {String} configName - base name of configuration file
  */
 function getItem(configName) {
-  let config = { name: configName };
-  config.data = getConfigData(configName);
-  config.lastRun = 'Keine Daten';
+  let data = { name: configName };
+  data.data = getConfigData(configName);
+  data.lastRun = 'Keine Daten';
   try {
-    const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
-    config.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
+    const fileStat = fs.statSync(path.join(resultsDir, data.data.destDir, 'index.json'));
+    data.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
   } catch (err) {
     if (err.length > 0 && err.code != 'ENOENT') {
       logConsole.info(configName + ' error: ' + JSON.stringify(err, null, 4));
     }
   }
-  return config;
+  return data;
 }
 
 /**
@@ -260,23 +260,23 @@ function getItem(configName) {
  * @param {String} configName - base name of configuration file
  */
 function getConfig(configName) {
-  let config = { name: configName };
-  config.file = getConfigFile(configName);
-  config.data = getConfigData(configName);
+  let data = { name: configName };
+  data.file = getConfigFile(configName);
+  data.data = getConfigData(configName);
   try {
-    const fileStat = fs.statSync(path.join(resultsDir, config.data.destDir, 'index.json'));
-    config.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
+    const fileStat = fs.statSync(path.join(resultsDir, data.data.destDir, 'index.json'));
+    data.lastRun = dateFormat(fileStat.mtime, 'dd.mm.yyyy, HH:MM:ss');
   } catch (err) {
-    config.lastRun = 'Keine Daten im Verzeichnis ./results';
+    data.lastRun = 'Keine Daten im Verzeichnis ./results';
     if (err.length > 0 && err.code != 'ENOENT') {
       logConsole.info(configName + ' error: ' + JSON.stringify(err, null, 4));
     }
   }
-  if (config.data.destDir) {
-    config.logfile = getLogfile(config.data.destDir);
-    config.result = getResult(config.data.destDir);
+  if (data.data.destDir) {
+    data.logfile = getLogfile(data.data.destDir);
+    data.result = getResult(data.data.destDir);
   }
-  return config;
+  return data;
 }
 
 /**
@@ -304,7 +304,7 @@ function getConfigData(configName) {
     const configFileContent = getConfigFile(configName);
     configData = _eval(configFileContent);
   } catch (err) {
-    //config.error = err;
+    //configData.error = err;
   }
   return configData;
 }
@@ -365,30 +365,30 @@ function getCompare(destDir, compare, viewport) {
 /**
  * calculate result summary
  *
- * @param {Object} config - configuration
+ * @param {Object} data - configuration
  */
-function getSummary(config) {
-  config.success = true;
-  config.totalTests = 0;
-  config.failedTests = 0;
-  Object.keys(config.result).forEach((key) => { // jscs:ignore jsDoc
-    if (!config.result[key].success) {
-      config.success = false;
-      config.failedTests++;
+function getSummary(data) {
+  data.success = true;
+  data.totalTests = 0;
+  data.failedTests = 0;
+  Object.keys(data.result).forEach((key) => { // jscs:ignore jsDoc
+    if (!data.result[key].success) {
+      data.success = false;
+      data.failedTests++;
     }
-    config.totalTests++;
+    data.totalTests++;
   });
 }
 
 /**
  * start compare-layouts with config file
  *
- * @param {Object} config - configuration
+ * @param {Object} data - configuration
  * @param {Boolean} verbose - make more output
  * @param {Object} res - result
  */
-function runConfigAsync(config, verbose, res) {
-  const destDir = path.join(__dirname, 'results', config.data.destDir);
+function runConfigAsync(data, verbose, res) {
+  const destDir = path.join(__dirname, 'results', data.data.destDir);
   const logfilePath = path.join(destDir, 'console.log');
   const log = (msg) => { // jscs:ignore jsDoc
     logConsole.info(msg);
@@ -398,22 +398,22 @@ function runConfigAsync(config, verbose, res) {
   if (!fs.existsSync(destDir)) {
     makeDir.sync(destDir);
   }
-  log('server started ' + config.name);
-  running.push(config.name);
+  log('server started ' + data.name);
+  running.push(data.name);
   if (fs.existsSync(logfilePath)) {
     fs.unlinkSync(logfilePath);
   }
-  const configFilename = './config/' + config.name + '.js';
+  const configFilename = './config/' + data.name + '.js';
   const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
   loader.stdout.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
   loader.stderr.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
   loader.on('error', (err) => { log(' error: ' + err.toString().trim()); }); // jscs:ignore jsDoc
   loader.on('close', (code) => { // jscs:ignore jsDoc
     if (code > 0) {
-      log('load ' + config.name + ' error, exit-code: ' + code);
+      log('load ' + data.name + ' error, exit-code: ' + code);
     }
-    log('server finished ' + config.name);
-    running.splice(running.indexOf(config.name), 1);
+    log('server finished ' + data.name);
+    running.splice(running.indexOf(data.name), 1);
     if (running.length === 0) {
       res.end();
     }
@@ -423,11 +423,11 @@ function runConfigAsync(config, verbose, res) {
 /**
  * delete results directory
  *
- * @param {Object} config - configuration
+ * @param {Object} data - configuration
  * @param {Object} res - result
  */
-function clearResult(config, res) {
-  const destDir = path.join(__dirname, 'results', config.data.destDir);
+function clearResult(data, res) {
+  const destDir = path.join(__dirname, 'results', data.data.destDir);
   const log = (msg) => { // jscs:ignore jsDoc
     logConsole.info(msg);
     res.write(replaceAnsiColors(msg) + '\n');
@@ -435,23 +435,23 @@ function clearResult(config, res) {
   if (fs.existsSync(destDir)) {
     fsTools.removeSync(destDir);
   }
-  log('Ergebnisse gelöscht für ' + config.name);
+  log('Ergebnisse gelöscht für ' + data.name);
   res.end();
 }
 
 /**
  * save configuration
  *
- * @param {Object} config - configuration
+ * @param {Object} data - configuration
  * @param {Object} configData - data
  */
-function storeConfig(config, configData) {
-  fs.writeFileSync(configDir + '/' + config.name + '.js', configData, 0);
-  logConsole.info('written: ' + configDir + '/' + config.name + '.js');
-  config.file = getConfigFile(config.name);
-  config.data = getConfigData(config.name);
-  if (config.data.length === 0) {
-    config.error = 'Syntax error in config file.';
+function storeConfig(data, configData) {
+  fs.writeFileSync(configDir + '/' + data.name + '.js', configData, 0);
+  logConsole.info('written: ' + configDir + '/' + data.name + '.js');
+  data.file = getConfigFile(data.name);
+  data.data = getConfigData(data.name);
+  if (data.data.length === 0) {
+    data.error = 'Syntax error in config file.';
   }
 }
 
