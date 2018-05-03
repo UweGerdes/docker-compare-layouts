@@ -1,7 +1,7 @@
 <li class="config <% if ( ! config.success ) { %>failed<% } %>">
   <div class="name">
     <a href="/app/<%= config.name %>" title="<%= config.name %> anzeigen">
-      <% if (config.data.label) { %>
+      <% if (config.data.module && config.data.label) { %>
         <%= config.data.module %> <%= config.data.label %>
       <% } else { %>
         <%= config.data.destDir %>
