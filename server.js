@@ -219,13 +219,12 @@ logConsole.info('compare-layouts server listening on ' +
 function getConfigs() {
   let configs = [];
   const filenames = glob.sync(
-    '{' + path.join('*.js') +
-    ',' + path.join('**', 'compare-layouts', '*.js') +
-    '}',
-    { cwd: configDir }
+    '{' + path.join('config', '*.js') +
+    ',' + path.join('config', '**', 'tests', 'compare-layouts', '*.js') +
+    '}'
   );
   filenames.forEach((fileName) => { // jscs:ignore jsDoc
-    const configName = fileName.replace(/\.js/, '');
+    const configName = fileName.replace(/(\.\/)?(config\/)?(.+)\.js/, '$3');
     configs.push(getItem(configName));
   });
   configs.forEach((config) => { // jscs:ignore jsDoc
@@ -404,7 +403,7 @@ function runConfigAsync(config, verbose, res) {
   if (fs.existsSync(logfilePath)) {
     fs.unlinkSync(logfilePath);
   }
-  const configFilename = config.name + '.js';
+  const configFilename = './config/' + config.name + '.js';
   const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
   loader.stdout.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
   loader.stderr.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
