@@ -39,7 +39,7 @@ function loadPage(pageKey) {
   const page = config.pages[pageKey];
   if (page.cache && chkCacheFile(path.join(destDir, pageKey,
         Object.keys(config.viewports)[0], safeFilename(page.selector), '.json'))) {
-    console.log('cached page  ' + pageKey + ': ' + page.url);
+    log('cached page  ' + pageKey + ': ' + page.url);
     return new Promise((resolve) => { // jscs:ignore jsDoc
       resolve({ 'pageKey': pageKey, 'status': 'cached' });
     });
@@ -60,23 +60,23 @@ function loadPage(pageKey) {
         }
       }
     }
-    console.log('loading page ' + pageKey + ': ' + page.url);
+    log('loading page ' + pageKey + ': ' + page.url);
     const loader = exec(cmd + ' ' + args.join(' '),
       (error, stdout, stderr) => { // jscs:ignore jsDoc
         if (verbose || stdout.indexOf('element not found') > -1) {
-          console.log(pageKey + ': ' + stdout.trim() +
+          log(pageKey + ': ' + stdout.trim() +
               (stderr ? '\n' + cmd + ' stderr: ' + stderr.trim() : ''));
         }
       }
     );
     loader.stderr.on('data', (stderr) => { // jscs:ignore jsDoc
-      console.log(pageKey + ' stderr: ' + stderr.trim());
+      log(pageKey + ' stderr: ' + stderr.trim());
     });
     loader.on('error', (error) => { // jscs:ignore jsDoc
-      console.log(pageKey + ' error: ' + error);
+      log(pageKey + ' error: ' + error);
     });
     loader.on('close', (error) => { // jscs:ignore jsDoc
-      console.log('loaded page ' + pageKey + ': ' + page.url);
+      log('loaded page ' + pageKey + ': ' + page.url);
       if (error > 0) {
         reject({ 'pageKey': pageKey, 'status': 'error', 'exitcode': error });
       } else {
@@ -139,7 +139,7 @@ function compareImages(result) {
       (error, stdout, stderr) => { // jscs:ignore jsDoc
         if (stderr.match(/^[0-9]+$/)) {
           result.compareImagesStderr = stderr;
-          if (verbose) { console.log(result.compareFilename + ' saved'); }
+          if (verbose) { log(result.compareFilename + ' saved'); }
           if (stderr != '0') {
             result.success = false;
           }
@@ -165,7 +165,7 @@ function compositeImages(result) {
         result.baseFilename2 + '.png" ' + result.compositeFilename,
       (error, stdout, stderr) => { // jscs:ignore jsDoc
         if (stderr.length === 0) {
-          if (verbose) { console.log(result.compositeFilename + ' saved'); }
+          if (verbose) { log(result.compositeFilename + ' saved'); }
         } else {
           result.compositeImagesStderr = 'stderr: ' + stderr;
           result.compositeFilename = '';
@@ -198,12 +198,12 @@ function compareStyleTree(comp) {
     fs.writeFile(jsonFilename, JSON.stringify(compareResult, undefined, 4),
       (error) => { // jscs:ignore jsDoc
         if (error) {
-          console.log(jsonFilename + ' error: ' + error);
+          log(jsonFilename + ' error: ' + error);
           compare.error = error;
           reject(compare);
         }
         if (verbose) {
-          console.log(jsonFilename + ' saved');
+          log(jsonFilename + ' saved');
         }
         compare.jsonFilename = jsonFilename;
         resolve(compare);
@@ -222,15 +222,41 @@ function saveResults(results) {
   results.forEach((result) => { // jscs:ignore jsDoc
     output[result.compareKey + '_' + result.viewport] = result;
   });
-  fs.writeFile(path.join(destDir, 'index.json'), JSON.stringify(output, null, 4),
-    (error) => { // jscs:ignore jsDoc
-      if (error) {
-        console.log(path.join(destDir, 'index.json') + ' error: ' + error);
-      } else {
-        console.log('compare result saved in: ' + path.join(destDir, 'index.json'));
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
+    fs.writeFile(path.join(destDir, 'index.json'), JSON.stringify(output, null, 4),
+      (error) => { // jscs:ignore jsDoc
+        if (error) {
+          log(path.join(destDir, 'index.json') + ' error: ' + error);
+          reject(path.join(destDir, 'index.json') + ' error: ' + error);
+        } else {
+          log('compare result saved in: ' + path.join(destDir, 'index.json'));
+          resolve('compare result saved in: ' + path.join(destDir, 'index.json'));
+        }
       }
-    }
-  );
+    );
+  });
+}
+
+let logList = [];
+/**
+ * log output
+ *
+ * @param {String} msg - output
+ */
+function log(msg) {
+  console.log(msg);
+  logList.push(msg);
+}
+
+/**
+ * save log output
+ */
+function logSave() {
+  const logfilePath = path.join(destDir, 'console.log');
+  fs.appendFileSync(logfilePath, logList.join('\n') + '\n');
+  return new Promise((resolve) => { // jscs:ignore jsDoc
+    resolve('finish');
+  });
 }
 
 let results = { };
@@ -245,7 +271,7 @@ Object.keys(config.compares).forEach((compareKey) => { // jscs:ignore jsDoc
 // jscs:disable jsDoc
 makeDir(destDir)
 .then((path) => {
-  console.log('Results in:', path);
+  log('Results in:', path);
   return path;
 })
 .then(() => {
@@ -292,7 +318,11 @@ makeDir(destDir)
   );
 })
 .then(() => {
-  saveResults(results.compares);
+  return saveResults(results.compares);
+})
+.then((result) => {
+  console.log(result);
+  return logSave();
 })
 .catch((error) => {
   console.error('Failed!', error);
@@ -308,7 +338,7 @@ function chkCacheFile(file) {
   try {
     return fs.lstatSync(file).isFile();
   } catch (error) {
-    //console.log('chkCacheFile ' + file + ' not found');
+    //log('chkCacheFile ' + file + ' not found');
   }
   return false;
 }

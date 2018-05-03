@@ -389,10 +389,8 @@ function getSummary(data) {
  */
 function runConfigAsync(data, verbose, res) {
   const destDir = path.join(__dirname, 'results', data.data.destDir);
-  const logfilePath = path.join(destDir, 'console.log');
   const log = (msg) => { // jscs:ignore jsDoc
     logConsole.info(msg);
-    fs.appendFileSync(logfilePath, msg + '\n');
     res.write(replaceAnsiColors(msg) + '\n');
   };
   if (!fs.existsSync(destDir)) {
@@ -400,9 +398,6 @@ function runConfigAsync(data, verbose, res) {
   }
   log('server started ' + data.name);
   running.push(data.name);
-  if (fs.existsSync(logfilePath)) {
-    fs.unlinkSync(logfilePath);
-  }
   const configFilename = './config/' + data.name + '.js';
   const loader = exec('node index.js ' + configFilename + (verbose ? ' -v' : ''));
   loader.stdout.on('data', (data) => { log(data.toString().trim()); }); // jscs:ignore jsDoc
