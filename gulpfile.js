@@ -140,8 +140,8 @@ watchFilesFor['compare-layouts-default'] = [
 gulp.task('compare-layouts-default', (callback) => {
   const resultsDir = path.join('results', 'default');
   del([
-      path.join(baseDir, resultsDir, '*.png'),
-      path.join(baseDir, resultsDir, '**', 'index.json')
+      path.join(baseDir, resultsDir, 'index.json'),
+      path.join(baseDir, resultsDir, 'console.log')
     ], { force: true });
   const loader = exec('node index.js config/default.js', { cwd: baseDir });
   loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
@@ -239,9 +239,9 @@ function getRequest(data) {
     config = data[1];
   return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     const resultsDir = path.join('results', config.destDir);
-    del([
-        path.join(baseDir, resultsDir, 'console.log'),
-        path.join(baseDir, resultsDir, 'index.json')
+    del.sync([
+        path.join(baseDir, resultsDir, 'index.json'),
+        path.join(baseDir, resultsDir, 'console.log')
       ], { force: true });
     const loader = exec('node index.js ' + configFile, { cwd: baseDir });
     loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
