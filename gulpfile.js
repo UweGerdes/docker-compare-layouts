@@ -26,6 +26,7 @@ const exec = require('child_process').exec,
   path = require('path'),
   rename = require('rename'),
   runSequence = require('run-sequence'),
+  ejslint = require('./bin/ejslint.js'),
   ipv4addresses = require('./bin/ipv4addresses.js'),
   logConsole = require('./bin/log.js')
   ;
@@ -113,10 +114,23 @@ gulp.task('jsonlint', () => {
     ;
 });
 
+watchFilesFor.ejslint = [
+  path.join(baseDir, 'views', '**', '*.ejs')
+];
+/**
+ * jsonlint: lint ejs files
+ *
+ * @param {function} callback - gulp callback
+ */
+gulp.task('ejslint', (callback) => {
+  ejslint.ejslint(watchFilesFor.ejslint, callback);
+});
+
 watchFilesFor['compare-layouts-default'] = [
   path.join(baseDir, 'config', 'default.js'),
   path.join(baseDir, 'index.js'),
-  path.join(baseDir, 'bin', '*.js')
+  path.join(baseDir, 'bin', 'load-poage-styles.js'),
+  path.join(baseDir, 'bin', 'style-tree.js')
 ];
 /**
  * compare-layouts-default: test task
@@ -271,7 +285,9 @@ gulp.task('server:stop', () => {
 
 watchFilesFor.server = [
   path.join(baseDir, 'server.js'),
-  path.join(baseDir, 'bin', 'configs.js')
+  path.join(baseDir, 'bin', 'ipv4addresses.js'),
+  path.join(baseDir, 'bin', 'log.js'),
+  path.join(baseDir, 'bin', 'obj2html.js')
 ];
 /**
  * server: restart if server.js changed
