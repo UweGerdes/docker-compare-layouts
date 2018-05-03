@@ -1,13 +1,13 @@
-<li class="config <% if ( ! config.success ) { %>failed<% } %>">
+<li class="config <% if ( ! data.success ) { %>failed<% } %>">
   <div class="name">
-    <a href="/app/<%= config.name %>" title="<%= config.name %> anzeigen">
-      <% if (config.data.module && config.data.label) { %>
-        <%= config.data.module %> <%= config.data.label %>
+    <a href="/app/<%= data.name %>" title="<%= data.name %> anzeigen">
+      <% if (data.config.module && data.config.label) { %>
+        <%= data.config.module %> <%= data.config.label %>
       <% } else { %>
-        <%= config.data.destDir %>
+        <%= data.config.destDir %>
       <% } %>
     </a>
   </div>
-  <div class="result"><% if (running.indexOf(config.name) > -1 ) { %>running<% } else { %><% if ( config.totalTests > 0 ) { %><% if ( config.success ) { %><%= config.totalTests %> test<% if ( config.totalTests != 1 ) { %>s<% } %> OK<% } else { %><%= config.failedTests %> of <%= config.totalTests %> test<% if ( config.totalTests != 1 ) { %>s<% } %> FAILED<% } %><% } %><% } %></div>
-  <div class="lastRun"><% if (running.indexOf(config.name) > -1) { %>gestartet<% } else { %><%= config.lastRun %><% } %></div>
+  <div class="result"><% if (running.indexOf(data.name) > -1 ) { %>running<% } else { %><% if ( data.totalTests > 0 ) { %><% if ( data.success ) { %><%= data.totalTests %> test<% if ( data.totalTests != 1 ) { %>s<% } %> OK<% } else { %><%= data.failedTests %> of <%= data.totalTests %> test<% if ( data.totalTests != 1 ) { %>s<% } %> FAILED<% } %><% } %><% } %></div>
+  <div class="lastRun"><% if (running.indexOf(data.name) > -1) { %>gestartet<% } else { %><%= data.lastRun %><% } %></div>
 </li>

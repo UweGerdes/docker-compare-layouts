@@ -16,62 +16,62 @@
         <h1>compare-layouts Status</h1>
         <div class="head">
           <div class="buttonContainer">
-            <a href="/app<% if (config.name) { %>/<%= config.name %><% } %>" class="button buttonReload">neu laden</a>
+            <a href="/app<% if (name) { %>/<%= name %><% } %>" class="button buttonReload">neu laden</a>
             <a href="javascript:runAll();"   class="button buttonStart">alle starten</a>
           </div>
         </div>
         <ul class="configs">
-          <% configs.forEach(function(config) { %>
+          <% configs.forEach(function(data) { %>
             <% include listItem %>
           <% }) %>
         </ul>
       </div>
-      <% if (config.error) { %>
+      <% if (error) { %>
       <div class="error">
-        <h2><%= config.error %></h2>
+        <h2><%= error %></h2>
       </div>
       <% } %>
-      <% if (config.name) { %>
+      <% if (name) { %>
       <div class="item">
         <div class="head">
           <h1>Konfiguration:
-            <% if (config.data.label) { %>
-              <%= config.data.module %> <%= config.data.label %>
+            <% if (config.label) { %>
+              <%= config.module %> <%= config.label %>
             <% } else { %>
-              <%= config.data.destDir %>
+              <%= config.destDir %>
             <% } %>
           </h1>
           <div class="buttonContainer">
             <a href="/app" class="button buttonReload" title="Konfigurations-Details schließen">schließen</a>
             <span class="started">gestartet</span>
-            <a href="javascript:run('<%= config.name %>');" class="button buttonStart" title="Konfiguration starten">starten</a>
-            <form name="params" method="GET" action="/app/<%= config.name %>" class="params"><label for="verbose" class="checkbox"><input type="checkbox" name="verbose" value="verbose" id="verbose" />verbose</label></form>
-            <a href="/app/<%= config.name %>/edit" class="button buttonEdit" title="Konfiguration bearbeiten">bearbeiten</a>
-            <a href="javascript:clear('<%= config.name %>');" class="button buttonClear" title="Ergebnis löschen">löschen</a>
+            <a href="javascript:run('<%= name %>');" class="button buttonStart" title="Konfiguration starten">starten</a>
+            <form name="params" method="GET" action="/app/<%= name %>" class="params"><label for="verbose" class="checkbox"><input type="checkbox" name="verbose" value="verbose" id="verbose" />verbose</label></form>
+            <a href="/app/<%= name %>/edit" class="button buttonEdit" title="Konfiguration bearbeiten">bearbeiten</a>
+            <a href="javascript:clear('<%= name %>');" class="button buttonClear" title="Ergebnis löschen">löschen</a>
           </div>
         </div>
         <% if (action == 'edit') { %>
         <div class="configFile">
-          <h2>Konfigurationsdatei config/<%= config.name %>.js bearbeiten</h2>
-          <form name="edit" method="POST" action="/app/<%= config.name %>/edit" class="edit">
-            <textarea name="configfile" class="editor" style="width:95%; height:500px;"><%= config.file %></textarea>
+          <h2>Konfigurationsdatei config/<%= name %>.js bearbeiten</h2>
+          <form name="edit" method="POST" action="/app/<%= name %>/edit" class="edit">
+            <textarea name="configfile" class="editor" style="width:95%; height:500px;"><%= file %></textarea>
             <input type="submit" name="submit" value="speichern" class="button buttonSubmit">
-            <a href="/app/<%= config.name %>" class="button buttonCancel" title="zurück zur Ansicht">verwerfen</a>
+            <a href="/app/<%= name %>" class="button buttonCancel" title="zurück zur Ansicht">verwerfen</a>
           </form>
         </div>
         <% } else if (action == 'check') { %>
           <div class="configFile">
-            <h2>Konfigurationsdatei config/<%= config.name %>.js</h2>
-            <pre class="editor"><%= config.file %></pre>
+            <h2>Konfigurationsdatei config/<%= name %>.js</h2>
+            <pre class="editor"><%= file %></pre>
           </div>
           <div class="configData">
             <h2>Effektive Konfiguration</h2>
-            <pre class="editor">config.data = <%= JSON.stringify(config.data, null, 4) %></pre>
+            <pre class="editor">config = <%= JSON.stringify(config, null, 4) %></pre>
           </div>
         <% } else { %>
-        <% if (running.indexOf(config.name) == -1 && config.lastRun != 'Keine Daten') { %>
+        <% if (running.indexOf(name) == -1 && lastRun != 'Keine Daten') { %>
         <div class="result">
-          <h2>Testergebnis <%= config.lastRun %></h2>
+          <h2>Testergebnis <%= lastRun %></h2>
           <table class="results">
             <thead>
               <th>Vergleich</th>
@@ -79,8 +79,8 @@
               <th>Selektor 2</th>
             </thead>
             <tbody>
-<% Object.keys(config.result).forEach(function(resultKey) { %>
-  <% result = config.result[resultKey] %>
+<% Object.keys(results).forEach(function(resultKey) { %>
+  <% result = results[resultKey] %>
   <% include showItem %>
 <% }) %>
             </tbody>
@@ -89,21 +89,21 @@
         <% } %>
         <div class="logOutput">
           <h2>Log-Ausgabe</h2>
-          <div id="response" class="response"><%- config.logfile %></div>
+          <div id="response" class="response"><%- logfile %></div>
         </div>
 <% /* %>
         <div class="resultData">
           <h2>Ergebnisdaten</h2>
-          <pre class="editor">config.result = <%= JSON.stringify(config.result, null, 4) %></pre>
+          <pre class="editor">results = <%= JSON.stringify(results, null, 4) %></pre>
         </div>
 <% */ %>
         <div class="configFile">
-          <h2>Konfigurationsdatei config/<%= config.name %>.js</h2>
-          <pre class="editor"><%= config.file %></pre>
+          <h2>Konfigurationsdatei config/<%= name %>.js</h2>
+          <pre class="editor"><%= file %></pre>
         </div>
         <div class="configData">
           <h2>Effektive Konfiguration</h2>
-          <pre class="editor">config.data = <%= JSON.stringify(config.data, null, 4) %></pre>
+          <pre class="editor">config = <%= JSON.stringify(config, null, 4) %></pre>
         </div>
 <!--
         <pre><%= JSON.stringify(config, null, 4) %></pre>
@@ -113,7 +113,7 @@
       <% } else { %>
         <div class="logOutput">
           <h2>Log-Ausgabe</h2>
-          <div class="response"><%- config.logfile %></div>
+          <div class="response"><%- logfile %></div>
         </div>
       <% } %>
     </div>
