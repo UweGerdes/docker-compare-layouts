@@ -64,11 +64,11 @@ $ docker start -ai compare-layouts-dev
 
 ## Usage
 
-Start the docker container in your project test directory (with config directory):
+Start the docker container in your project test directory (with tests/compare-layouts directory):
 
 ```bash
 $ docker run -d \
-	-v $(pwd)/config:/home/node/app/config \
+	-v $(pwd)/modules:/home/node/app/config/modules \
 	--name compare-layouts \
 	uwegerdes/compare-layouts
 ```
