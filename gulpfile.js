@@ -172,7 +172,10 @@ gulp.task('test-compare-layouts', (callback) => {
   .then(() => { // jscs:ignore jsDoc
     callback();
   })
-  ;
+  .catch((error) => { // jscs:ignore jsDoc
+    console.error('Failed!', error);
+    callback();
+  });
 });
 
 /**
@@ -221,9 +224,37 @@ function getRecentFile(files) {
  * @param {array} file - list with glob paths
  */
 function getRequest(file) {
-  return new Promise((resolve) => { // jscs:ignore jsDoc
-    const testPath = file.replace(/(.+)\/views\/(.+)\.[^.]+?$/, '$1/tests/compare-layouts/$2.js');
-    resolve(testPath);
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
+    const regex = /^.*?config\/(modules\/.+)\/[^/]+\/(.+)\..+$/;
+    const match = regex.exec(file);
+    const configFile = match[1] + '/tests/compare-layouts/' + match[2] + '.js';
+    if (!fs.existsSync(configFile)) {
+      reject('no compare-layouts configfile for ' + file);
+    }
+    const config = require('./config/' + configFile);
+    const resultsDir = path.join('results', config.destDir);
+    console.log('resultsDir:', resultsDir);
+    del([
+        path.join(baseDir, resultsDir, 'console.log'),
+        path.join(baseDir, resultsDir, 'index.json')
+      ], { force: true });
+    const loader = exec('node index.js ' + configFile, { cwd: baseDir });
+    loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
+      logConsole.info(data.toString().trim());
+    });
+    loader.stderr.on('data', (data) => { // jscs:ignore jsDoc
+      logConsole.info('stderr: ' + data.toString().trim());
+    });
+    loader.on('error', (err) => { // jscs:ignore jsDoc
+      logConsole.info('error: ' + err.toString().trim());
+    });
+    loader.on('close', (code) => { // jscs:ignore jsDoc
+      if (code > 0) {
+        logConsole.info('compare-layouts-default exit-code: ' + code);
+      }
+      livereload.changed({ path: resultsDir, quiet: true });
+      resolve(file);
+    });
   });
 }
 
