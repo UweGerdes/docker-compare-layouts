@@ -159,20 +159,8 @@ watchFilesFor['test-compare-layouts'] = [
  */
 gulp.task('test-compare-layouts', (callback) => {
   getRecentFile(watchFilesFor['test-compare-layouts'])
-  .then((filename) => { // jscs:ignore jsDoc
-    console.log('filename', filename);
-    return filename;
-  })
   .then(getConfig)
-  .then((config) => { // jscs:ignore jsDoc
-    //    console.log('config', config);
-    return config;
-  })
   .then(getRequest)
-  .then((result) => { // jscs:ignore jsDoc
-    //    console.log('result', result);
-    return result;
-  })
   .then(() => { // jscs:ignore jsDoc
     callback();
   })

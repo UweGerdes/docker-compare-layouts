@@ -227,7 +227,7 @@ function saveResults(results) {
       if (error) {
         console.log(path.join(destDir, 'index.json') + ' error: ' + error);
       } else {
-        console.log('result in: ' + path.join(destDir, 'index.json'));
+        console.log('compare result saved in: ' + path.join(destDir, 'index.json'));
       }
     }
   );
