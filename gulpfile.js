@@ -129,7 +129,7 @@ gulp.task('compare-layouts-default', (callback) => {
       path.join(baseDir, resultsDir, '*.png'),
       path.join(baseDir, resultsDir, '**', 'index.json')
     ], { force: true });
-  const loader = exec('node index.js default.js', { cwd: baseDir });
+  const loader = exec('node index.js config/default.js', { cwd: baseDir });
   loader.stdout.on('data', (data) => { // jscs:ignore jsDoc
     logConsole.info(data.toString().trim());
   });
@@ -158,15 +158,19 @@ watchFilesFor['test-compare-layouts'] = [
  * @param {function} callback - gulp callback
  */
 gulp.task('test-compare-layouts', (callback) => {
-  getFilenames(watchFilesFor['test-compare-layouts'])
-  .then(getRecentFile)
+  getRecentFile(watchFilesFor['test-compare-layouts'])
   .then((filename) => { // jscs:ignore jsDoc
     console.log('filename', filename);
     return filename;
   })
+  .then(getConfig)
+  .then((config) => { // jscs:ignore jsDoc
+    //    console.log('config', config);
+    return config;
+  })
   .then(getRequest)
   .then((result) => { // jscs:ignore jsDoc
-    console.log('result', result);
+    //    console.log('result', result);
     return result;
   })
   .then(() => { // jscs:ignore jsDoc
@@ -179,61 +183,60 @@ gulp.task('test-compare-layouts', (callback) => {
 });
 
 /**
- * get list of files for glob pattern
+ * get newest file from glob list
  *
- * @private
- * @param {function} paths - patterns for paths
+ * @param {array} paths - list with glob paths
  */
-const getFilenames = (paths) => {
-  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
-    paths.forEach((path) => { // jscs:ignore jsDoc
-      glob(path, (error, files) => { // jscs:ignore jsDoc
-        if (error) {
-          reject(error);
-        } else {
-          resolve(files);
-        }
-      });
-    });
-  });
-};
-
-/**
- * get newest file from glob list - synchronous
- *
- * @param {array} files - list with glob paths
- */
-function getRecentFile(files) {
+function getRecentFile(paths) {
   let newest = null;
   let bestTime = 0;
-  for (let i = 0; i < files.length; i++) {
-    const fileTime = fs.statSync(files[i]).mtime.getTime();
-    if (fileTime > bestTime) {
-      newest = files[i];
-      bestTime = fileTime;
+  paths.forEach((path) => { // jscs:ignore jsDoc
+    const files = glob.sync(path);
+    for (let i = 0; i < files.length; i++) {
+      const fileTime = fs.statSync(files[i]).mtime.getTime();
+      if (fileTime > bestTime) {
+        newest = files[i];
+        bestTime = fileTime;
+      }
     }
-  }
+  });
   return new Promise((resolve) => { // jscs:ignore jsDoc
     resolve(newest);
   });
 }
 
 /**
- * get request with
+ * get config for file
  *
  * @param {array} file - list with glob paths
  */
-function getRequest(file) {
+function getConfig(file) {
   return new Promise((resolve, reject) => { // jscs:ignore jsDoc
-    const regex = /^.*?config\/(modules\/.+)\/[^/]+\/(.+)\..+$/;
+    const regex = /^.*?(config\/modules\/.+?)\/(?:tests\/compare-layouts|[^/]+)\/([^/]+)\..+$/;
     const match = regex.exec(file);
     const configFile = match[1] + '/tests/compare-layouts/' + match[2] + '.js';
     if (!fs.existsSync(configFile)) {
-      reject('no compare-layouts configfile for ' + file);
+      reject('no compare-layouts configfile for ' + configFile);
     }
-    const config = require('./config/' + configFile);
+    try {
+      const config = require('./' + configFile);
+      resolve([configFile, config]);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+/**
+ * get request for config
+ *
+ * @param {array} data - configFilename and test configuration
+ */
+function getRequest(data) {
+  const configFile = data[0],
+    config = data[1];
+  return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     const resultsDir = path.join('results', config.destDir);
-    console.log('resultsDir:', resultsDir);
     del([
         path.join(baseDir, resultsDir, 'console.log'),
         path.join(baseDir, resultsDir, 'index.json')
@@ -251,9 +254,10 @@ function getRequest(file) {
     loader.on('close', (code) => { // jscs:ignore jsDoc
       if (code > 0) {
         logConsole.info('compare-layouts-default exit-code: ' + code);
+        reject('compare-layouts-default exit-code: ' + code + ', start verbose to see more');
       }
       livereload.changed({ path: resultsDir, quiet: true });
-      resolve(file);
+      resolve(data);
     });
   });
 }

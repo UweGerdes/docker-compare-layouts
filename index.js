@@ -25,7 +25,7 @@ const del = require('del'),
  * @param {String} arg - single argument string - find not -someting but .js or .json
  */
 const configFile = process.argv.slice(2).filter(arg => arg.match(/^[^-].+\.js(on)?$/)),
-  config = require('./config/' + configFile[0]),
+  config = require('./' + configFile[0]),
   resultsDir = './results',
   destDir = path.join(resultsDir, config.destDir),
   verbose = process.argv.indexOf('-v') > -1;
@@ -38,7 +38,7 @@ const configFile = process.argv.slice(2).filter(arg => arg.match(/^[^-].+\.js(on
 function loadPage(pageKey) {
   const page = config.pages[pageKey];
   if (page.cache && chkCacheFile(path.join(destDir, pageKey,
-        Object.keys(config.viewports)[0], 'page.png'))) {
+        Object.keys(config.viewports)[0], safeFilename(page.selector), '.json'))) {
     console.log('cached page  ' + pageKey + ': ' + page.url);
     return new Promise((resolve) => { // jscs:ignore jsDoc
       resolve({ 'pageKey': pageKey, 'status': 'cached' });
@@ -48,7 +48,7 @@ function loadPage(pageKey) {
   return new Promise((resolve, reject) => { // jscs:ignore jsDoc
     let args = [
       './bin/load-page-styles.js',
-      '--configFile=config/"' + configFile + '"',
+      '--configFile="' + configFile + '"',
       '--pageKey="' + pageKey + '"'];
     let cmd = 'casperjs';
     if (page.engine) {
