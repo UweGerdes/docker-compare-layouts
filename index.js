@@ -230,7 +230,7 @@ function saveResults(results) {
           reject(path.join(destDir, 'index.json') + ' error: ' + error);
         } else {
           log('compare result saved in: ' + path.join(destDir, 'index.json'));
-          resolve('compare result saved in: ' + path.join(destDir, 'index.json'));
+          resolve('compare-layouts finished');
         }
       }
     );
@@ -270,10 +270,6 @@ Object.keys(config.compares).forEach((compareKey) => { // jscs:ignore jsDoc
 
 // jscs:disable jsDoc
 makeDir(destDir)
-.then((path) => {
-  log('Results in:', path);
-  return path;
-})
 .then(() => {
   const pageKeys = Object.keys(config.pages);
   return Promise.all(
