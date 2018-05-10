@@ -129,7 +129,7 @@ gulp.task('ejslint', (callback) => {
 watchFilesFor['compare-layouts-default'] = [
   path.join(baseDir, 'config', 'default.js'),
   path.join(baseDir, 'index.js'),
-  path.join(baseDir, 'bin', 'load-poage-styles.js'),
+  path.join(baseDir, 'bin', 'load-page-styles.js'),
   path.join(baseDir, 'bin', 'style-tree.js')
 ];
 /**
@@ -163,7 +163,7 @@ gulp.task('compare-layouts-default', (callback) => {
 });
 
 watchFilesFor['test-compare-layouts'] = [
-  path.join(baseDir, 'config', 'modules', '**', '*.ejs'),
+//  path.join(baseDir, 'config', 'modules', '**', '*.ejs'),
   path.join(baseDir, 'config', 'modules', '**', 'compare-layouts', '*.js')
 ];
 /**
