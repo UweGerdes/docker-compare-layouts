@@ -30,8 +30,6 @@ Differences between the old and new layout are highlighted, mouse moves should c
 
 Other page elements should not change, you are informed if they do.
 
-Perhaps I can figure out how to configure a livereload to trigger an automatic start.
-
 ## Config File
 
 The configuration file defines urls, viewport widths and page elements and how to compare them.

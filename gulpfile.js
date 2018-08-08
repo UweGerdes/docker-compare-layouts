@@ -129,7 +129,9 @@ watchFilesFor['compare-layouts-default'] = [
   path.join(baseDir, 'config', 'default.js'),
   path.join(baseDir, 'index.js'),
   path.join(baseDir, 'bin', 'load-page-styles.js'),
-  path.join(baseDir, 'bin', 'style-tree.js')
+  path.join(baseDir, 'bin', 'style-tree.js'),
+  path.join(baseDir, 'views', '*.ejs'),
+  path.join(baseDir, 'css', '*.css')
 ];
 /**
  * compare-layouts-default: test task
