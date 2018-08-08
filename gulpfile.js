@@ -22,7 +22,6 @@ const exec = require('child_process').exec,
   lesshint = require('gulp-lesshint'),
   livereload = require('gulp-livereload'),
   notify = require('gulp-notify'),
-  postMortem = require('gulp-postmortem'),
   path = require('path'),
   rename = require('rename'),
   runSequence = require('run-sequence'),
@@ -304,15 +303,6 @@ gulp.task('server', () => {
   });
 });
 
-/**
- * server-postMortem: stop server on termination of gulp
- */
-gulp.task('server-postMortem', () => {
-  return gulp.src(watchFilesFor.server)
-    .pipe(postMortem({ gulp: gulp, tasks: ['server:stop'] }))
-    ;
-});
-
 watchFilesFor.livereload = [
   path.join(baseDir, 'views', '*.ejs'),
   path.join(baseDir, 'css', '*.css'),
@@ -400,7 +390,6 @@ gulp.task('default', (callback) => {
   runSequence('build',
     'server:start',
     'watch',
-    'server-postMortem',
     callback);
 });
 
