@@ -16,11 +16,13 @@ This should be available with easy to use config files.
 
 ## Use Cases
 
-You are styling a block on a web page. You have a style that should become better.
+You are styling a block on a web page. You have a layout to improve and want to check the progress.
 
 You want to see the changes compared to a previous version.
 
 You want to check different screen widths.
+
+## Integrated Server
 
 You get a web ui to start the grabbing and show the results.
 
@@ -112,6 +114,8 @@ You will find a lot of files (the cache for the server app) in a subdirectory of
 
 ## Changelog
 
-0.5.3 bug fixing, better logging, integration in other project
+0.5.4: use firefox-esr and slimerjs v0.10
 
-0.5.2 refactoring
+0.5.3: bug fixing, better logging, integration in other project
+
+0.5.2: refactoring
