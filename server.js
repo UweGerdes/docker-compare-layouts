@@ -60,7 +60,7 @@ app.use(express.static(__dirname));
  * @param {Object} req - request
  * @param {Object} res - result
  */
-app.get(/^\/app\/(.+)$/, (req, res) => {
+app.get(/^\/app\/(.+)?$/, (req, res) => {
   const configs = getConfigs();
   let data = { };
   const action = req.query.action || 'show';

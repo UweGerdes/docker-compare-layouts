@@ -31,19 +31,19 @@ module.exports = {
       'cache': true
     },
     'app-phantomjs': {
-      'url': server + 'app',
+      'url': server + 'app/',
       'selector': 'body',
       'engine': phantomjs,
       'cache': false
     },
     'app-phantomjs-cached': {
-      'url': server + 'app',
+      'url': server + 'app/',
       'selector': 'body',
       'engine': phantomjs,
       'cache': true
     },
     'app-slimerjs': {
-      'url': server + 'app',
+      'url': server + 'app/',
       'selector': 'body',
       'engine': slimerjs,
       'cache': false
